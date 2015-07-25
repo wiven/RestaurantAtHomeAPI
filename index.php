@@ -1,4 +1,14 @@
 <?php
+use \Rath\helpers\CrossDomainAjax as CrossDomainAjax;
+
+include_once 'Rath/Libraries/medoo.min.php';
+
+//TODO: fix application path
+if (!defined('APPLICATION_PATH')) {
+//    define('APPLICATION_PATH', realpath(__DIR__ . '/../'));
+    define('APPLICATION_PATH', 'C:\xampp\htdocs\RestaurantAtHomeAPI');
+}
+
 /**
  * Step 1: Require the Slim Framework
  *
@@ -8,6 +18,7 @@
  * If you are using Composer, you can skip this step.
  */
 require 'Slim/Slim.php';
+require '\Rath\helpers\CrossDomainAjax.php';
 
 \Slim\Slim::registerAutoloader();
 
@@ -164,10 +175,20 @@ $app->delete(
 
 $app->get('/ping', function() use ($app){
     $status = ['ack'=> time()];
-    //echo json_encode($status);
-    $callback = $app->request()->get('callback');
-    $app->contentType('application/javascript');
-    echo sprintf("%s(%s)", $callback, json_encode($status));
+    CrossDomainAjax::PrintCrossDomainCall($app,$status);
+});
+
+$app->get('/login',function() use ($app){
+
+});
+
+
+/**
+ * Master data generation
+ */
+$app->POST('/masterdata', function() use ($app){
+    Rath\Helpers\MasterData::CreateDemoData();
+    CrossDomainAjax::PrintCrossDomainCall($app,['Datageneration success']);
 });
 
 /**
