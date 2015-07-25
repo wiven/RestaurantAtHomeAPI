@@ -162,6 +162,14 @@ $app->delete(
     }
 );
 
+$app->get('/ping', function() use ($app){
+    $status = ['ack'=> time()];
+    //echo json_encode($status);
+    $callback = $app->request()->get('callback');
+    $app->contentType('application/javascript');
+    echo sprintf("%s(%s)", $callback, json_encode($status));
+});
+
 /**
  * Step 4: Run the Slim application
  *
