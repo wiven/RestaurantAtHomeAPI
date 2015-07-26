@@ -6,9 +6,11 @@
  * Date: 25/07/2015
  * Time: 20:45
  */
+require 'Base.php';
+
 class User extends Base
 {
-    const TABLE_NAME = "users";
+    const TABLE_NAME = "user";
 
     const ID_COL = "id";
     const NAME_COL = "name";
@@ -18,6 +20,6 @@ class User extends Base
     const EMAIL_COL = "email";
     const PASSWORD_COL = "password";
     const ADMIN_COL = "admin";
-
+    const SOCIAL_LOGIN_COL = 'socialLogin';
 
 }

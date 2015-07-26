@@ -1,13 +1,17 @@
 <?php
-use \Rath\helpers\CrossDomainAjax as CrossDomainAjax;
+//use \Rath\helpers\CrossDomainAjax as CrossDomainAjax;
 
-include_once 'Rath/Libraries/medoo.min.php';
+require_once 'Rath/Libraries/medoo.min.php';
 
 //TODO: fix application path
 if (!defined('APPLICATION_PATH')) {
 //    define('APPLICATION_PATH', realpath(__DIR__ . '/../'));
     define('APPLICATION_PATH', 'C:\xampp\htdocs\RestaurantAtHomeAPI');
 }
+
+/**
+ * @SWG\Info(title="RestaurantAtHome API", version="0.1")
+ */
 
 /**
  * Step 1: Require the Slim Framework
@@ -18,7 +22,12 @@ if (!defined('APPLICATION_PATH')) {
  * If you are using Composer, you can skip this step.
  */
 require 'Slim/Slim.php';
-require '\Rath\helpers\CrossDomainAjax.php';
+require 'Rath/Helpers/CrossDomainAjax.php';
+require 'Rath/Helpers/MasterData.php';
+
+require 'Rath/Controllers/LoginController.php';
+
+include_once 'Rath\Libraries\Slagger.php';
 
 \Slim\Slim::registerAutoloader();
 
@@ -31,6 +40,9 @@ require '\Rath\helpers\CrossDomainAjax.php';
  * of setting names and values into the application constructor.
  */
 $app = new \Slim\Slim();
+
+// Inject as Slim application middleware
+$app->add(new \Slagger\Slagger('/v1/docs', 'Rath'));
 
 /**
  * Step 3: Define the Slim application routes
@@ -178,16 +190,26 @@ $app->get('/ping', function() use ($app){
     CrossDomainAjax::PrintCrossDomainCall($app,$status);
 });
 
-$app->get('/login',function() use ($app){
+$app->get('/login/:email/:password/:socialLogin',function($email,$password,$socialLogin) use ($app){
+//    var_dump($email);
+//    var_dump($password);
+//    var_dump($socialLogin);
 
+    $result = LoginController::AuthenticateUser($email,$password,$socialLogin);
+    CrossDomainAjax::PrintCrossDomainCall($app,$result);
 });
 
 
+
+
 /**
- * Master data generation
+ * @SWG\Post(
+ *     path="/api/resource.json",
+ *     @SWG\Response(response="200", description="An example resource")
+ * )
  */
 $app->POST('/masterdata', function() use ($app){
-    Rath\Helpers\MasterData::CreateDemoData();
+    MasterData::CreateDemoData();
     CrossDomainAjax::PrintCrossDomainCall($app,['Datageneration success']);
 });
 

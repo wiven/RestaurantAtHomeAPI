@@ -6,9 +6,9 @@
  * Time: 20:23
  */
 
-namespace Rath\helpers;
+//namespace Rath\helpers;
 
-require APPLICATION_PATH.'\Rath\Libraries\medoo.min.php';
+require_once APPLICATION_PATH.'\Rath\Libraries\medoo.min.php';
 
 class MedooFactory
 {

@@ -6,7 +6,7 @@
  * Time: 20:02
  */
 
-namespace Rath\helpers;
+//namespace Rath\helpers;
 
 
 class CrossDomainAjax

@@ -6,31 +6,20 @@
  * Time: 20:40
  */
 
-namespace Rath\helpers;
+//namespace Rath\helpers;
+//use Rath\helpers\MedooFactory as MedooFactory;
 
-use Rath\helpers\MedooFactory as MedooFactory;
-require APPLICATION_PATH.'/Rath/Libraries/medoo.min.php';
+require_once APPLICATION_PATH.'/Rath/Libraries/medoo.min.php';
+
+//include_once 'MedooFactory.php';
+require_once APPLICATION_PATH.'/Rath/Entities/User.php';
+require_once APPLICATION_PATH.'/Rath/Entities/Base.php';
+require_once 'MedooFactory.php';
 
 class MasterData
 {
     static  function CreateDemoData(){
         $db = MedooFactory::CreateMedooInstance();
-//        $db = new \medoo([
-//            // required
-//            'database_type' => 'mysql',
-//            'database_name' => 'rathdev',
-//            'server' => 'localhost',
-//            'username' => 'root',
-//            'password' => '',
-//            'charset' => 'utf8',
-//
-//            // optional
-//            'port' => 3306,
-//            // driver_option for connection, read more from http://www.php.net/manual/en/pdo.setattribute.php
-////            'option' => [
-////                PDO::ATTR_CASE => PDO::CASE_NATURAL
-////            ]
-//        ]);
 
         MasterData::InsertDemoUsers($db);
 
@@ -44,11 +33,13 @@ class MasterData
                 \User::EMAIL_COL => "thdepauw@hotmail.com",
                 \User::PASSWORD_COL => md5("10Centimeter"),
                 \User::ADMIN_COL => true
-            ],
+            ]);
+        $db->insert(\User::TABLE_NAME,
             [
                 \User::NAME_COL => "Wim",
                 \User::SURNAME_COL => "Vandevenne",
                 \User::EMAIL_COL => "wim.vandevenne@gmail.com",
+                \User::PASSWORD_COL => md5("10Centimeter"),
                 \User::ADMIN_COL => true
             ]);
     }
