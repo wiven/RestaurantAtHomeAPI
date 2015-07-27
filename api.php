@@ -3,11 +3,10 @@
 
 require_once 'Rath/Libraries/medoo.min.php';
 
-//TODO: fix application path
-if (!defined('APPLICATION_PATH')) {
-//    define('APPLICATION_PATH', realpath(__DIR__ . '/../'));
-    define('APPLICATION_PATH', 'C:\xampp\htdocs\RestaurantAtHomeAPI');
-}
+if (!defined('APPLICATION_PATH'))
+    define('APPLICATION_PATH', realpath(__DIR__ ));
+
+
 
 /**
  * @SWG\Info(title="RestaurantAtHome API", version="0.1")
@@ -27,7 +26,7 @@ require 'Rath/Helpers/MasterData.php';
 
 require 'Rath/Controllers/LoginController.php';
 
-include_once 'Rath\Libraries\Slagger.php';
+//include_once 'Rath\Libraries\Slagger.php';
 
 \Slim\Slim::registerAutoloader();
 
@@ -42,7 +41,7 @@ include_once 'Rath\Libraries\Slagger.php';
 $app = new \Slim\Slim();
 
 // Inject as Slim application middleware
-$app->add(new \Slagger\Slagger('/v1/docs', 'Rath'));
+//$app->add(new \Slagger\Slagger('/v1/docs', 'Rath'));
 
 /**
  * Step 3: Define the Slim application routes
@@ -118,7 +117,7 @@ $app->get(
             <section>
                 <h2>Get Started</h2>
                 <ol>
-                    <li>The application code is in <code>index.php</code></li>
+                    <li>The application code is in <code>api.php</code></li>
                     <li>Read the <a href="http://docs.slimframework.com/" target="_blank">online documentation</a></li>
                     <li>Follow <a href="http://www.twitter.com/slimphp" target="_blank">@slimphp</a> on Twitter</li>
                 </ol>
