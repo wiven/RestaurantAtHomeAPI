@@ -21,5 +21,5 @@ class User extends Base
     const PASSWORD_COL = "password";
     const ADMIN_COL = "admin";
     const SOCIAL_LOGIN_COL = 'socialLogin';
-
+    const HASH_COL = "hash";
 }

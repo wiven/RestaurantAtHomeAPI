@@ -62,7 +62,7 @@ class LoginController
 
         $user = $db->select(User::TABLE_NAME,
             [
-                User::ID_COL,
+                User::HASH_COL,
                 User::EMAIL_COL,
                 User::NAME_COL,
                 User::SURNAME_COL,
@@ -74,10 +74,72 @@ class LoginController
 //        var_dump($para);
 //        echo "User: ".$user[User::NAME_COL]." Surname: ".$user[User::SURNAME_COL];
 //        die(var_dump($user));
-        $user[0]["idHash"] = sha1($user[0][User::ID_COL]);
+
 //        var_dump($user);
+        //TODO: See when to send the Admin parameter.
         return $user;
     }
+
+    static function CreateUser($user){
+        $db = MedooFactory::CreateMedooInstance();
+
+        $email = $user[User::EMAIL_COL]; //TODO: Validate Email;
+
+        $dbUser = $db->select(User::TABLE_NAME,
+            [
+                User::ID_COL,
+                User::EMAIL_COL,
+            ],[
+                "AND" => [
+                    User::EMAIL_COL => $email,
+                ]
+            ]
+            );
+        if($dbUser)
+            return "User with email ".$email." already exists.";
+
+        $db->insert(\User::TABLE_NAME,
+            [
+                User::NAME_COL => $user[User::NAME_COL],
+                User::SURNAME_COL => $user[User::SURNAME_COL],
+                User::EMAIL_COL => $user[User::EMAIL_COL],
+                User::PASSWORD_COL => $user[User::PASSWORD_COL],
+                User::TYPE_COL => $user[User::TYPE_COL]
+            ]);
+    }
+
+    static function UpdateUser($user)
+    {
+        $db = MedooFactory::CreateMedooInstance();
+
+        $email = $user[User::EMAIL_COL]; //TODO: Validate Email;
+
+        $db->update(User::TABLE_NAME,
+            [
+                User::NAME_COL => $user[User::NAME_COL],
+                User::SURNAME_COL => $user[User::SURNAME_COL],
+                User::PASSWORD_COL => $user[User::PASSWORD_COL],
+                User::TYPE_COL => $user[User::TYPE_COL]
+            ],
+            [
+                User::EMAIL_COL => $email,
+            ]
+            );
+    }
+
+    static function DeleteUser($user)
+    {
+        $db = MedooFactory::CreateMedooInstance();
+
+        $email = $user[User::EMAIL_COL]; //TODO: Validate Email;
+
+        $db->delete(User::TABLE_NAME,
+            [
+                User::EMAIL_COL => $email,
+            ]);
+
+    }
+
 }
 
 //$para = [

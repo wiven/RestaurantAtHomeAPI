@@ -8,7 +8,7 @@
 
 //namespace Rath\helpers;
 
-require_once APPLICATION_PATH.'\Rath\Libraries\medoo.min.php';
+require_once APPLICATION_PATH.'/Rath/Libraries/medoo.min.php';
 
 class MedooFactory
 {

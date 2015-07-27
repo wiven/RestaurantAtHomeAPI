@@ -28,11 +28,12 @@ class MasterData
     private function InsertDemoUsers($db){
         $db->insert(\User::TABLE_NAME,
             [
-                \User::NAME_COL => "Thomas",
-                \User::SURNAME_COL => "De Pauw",
-                \User::EMAIL_COL => "thdepauw@hotmail.com",
-                \User::PASSWORD_COL => md5("10Centimeter"),
-                \User::ADMIN_COL => true
+                User::NAME_COL => "Thomas",
+                User::SURNAME_COL => "De Pauw",
+                User::EMAIL_COL => "thdepauw@hotmail.com",
+                User::PASSWORD_COL => md5("10Centimeter"),
+                User::ADMIN_COL => true,
+                User::HASH_COL => sha1("thdepauw@hotmail.com")
             ]);
         $db->insert(\User::TABLE_NAME,
             [
@@ -40,7 +41,8 @@ class MasterData
                 \User::SURNAME_COL => "Vandevenne",
                 \User::EMAIL_COL => "wim.vandevenne@gmail.com",
                 \User::PASSWORD_COL => md5("10Centimeter"),
-                \User::ADMIN_COL => true
+                \User::ADMIN_COL => true,
+                User::HASH_COL => sha1("wim.vandevenne@gmail.com")
             ]);
     }
 }
