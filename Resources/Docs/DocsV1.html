@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>RestaurantAtHome Api Docs</title>
+
+    <link rel="stylesheet" href="styles/default.css">
+    <script src="highlight.pack.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+    <script>
+        $(document).ready(function() {
+            $('pre code').each(function(i, block) {
+                hljs.highlightBlock(block);
+            });
+        });
+    </script>
+</head>
+<body>
+    <header>
+        <h1>Introduction</h1>
+        <p>This document is the first draft of the API documentation. It contains the routes with the
+        required parameters and return type.</p>
+        <p>All routes should directly be pasted behind the base site</p>
+    </header>
+    <div>
+        <h2>Application Managment</h2>
+        <article>
+            <h3>/ping</h3>
+            <p>This method wil return a timestamp to indicate the api is live.</p>
+            <h4>Type</h4>
+                <p>GET</p>
+            <h4>Parameters</h4>
+                <p>None</p>
+            <h4>Return</h4>
+            <pre><code class="json">
+                {
+                "ack": 1438102668
+                }
+            </code></pre>
+        </article>
+    </div>
+
+    <div>
+        <h2>User actions</h2>
+        <article>
+            <h3>/login</h3>
+            <p>allows to authenticate the user.</p>
+            <p>example: http://.../login/email@hotmail.com/a361f49bee3c15f9691c92506d14361e/0</p>
+            <h4>Type</h4>
+            <p>GET</p>
+            <h4>Parameters</h4>
+                <ul>
+                    <li>email</li>
+                    <li>password</li>
+                    <li>socialLogin: indicates the user authenticated with a social media. Then a password isn't required</li>
+                </ul>
+            <h4>Return</h4>
+            <pre><code>
+                {
+                "hash": "8aab72bb43951f7a3ebbb009682a229e42b8d6a9",
+                "email": "thdepauw@hotmail.com",
+                "name": "Thomas",
+                "surname": "De Pauw",
+                "type": "Client"
+                }
+            </code></pre>
+        </article>
+        <article>
+            <h3>/user</h3>
+            <p>Create a new user.</p>
+            <p>example: http://.../user</p>
+            <h4>Type</h4>
+            <p>POST</p>
+            <h4>Parameters</h4>
+            <p>This has to be send in the body:</p>
+            <pre><code>
+                {
+                "email":"email@hotmail.com",
+                "name":"Inessa",
+                "surname":"Verleyen",
+                "phoneNo":"0123456789",
+                "type":"Client",
+                "socialLogin": "0",
+                "password":"a361f49bee3c15f9691c92506d14361e"
+                }
+            </code></pre>
+            <p>Extra info</p>
+            <ul>
+                <li>socialLogin: indicates the user authenticated with a social media. Then a password isn't required</li>
+                <li>password: Send as MD5</li>
+                <li>Type:
+                    <ul>
+                        <li>Client</li>
+                        <li>Resto</li>
+                    </ul>
+                </li>
+            </ul>
+            <h4>Return</h4>
+            <pre><code>
+                {
+                "hash": "ac3478d69a3c81fa62e60f5c3696165a4e5e6ac4",
+                "email": "inessa_verleyen@hotmail.com",
+                "name": "Inessa",
+                "surname": "Verleyen",
+                "phoneNo": "0123456789",
+                "type": "Client",
+                "socialLogin": "0"
+                }
+            </code></pre>
+        </article>
+        <article>
+            <h3>/user</h3>
+            <p>Get detailed user information.</p>
+            <p>example: http://.../user/ac3478d69a3c81fa62e60f5c3696165a4e5e6ac4</p>
+            <h4>Type</h4>
+            <p>GET</p>
+            <h4>Parameters</h4>
+            <ul>
+                <li>hash: the users hash code</li>
+            </ul>
+            <h4>Return</h4>
+            <pre><code>
+                {
+                "hash": "ac3478d69a3c81fa62e60f5c3696165a4e5e6ac4",
+                "email": "inessa_verleyen@hotmail.com",
+                "name": "Inessa",
+                "surname": "Verleyen",
+                "phoneNo": "0123456789",
+                "type": "Client",
+                "socialLogin": "0"
+                }
+            </code></pre>
+        </article>
+        <article>
+            <h3>/user</h3>
+            <p>Get detailed user information.</p>
+            <p>example: http://.../user</p>
+            <h4>Type</h4>
+            <p>PUT</p>
+            <h4>Parameters</h4>
+            <pre><code>
+                {
+                "hash": "ac3478d69a3c81fa62e60f5c3696165a4e5e6ac4",
+                "name":"Inessa",
+                "surname":"Verleyen",
+                "phoneNo":"0123456789",
+                "type":"Client",
+                "password":"a361f49bee3c15f9691c92506d14361e"
+                }
+            </code></pre>
+            <p>Extra info</p>
+            <ul>
+                <li>socialLogin: indicates the user authenticated with a social media. Then a password isn't required</li>
+                <li>password: Send as MD5</li>
+                <li>Type:
+                    <ul>
+                        <li>Client</li>
+                        <li>Resto</li>
+                    </ul>
+                </li>
+
+            </ul>
+            <h4>Return</h4>
+            <p>updated user</p>
+            <pre><code>
+                {
+                "hash": "ac3478d69a3c81fa62e60f5c3696165a4e5e6ac4",
+                "email": "inessa_verleyen@hotmail.com",
+                "name": "Inessa",
+                "surname": "Verleyen",
+                "phoneNo": "0123456789",
+                "type": "Client",
+                "socialLogin": "0"
+                }
+            </code></pre>
+        </article>
+        <article>
+            <h3>/user</h3>
+            <p>Remove a user and all his data.</p>
+            <p>example: http://.../user/ac3478d69a3c81fa62e60f5c3696165a4e5e6ac4</p>
+            <h4>Type</h4>
+            <p>DELETE</p>
+            <h4>Parameters</h4>
+            <ul>
+                <li>hash: the users hash code</li>
+            </ul>
+            <p>!!! Also have a look at the following documentation: <a href="http://docs.slimframework.com/routing/delete/">Slim Delete</a></p>
+            <h4>Return</h4>
+            <pre><code>
+               to come ...
+            </code></pre>
+        </article>
+    </div>
+
+
+
+</body>
+</html>

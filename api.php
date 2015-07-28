@@ -24,7 +24,7 @@ require 'Slim/Slim.php';
 require 'Rath/Helpers/CrossDomainAjax.php';
 require 'Rath/Helpers/MasterData.php';
 
-require 'Rath/Controllers/LoginController.php';
+require 'Rath/Controllers/UserController.php';
 
 //include_once 'Rath\Libraries\Slagger.php';
 
@@ -39,6 +39,7 @@ require 'Rath/Controllers/LoginController.php';
  * of setting names and values into the application constructor.
  */
 $app = new \Slim\Slim();
+$app->setName("RestaurantAtHomeApi");
 
 // Inject as Slim application middleware
 //$app->add(new \Slagger\Slagger('/v1/docs', 'Rath'));
@@ -52,6 +53,7 @@ $app = new \Slim\Slim();
  * is an anonymous function.
  */
 
+//<editor-fold desc="Intro page SLIM">
 // GET route
 $app->get(
     '/',
@@ -154,7 +156,9 @@ EOT;
         echo $template;
     }
 );
+//</editor-fold>
 
+//<editor-fold desc="Examples">
 // POST route
 $app->post(
     '/post',
@@ -183,20 +187,49 @@ $app->delete(
         echo 'This is a DELETE route';
     }
 );
+//</editor-fold>
+
+//<editor-fold desc="Application status">
 
 $app->get('/ping', function() use ($app){
     $status = ['ack'=> time()];
     CrossDomainAjax::PrintCrossDomainCall($app,$status);
 });
+//</editor-fold>
+
+
+//<editor-fold desc="User managment">
+
+
 
 $app->get('/login/:email/:password/:socialLogin',function($email,$password,$socialLogin) use ($app){
-//    var_dump($email);
-//    var_dump($password);
-//    var_dump($socialLogin);
-
-    $result = LoginController::AuthenticateUser($email,$password,$socialLogin);
+    $result = UserController::AuthenticateUser($email,$password,$socialLogin);
     CrossDomainAjax::PrintCrossDomainCall($app,$result);
 });
+
+$app->post('/user',function() use ($app){
+    $user = json_decode($app->request->getBody());
+    $result = UserController::CreateUser($user);
+    CrossDomainAjax::PrintCrossDomainCall($app,$result);
+});
+
+$app->get('/user/:hash', function($hash) use ($app){
+    $result = UserController::GetuserByHash($hash);
+    CrossDomainAjax::PrintCrossDomainCall($app,$result);
+});
+
+$app->put('/user', function() use ($app){
+    $user = json_decode($app->request->getBody());
+    $result = UserController::UpdateUser($user);
+    CrossDomainAjax::PrintCrossDomainCall($app,$result);
+});
+
+$app->delete('/user/:hash', function($hash) use ($app){
+
+});
+
+
+//</editor-fold>
 
 
 

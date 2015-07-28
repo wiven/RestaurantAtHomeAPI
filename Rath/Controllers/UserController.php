@@ -12,8 +12,9 @@
 require_once APPLICATION_PATH.'/Rath/Libraries/medoo.min.php';
 require_once APPLICATION_PATH.'/Rath/Helpers/MedooFactory.php';
 require_once APPLICATION_PATH.'/Rath/Entities/User.php';
+require_once APPLICATION_PATH.'/Rath/Entities/ApiResponse.php';
 
-class LoginController
+class UserController
 {
 
     /**
@@ -80,10 +81,16 @@ class LoginController
         return $user;
     }
 
+    /**
+     * @param $user
+     * @return string
+     */
     static function CreateUser($user){
+        var_dump($user);
+        $response = new ApiResponse();
         $db = MedooFactory::CreateMedooInstance();
 
-        $email = $user[User::EMAIL_COL]; //TODO: Validate Email;
+        $email = $user->email;//[User::EMAIL_COL]; //TODO: Validate Email;
 
         $dbUser = $db->select(User::TABLE_NAME,
             [
@@ -95,49 +102,112 @@ class LoginController
                 ]
             ]
             );
-        if($dbUser)
-            return "User with email ".$email." already exists.";
+        echo "user value: ";
+        var_dump($dbUser);
 
-        $db->insert(\User::TABLE_NAME,
-            [
-                User::NAME_COL => $user[User::NAME_COL],
-                User::SURNAME_COL => $user[User::SURNAME_COL],
-                User::EMAIL_COL => $user[User::EMAIL_COL],
-                User::PASSWORD_COL => $user[User::PASSWORD_COL],
-                User::TYPE_COL => $user[User::TYPE_COL]
-            ]);
+        if($dbUser){
+            $response->code = 2;
+            $response->message = "User with email ".$email." already exists.";
+            return $response;
+        }
+
+        echo "Insert user";
+        $userId = UserController::GetNextUserId($db);
+
+        $data = [
+            User::ID_COL => $userId,
+            User::NAME_COL => $user->name,
+            User::SURNAME_COL => $user->surname,
+            User::EMAIL_COL => $user->email,
+            User::TYPE_COL => $user->type,
+            User::HASH_COL => sha1($userId),
+            User::PHONE_NO_COL => $user->phoneNo
+        ];
+        if($user->socialLogin)
+            $data[User::PASSWORD_COL]= $user->password; //Already MD5
+
+        $db->insert(\User::TABLE_NAME,$data);
+
+        return UserController::GetUserByEmail($user->email);
     }
 
     static function UpdateUser($user)
     {
+        //TODO: add validation and fault capture
         $db = MedooFactory::CreateMedooInstance();
-
-        $email = $user[User::EMAIL_COL]; //TODO: Validate Email;
 
         $db->update(User::TABLE_NAME,
             [
-                User::NAME_COL => $user[User::NAME_COL],
-                User::SURNAME_COL => $user[User::SURNAME_COL],
-                User::PASSWORD_COL => $user[User::PASSWORD_COL],
-                User::TYPE_COL => $user[User::TYPE_COL]
+                User::NAME_COL => $user->name,
+                User::SURNAME_COL => $user->surname,
+                User::PASSWORD_COL => $user->password, //Already MD5
+                User::TYPE_COL => $user->type,
+                User::PHONE_NO_COL => $user->phoneNo
             ],
             [
-                User::EMAIL_COL => $email,
-            ]
-            );
+                User::HASH_COL => $user->hash,
+            ]);
+        return UserController::GetuserByHash($user->hash);
     }
 
-    static function DeleteUser($user)
+    static function DeleteUser($hash)
     {
+        $response = new ApiResponse();
         $db = MedooFactory::CreateMedooInstance();
-
-        $email = $user[User::EMAIL_COL]; //TODO: Validate Email;
 
         $db->delete(User::TABLE_NAME,
             [
-                User::EMAIL_COL => $email,
+                User::HASH_COL => $hash,
             ]);
+        $response->code = 1;
+        $response->message = "User sucessfully removed.";
+        return $response;
+    }
 
+    static function GetUserByEmail($email){
+        $db = MedooFactory::CreateMedooInstance();
+        $user = $db->select(User::TABLE_NAME,
+            [
+                User::HASH_COL,
+                User::EMAIL_COL,
+                User::NAME_COL,
+                User::SURNAME_COL,
+                User::PHONE_NO_COL,
+                User::TYPE_COL,
+                User::SOCIAL_LOGIN_COL
+            ],[
+                User::EMAIL_COL => $email
+            ]
+        );
+        return $user;
+    }
+
+    static function GetuserByHash($hash){
+        $db = MedooFactory::CreateMedooInstance();
+        $user = $db->select(User::TABLE_NAME,
+            [
+                User::HASH_COL,
+                User::EMAIL_COL,
+                User::NAME_COL,
+                User::SURNAME_COL,
+                User::PHONE_NO_COL,
+                User::TYPE_COL,
+                User::SOCIAL_LOGIN_COL
+            ],[
+                User::HASH_COL => $hash
+            ]
+        );
+        return $user;
+    }
+
+    private static function GetNextUserId(medoo $db){
+        $lastId = $db->get(User::TABLE_NAME,
+            User::ID_COL,
+            [
+                "ORDER" => [User::ID_COL.' DESC']
+            ]);
+        var_dump($lastId);
+        return $lastId+1;
     }
 
 }
