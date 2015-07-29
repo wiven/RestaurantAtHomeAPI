@@ -267,6 +267,6 @@ $app->get('/user/delete/:hash', function($hash) use ($app){
  * and returns the HTTP response to the HTTP client.
  */
 
-
+//Added change from test Issue Git
 
 $app->run();
