@@ -1,12 +1,16 @@
 <?php
-//use \Rath\helpers\CrossDomainAjax as CrossDomainAjax;
-
-require_once 'Rath/Libraries/medoo.min.php';
-
 if (!defined('APPLICATION_PATH'))
     define('APPLICATION_PATH', realpath(__DIR__ ));
 
+require_once 'Rath/Libraries/medoo.min.php';
+require_once 'Rath/Slim/PermissionMiddleware.php';
 
+require 'Slim/Slim.php';
+require 'Rath/Helpers/CrossDomainAjax.php';
+require 'Rath/Helpers/MasterData.php';
+
+require 'Rath/Controllers/UserController.php';
+require 'Rath/Controllers/UserPermissionController.php';
 
 /**
  * @SWG\Info(title="RestaurantAtHome API", version="0.1")
@@ -20,11 +24,8 @@ if (!defined('APPLICATION_PATH'))
  *
  * If you are using Composer, you can skip this step.
  */
-require 'Slim/Slim.php';
-require 'Rath/Helpers/CrossDomainAjax.php';
-require 'Rath/Helpers/MasterData.php';
 
-require 'Rath/Controllers/UserController.php';
+
 
 //include_once 'Rath\Libraries\Slagger.php';
 
@@ -40,6 +41,7 @@ require 'Rath/Controllers/UserController.php';
  */
 $app = new \Slim\Slim();
 $app->setName("RestaurantAtHomeApi");
+//$app->add(new PermissionMiddleware()); //TODO; Authentication check
 
 // Inject as Slim application middleware
 //$app->add(new \Slagger\Slagger('/v1/docs', 'Rath'));
@@ -197,41 +199,10 @@ $app->get('/ping', function() use ($app){
 });
 //</editor-fold>
 
+//<editor-fold desc="Application Managment">
 
-//<editor-fold desc="User managment">
-
-
-
-$app->get('/login/:email/:password/:socialLogin',function($email,$password,$socialLogin) use ($app){
-    $result = UserController::AuthenticateUser($email,$password,$socialLogin);
-    CrossDomainAjax::PrintCrossDomainCall($app,$result);
-});
-
-$app->post('/user',function() use ($app){
-    $user = json_decode($app->request->getBody());
-    $result = UserController::CreateUser($user);
-    CrossDomainAjax::PrintCrossDomainCall($app,$result);
-});
-
-$app->get('/user/:hash', function($hash) use ($app){
-    $result = UserController::GetuserByHash($hash);
-    CrossDomainAjax::PrintCrossDomainCall($app,$result);
-});
-
-$app->put('/user', function() use ($app){
-    $user = json_decode($app->request->getBody());
-    $result = UserController::UpdateUser($user);
-    CrossDomainAjax::PrintCrossDomainCall($app,$result);
-});
-
-$app->delete('/user/:hash', function($hash) use ($app){
-
-});
-
-
-//</editor-fold>
-
-
+const API_MASTERDATA_ROUTE = "masterdata";
+const API_UNAUTHORISED_ROUTE = "unauthorised";
 
 
 /**
@@ -245,10 +216,57 @@ $app->POST('/masterdata', function() use ($app){
     CrossDomainAjax::PrintCrossDomainCall($app,['Datageneration success']);
 });
 
+$app->get('/unauthorised/:route', function($route) use ($app){
+    CrossDomainAjax::PrintCrossDomainCall($app,UserPermissionController::GetPermissionErrorMessage($route));
+})->name(API_UNAUTHORISED_ROUTE);
+
+//</editor-fold>
+
+//<editor-fold desc="User managment">
+
+const API_LOGIN_ROUTE = "login";
+
+const API_USER_CREATE_ROUTE = "userCreate";
+const API_USER_GET_ROUTE = "userGet";
+const API_USER_UPDATE_ROUTE = "userUpdate";
+const API_USER_DELETE_ROUTE = "userDelete";
+
+$app->get('/login/:email/:password/:socialLogin',function($email,$password,$socialLogin) use ($app){
+    $result = UserController::AuthenticateUser($email,$password,$socialLogin);
+    CrossDomainAjax::PrintCrossDomainCall($app,$result);
+})->name(API_LOGIN_ROUTE);
+
+$app->post('/user',function() use ($app){
+    $user = json_decode($app->request->getBody());
+    $result = UserController::CreateUser($user);
+    CrossDomainAjax::PrintCrossDomainCall($app,$result);
+})->name(API_USER_CREATE_ROUTE);
+
+$app->get('/user/:hash', function($hash) use ($app){
+    $result = UserController::GetuserByHash($hash);
+    CrossDomainAjax::PrintCrossDomainCall($app,$result);
+})->name(API_USER_GET_ROUTE);
+
+$app->put('/user', function() use ($app){
+    $user = json_decode($app->request->getBody());
+    $result = UserController::UpdateUser($user);
+    CrossDomainAjax::PrintCrossDomainCall($app,$result);
+})->name(API_USER_UPDATE_ROUTE);
+
+$app->get('/user/delete/:hash', function($hash) use ($app){
+    echo "called";
+})->name(API_USER_DELETE_ROUTE);
+
+
+//</editor-fold>
+
 /**
  * Step 4: Run the Slim application
  *
  * This method should be called last. This executes the Slim application
  * and returns the HTTP response to the HTTP client.
  */
+
+
+
 $app->run();

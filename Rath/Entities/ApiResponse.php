@@ -9,6 +9,12 @@
  */
 class ApiResponse
 {
+    function __construct(){ }
+
+    function __construct1($code,$message){
+        $this->code = $code;
+        $this->message = $message;
+    }
 
     /**
      * @SWG\Property(format="int32")

@@ -14,6 +14,7 @@ require_once APPLICATION_PATH.'/Rath/Libraries/medoo.min.php';
 //include_once 'MedooFactory.php';
 require_once APPLICATION_PATH.'/Rath/Entities/User.php';
 require_once APPLICATION_PATH.'/Rath/Entities/Base.php';
+require_once APPLICATION_PATH.'/Rath/Entities/UserPermission.php';
 require_once 'MedooFactory.php';
 
 class MasterData
@@ -22,10 +23,11 @@ class MasterData
         $db = MedooFactory::CreateMedooInstance();
 
         MasterData::InsertDemoUsers($db);
+        MasterData::InsertDefaultRoutPermissions($db);
 
     }
 
-    private function InsertDemoUsers($db){
+    private function InsertDemoUsers(medoo $db){
         $db->insert(\User::TABLE_NAME,
             [
                 User::NAME_COL => "Thomas",
@@ -44,5 +46,26 @@ class MasterData
                 \User::ADMIN_COL => true,
                 User::HASH_COL => sha1("wim.vandevenne@gmail.com")
             ]);
+    }
+
+    private function InsertDefaultRoutPermissions(medoo $db){
+        $db->insert(UserPermission::TABLE_NAME, [
+            [
+                UserPermission::USER_TYPE_COL => UserPermission::USER_TYPE_VAL_Client,
+                UserPermission::ROUTE_COL => "user"
+            ],
+            [
+                UserPermission::USER_TYPE_COL => UserPermission::USER_TYPE_VAL_Client,
+                UserPermission::ROUTE_COL => "login"
+            ],
+            [
+                UserPermission::USER_TYPE_COL => UserPermission::USER_TYPE_VAL_Resto,
+                UserPermission::ROUTE_COL => "user"
+            ],
+            [
+                UserPermission::USER_TYPE_COL => UserPermission::USER_TYPE_VAL_Resto,
+                UserPermission::ROUTE_COL => "login"
+            ]
+        ]);
     }
 }

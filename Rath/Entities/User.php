@@ -22,4 +22,6 @@ class User extends Base
     const ADMIN_COL = "admin";
     const SOCIAL_LOGIN_COL = 'socialLogin';
     const HASH_COL = "hash";
+    const EXCLUSIVE_PERMISSION_COL = "exclusivePermissions";
+
 }

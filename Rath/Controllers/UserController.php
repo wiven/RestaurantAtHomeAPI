@@ -136,14 +136,18 @@ class UserController
         //TODO: add validation and fault capture
         $db = MedooFactory::CreateMedooInstance();
 
+        $data = [
+            User::NAME_COL => $user->name,
+            User::SURNAME_COL => $user->surname,
+            User::TYPE_COL => $user->type,
+            User::PHONE_NO_COL => $user->phoneNo
+        ];
+
+        if(property_exists($user,"password"))
+            $data[User::PASSWORD_COL] = $user->password; //Already MD5
+
         $db->update(User::TABLE_NAME,
-            [
-                User::NAME_COL => $user->name,
-                User::SURNAME_COL => $user->surname,
-                User::PASSWORD_COL => $user->password, //Already MD5
-                User::TYPE_COL => $user->type,
-                User::PHONE_NO_COL => $user->phoneNo
-            ],
+            $data,
             [
                 User::HASH_COL => $user->hash,
             ]);
@@ -192,7 +196,9 @@ class UserController
                 User::SURNAME_COL,
                 User::PHONE_NO_COL,
                 User::TYPE_COL,
-                User::SOCIAL_LOGIN_COL
+                User::SOCIAL_LOGIN_COL,
+                User::ADMIN_COL,
+                User::EXCLUSIVE_PERMISSION_COL
             ],[
                 User::HASH_COL => $hash
             ]
@@ -210,6 +216,31 @@ class UserController
         return $lastId+1;
     }
 
+    static function CheckUserPermissions($hash,$route){
+        $user = UserController::GetuserByHash($hash)[0];
+//        die(var_dump($user));
+        if($user[User::ADMIN_COL]) //allow full access
+            return true;
+
+        if($user[User::EXCLUSIVE_PERMISSION_COL])
+            return false; //TODO: implement possibility to add user specific permissions
+
+        $db = MedooFactory::CreateMedooInstance();
+        $result = $db->select(UserPermission::TABLE_NAME,
+            [
+                UserPermission::DISABLED_COL
+            ],
+            [
+                "AND" => [
+                    UserPermission::USER_TYPE_COL => $user[User::TYPE_COL],
+                    UserPermission::ROUTE_COL => $route
+                ]
+            ]);
+        var_dump($result);
+        if(!($result))
+            return false;
+        return ($result[0][UserPermission::DISABLED_COL] == 0);
+    }
 }
 
 //$para = [
