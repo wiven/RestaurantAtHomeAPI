@@ -3,7 +3,7 @@ if (!defined('APPLICATION_PATH'))
     define('APPLICATION_PATH', realpath(__DIR__ ));
 
 require_once 'Rath/Libraries/medoo.min.php';
-require_once 'Rath/Slim/PermissionMiddleware.php';
+require_once 'Rath/Slim/Middleware/Authorization.php';
 
 require 'Slim/Slim.php';
 require 'Rath/Helpers/CrossDomainAjax.php';
@@ -41,7 +41,8 @@ require 'Rath/Controllers/UserPermissionController.php';
  */
 $app = new \Slim\Slim();
 $app->setName("RestaurantAtHomeApi");
-//$app->add(new PermissionMiddleware()); //TODO; Authentication check
+$app->add(new Authorization()); //TODO; Authentication check
+
 
 // Inject as Slim application middleware
 //$app->add(new \Slagger\Slagger('/v1/docs', 'Rath'));
@@ -193,10 +194,12 @@ $app->delete(
 
 //<editor-fold desc="Application status">
 
+const API_PING_ROUTE = "ping";
+
 $app->get('/ping', function() use ($app){
     $status = ['ack'=> time()];
     CrossDomainAjax::PrintCrossDomainCall($app,$status);
-});
+})->name(API_PING_ROUTE);
 //</editor-fold>
 
 //<editor-fold desc="Application Managment">
@@ -214,7 +217,7 @@ const API_UNAUTHORISED_ROUTE = "unauthorised";
 $app->POST('/masterdata', function() use ($app){
     MasterData::CreateDemoData();
     CrossDomainAjax::PrintCrossDomainCall($app,['Datageneration success']);
-});
+})->name(API_MASTERDATA_ROUTE);
 
 $app->get('/unauthorised/:route', function($route) use ($app){
     CrossDomainAjax::PrintCrossDomainCall($app,UserPermissionController::GetPermissionErrorMessage($route));
@@ -254,7 +257,8 @@ $app->put('/user', function() use ($app){
 })->name(API_USER_UPDATE_ROUTE);
 
 $app->get('/user/delete/:hash', function($hash) use ($app){
-    echo "called";
+    $result = UserController::DeleteUser($hash);
+    CrossDomainAjax::PrintCrossDomainCall($app,$result);
 })->name(API_USER_DELETE_ROUTE);
 
 
@@ -267,6 +271,10 @@ $app->get('/user/delete/:hash', function($hash) use ($app){
  * and returns the HTTP response to the HTTP client.
  */
 
-//Added change from test Issue Git
+//function exception_handler($exception) {
+//   if($exception);
+//}
+//
+//set_exception_handler('exception_handler');
 
 $app->run();

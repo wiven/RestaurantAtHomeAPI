@@ -24,4 +24,26 @@ class User extends Base
     const HASH_COL = "hash";
     const EXCLUSIVE_PERMISSION_COL = "exclusivePermissions";
 
+    public $id;
+
+    public $name;
+
+    public $surname;
+
+    public $phoneNo;
+
+    public  $type;
+
+    public $email;
+
+    public $password;
+
+    public $admin;
+
+    public $socialLogin;
+
+    public $hash;
+
+    public $exclusivePermissions;
+
 }

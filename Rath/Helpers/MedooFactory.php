@@ -15,13 +15,31 @@ class MedooFactory
     //TODO: Create developer variable.
 
     static function CreateMedooInstance(){
+//        $db = new \medoo([
+//            // required
+//            'database_type' => 'mysql',
+//            'database_name' => 'rathdev',
+//            'server' => 'localhost',
+//            'username' => 'root',
+//            'password' => '',
+//            'charset' => 'utf8',
+//
+//            // optional
+//            'port' => 3306,
+//            // driver_option for connection, read more from http://www.php.net/manual/en/pdo.setattribute.php
+////            'option' => [
+////                PDO::ATTR_CASE => PDO::CASE_NATURAL
+////            ]
+//        ]);
+
+        //apiDev
         $db = new \medoo([
             // required
             'database_type' => 'mysql',
-            'database_name' => 'rathdev',
+            'database_name' => 'deb84843n3_rathdev',
             'server' => 'localhost',
-            'username' => 'root',
-            'password' => '',
+            'username' => 'deb84843n3_tdp',
+            'password' => 'gEcDgPOy',
             'charset' => 'utf8',
 
             // optional

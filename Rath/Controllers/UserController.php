@@ -86,7 +86,7 @@ class UserController
      * @return string
      */
     static function CreateUser($user){
-        var_dump($user);
+//        var_dump($user); //TODO: Remove
         $response = new ApiResponse();
         $db = MedooFactory::CreateMedooInstance();
 
@@ -102,8 +102,8 @@ class UserController
                 ]
             ]
             );
-        echo "user value: ";
-        var_dump($dbUser);
+//        echo "user value: ";
+//        var_dump($dbUser);
 
         if($dbUser){
             $response->code = 2;
@@ -111,9 +111,9 @@ class UserController
             return $response;
         }
 
-        echo "Insert user";
+//        echo "Insert user";
         $userId = UserController::GetNextUserId($db);
-
+//        var_dump($user);
         $data = [
             User::ID_COL => $userId,
             User::NAME_COL => $user->name,
@@ -123,10 +123,12 @@ class UserController
             User::HASH_COL => sha1($userId),
             User::PHONE_NO_COL => $user->phoneNo
         ];
-        if($user->socialLogin)
+        if(!$user->socialLogin)
             $data[User::PASSWORD_COL]= $user->password; //Already MD5
-
-        $db->insert(\User::TABLE_NAME,$data);
+//        echo "Data to insert: ";
+//        var_dump($data);
+        $a = $db->insert(\User::TABLE_NAME,$data);
+//        var_dump('Insert Result: '.$a);
 
         return UserController::GetUserByEmail($user->email);
     }
@@ -164,7 +166,7 @@ class UserController
                 User::HASH_COL => $hash,
             ]);
         $response->code = 1;
-        $response->message = "User sucessfully removed.";
+        $response->message = "User successfully removed.";
         return $response;
     }
 
@@ -212,13 +214,21 @@ class UserController
             [
                 "ORDER" => [User::ID_COL.' DESC']
             ]);
-        var_dump($lastId);
+        //var_dump($lastId+1);
         return $lastId+1;
     }
 
     static function CheckUserPermissions($hash,$route){
-        $user = UserController::GetuserByHash($hash)[0];
-//        die(var_dump($user));
+        $result = UserController::GetuserByHash($hash);
+        $result = array_filter($result);
+//        var_dump($result);
+
+
+        if(!empty($result)>0)
+            $user = $result[0];
+        else
+            return false;
+
         if($user[User::ADMIN_COL]) //allow full access
             return true;
 
@@ -236,7 +246,7 @@ class UserController
                     UserPermission::ROUTE_COL => $route
                 ]
             ]);
-        var_dump($result);
+//        var_dump($result);
         if(!($result))
             return false;
         return ($result[0][UserPermission::DISABLED_COL] == 0);

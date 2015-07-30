@@ -1,0 +1,6 @@
+Client,userGet
+Client,userUpdate
+Client,userDelete
+Resto,userGet
+Resto,userUpdate
+Resto,userDelete

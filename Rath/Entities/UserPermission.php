@@ -18,4 +18,16 @@ class UserPermission
         const USER_TYPE_VAL_Resto = "Resto";
     const ROUTE_COL = "route";
     const DISABLED_COL = "disabled";
+
+    function __construct(){
+        $this->disabled = 0;
+    }
+
+    public $id;
+
+    public $userType;
+
+    public $route;
+
+    public $disabled;
 }
