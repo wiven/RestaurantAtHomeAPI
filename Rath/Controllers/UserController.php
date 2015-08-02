@@ -114,7 +114,7 @@ class UserController
 //        echo "Insert user";
         $userId = UserController::GetNextUserId($db);
         $hashString = sha1($userId.$user->email.time());
-        var_dump($hashString);
+//        var_dump($hashString);
         $data = [
             User::ID_COL => $userId,
             User::NAME_COL => $user->name,
