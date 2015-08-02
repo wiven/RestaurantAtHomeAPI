@@ -2,6 +2,9 @@
 if (!defined('APPLICATION_PATH'))
     define('APPLICATION_PATH', realpath(__DIR__ ));
 
+if(!defined('APPLICATION_MODE'))
+    define('APPLICATION_MODE', 'LOCAL');
+
 require_once 'Rath/Libraries/medoo.min.php';
 require_once 'Rath/Slim/Middleware/Authorization.php';
 

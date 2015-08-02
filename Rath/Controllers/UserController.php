@@ -113,14 +113,15 @@ class UserController
 
 //        echo "Insert user";
         $userId = UserController::GetNextUserId($db);
-//        var_dump($user);
+        $hashString = sha1($userId.$user->email.time());
+        var_dump($hashString);
         $data = [
             User::ID_COL => $userId,
             User::NAME_COL => $user->name,
             User::SURNAME_COL => $user->surname,
             User::EMAIL_COL => $user->email,
             User::TYPE_COL => $user->type,
-            User::HASH_COL => sha1($userId),
+            User::HASH_COL => $hashString,
             User::PHONE_NO_COL => $user->phoneNo
         ];
         if(!$user->socialLogin)
