@@ -14,6 +14,7 @@ require 'Rath/Helpers/MasterData.php';
 
 require 'Rath/Controllers/UserController.php';
 require 'Rath/Controllers/UserPermissionController.php';
+require 'Rath/Controllers/ApplicationManagementController.php';
 
 /**
  * @SWG\Info(title="RestaurantAtHome API", version="0.1")
@@ -200,7 +201,7 @@ $app->delete(
 const API_PING_ROUTE = "ping";
 
 $app->get('/ping', function() use ($app){
-    $status = ['ack'=> time()];
+    $status = ApplicationManagementController::GetStatus();
     CrossDomainAjax::PrintCrossDomainCall($app,$status);
 })->name(API_PING_ROUTE);
 //</editor-fold>
