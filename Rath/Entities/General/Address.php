@@ -6,7 +6,7 @@
  * Time: 18:25
  */
 
-//namespace Rath\Entities\General;
+namespace Rath\Entities\General;
 
 
 class Address

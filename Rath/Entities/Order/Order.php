@@ -6,7 +6,7 @@
  * Time: 17:53
  */
 
-namespace Entities\Order;
+namespace Rath\Entities\Order;
 
 
 class Order

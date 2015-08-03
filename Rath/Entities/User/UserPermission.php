@@ -1,6 +1,8 @@
 <?php
 
-require_once 'ApiResponse.php';
+//require_once 'ApiResponse.php';
+
+namespace Rath\Entities\User;
 
 /**
  * Created by PhpStorm.

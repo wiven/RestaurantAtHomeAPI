@@ -6,6 +6,9 @@
  * Date: 25/07/2015
  * Time: 21:03
  */
+
+namespace Rath\Entities;
+
 class Base
 {
     private $_data;

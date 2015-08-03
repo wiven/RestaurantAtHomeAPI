@@ -6,7 +6,10 @@
  * Date: 25/07/2015
  * Time: 20:45
  */
-require 'Base.php';
+
+namespace Rath\Entities\User;
+
+use Rath\Entities\Base;
 
 class User extends Base
 {
@@ -32,7 +35,7 @@ class User extends Base
 
     public $phoneNo;
 
-    public  $type;
+    public $type;
 
     public $email;
 

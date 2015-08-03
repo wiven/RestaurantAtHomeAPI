@@ -1,6 +1,6 @@
 <?php
 
-//namespace PetstoreIO;
+namespace Rath\Entities;
 
 /**
  * @SWG\Definition(

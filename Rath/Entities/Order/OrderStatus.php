@@ -6,6 +6,7 @@
  * Time: 17:52
  */
 
+namespace Rath\Entities\Order;
 
 class OrderStatus
 {

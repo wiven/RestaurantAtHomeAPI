@@ -6,13 +6,14 @@
  * Time: 20:20
  */
 
-//namespace Rath\Controllers;
-//use Rath\helpers\MedooFactory as MedooFactory;
+namespace Rath\Controllers;
 
-require_once APPLICATION_PATH.'/Rath/Libraries/medoo.min.php';
-require_once APPLICATION_PATH.'/Rath/Helpers/MedooFactory.php';
-require_once APPLICATION_PATH.'/Rath/Entities/User.php';
-require_once APPLICATION_PATH.'/Rath/Entities/ApiResponse.php';
+use Rath\helpers\MedooFactory;
+use Rath\Entities\User\User;
+use Rath\Entities\User\UserPermission;
+use Rath\Entities\ApiResponse;
+use Rath\Libraries\medoo;
+
 
 class UserController
 {
@@ -128,7 +129,7 @@ class UserController
             $data[User::PASSWORD_COL]= $user->password; //Already MD5
 //        echo "Data to insert: ";
 //        var_dump($data);
-        $a = $db->insert(\User::TABLE_NAME,$data);
+        $a = $db->insert(User::TABLE_NAME,$data);
 //        var_dump('Insert Result: '.$a);
 
         return UserController::GetUserByEmail($user->email);

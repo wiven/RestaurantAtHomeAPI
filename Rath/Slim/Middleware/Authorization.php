@@ -6,7 +6,14 @@
  * Date: 29/07/2015
  * Time: 19:36
  */
-require_once APPLICATION_PATH . '/Slim/Middleware.php';
+
+//require_once APPLICATION_PATH . '/Slim/Middleware.php';
+
+namespace Rath\Slim\Middleware;
+
+use Rath\Controllers\UserController;
+use Rath\Controllers\UserPermissionController;
+
 
 class Authorization extends \Slim\Middleware
 {

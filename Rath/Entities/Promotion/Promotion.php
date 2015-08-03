@@ -6,7 +6,7 @@
  * Time: 18:06
  */
 
-//namespace Rath\Entities\Promotion;
+namespace Rath\Entities\Promotion;
 
 
 class Promotion

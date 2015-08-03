@@ -6,7 +6,7 @@
  * Time: 18:03
  */
 
-//namespace Rath\Entities\Restaurant;
+namespace Rath\Entities\Restaurant;
 
 
 class Restaurant

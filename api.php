@@ -1,20 +1,25 @@
 <?php
-if (!defined('APPLICATION_PATH'))
-    define('APPLICATION_PATH', realpath(__DIR__ ));
+if (!defined('APP_PATH'))
+    define('APP_PATH', realpath(__DIR__ ));
 
-if(!defined('APPLICATION_MODE'))
-    define('APPLICATION_MODE', 'LOCAL');
+if(!defined('APP_MODE'))
+    define('APP_MODE', 'LOCAL');
 
-require_once 'Rath/Libraries/medoo.min.php';
-require_once 'Rath/Slim/Middleware/Authorization.php';
+require_once __DIR__.'/vendor/autoload.php';
 
-require 'Slim/Slim.php';
-require 'Rath/Helpers/CrossDomainAjax.php';
-require 'Rath/Helpers/MasterData.php';
+use Rath\helpers\CrossDomainAjax;
 
-require 'Rath/Controllers/UserController.php';
-require 'Rath/Controllers/UserPermissionController.php';
-require 'Rath/Controllers/ApplicationManagementController.php';
+$var = new Annotaion.
+//require_once 'Rath/Libraries/medoo.php';
+//require_once 'Rath/Slim/Middleware/Authorization.php';
+//
+//require 'Slim/Slim.php';
+//require 'Rath/Helpers/CrossDomainAjax.php';
+//require 'Rath/Helpers/MasterData.php';
+//
+//require 'Rath/Controllers/UserController.php';
+//require 'Rath/Controllers/UserPermissionController.php';
+//require 'Rath/Controllers/ApplicationManagementController.php';
 
 /**
  * @SWG\Info(title="RestaurantAtHome API", version="0.1")
@@ -45,7 +50,7 @@ require 'Rath/Controllers/ApplicationManagementController.php';
  */
 $app = new \Slim\Slim();
 $app->setName("RestaurantAtHomeApi");
-$app->add(new Authorization()); //TODO; Authentication check
+$app->add(new \Rath\Slim\Middleware\Authorization()); //TODO; Authentication check
 
 
 // Inject as Slim application middleware
@@ -201,7 +206,7 @@ $app->delete(
 const API_PING_ROUTE = "ping";
 
 $app->get('/ping', function() use ($app){
-    $status = ApplicationManagementController::GetStatus();
+    $status = Rath\Controllers\ApplicationManagementController::GetStatus();
     CrossDomainAjax::PrintCrossDomainCall($app,$status);
 })->name(API_PING_ROUTE);
 //</editor-fold>
@@ -219,12 +224,12 @@ const API_UNAUTHORISED_ROUTE = "unauthorised";
  * )
  */
 $app->POST('/masterdata', function() use ($app){
-    MasterData::CreateDemoData();
-    CrossDomainAjax::PrintCrossDomainCall($app,['Datageneration success']);
+    Rath\helpers\MasterData::CreateDemoData();
+    Rath\helpers\CrossDomainAjax::PrintCrossDomainCall($app,['Datageneration success']);
 })->name(API_MASTERDATA_ROUTE);
 
 $app->get('/unauthorised/:route', function($route) use ($app){
-    CrossDomainAjax::PrintCrossDomainCall($app,UserPermissionController::GetPermissionErrorMessage($route));
+    Rath\helpers\CrossDomainAjax::PrintCrossDomainCall($app,Rath\Controllers\UserPermissionController::GetPermissionErrorMessage($route));
 })->name(API_UNAUTHORISED_ROUTE);
 
 //</editor-fold>
@@ -239,30 +244,30 @@ const API_USER_UPDATE_ROUTE = "userUpdate";
 const API_USER_DELETE_ROUTE = "userDelete";
 
 $app->get('/login/:email/:password/:socialLogin',function($email,$password,$socialLogin) use ($app){
-    $result = UserController::AuthenticateUser($email,$password,$socialLogin);
-    CrossDomainAjax::PrintCrossDomainCall($app,$result);
+    $result = Rath\Controllers\UserController::AuthenticateUser($email,$password,$socialLogin);
+    Rath\helpers\CrossDomainAjax::PrintCrossDomainCall($app,$result);
 })->name(API_LOGIN_ROUTE);
 
 $app->post('/user',function() use ($app){
     $user = json_decode($app->request->getBody());
-    $result = UserController::CreateUser($user);
-    CrossDomainAjax::PrintCrossDomainCall($app,$result);
+    $result = Rath\Controllers\UserController::CreateUser($user);
+    Rath\helpers\CrossDomainAjax::PrintCrossDomainCall($app,$result);
 })->name(API_USER_CREATE_ROUTE);
 
 $app->get('/user/:hash', function($hash) use ($app){
-    $result = UserController::GetuserByHash($hash);
-    CrossDomainAjax::PrintCrossDomainCall($app,$result);
+    $result = Rath\Controllers\UserController::GetuserByHash($hash);
+    Rath\helpers\CrossDomainAjax::PrintCrossDomainCall($app,$result);
 })->name(API_USER_GET_ROUTE);
 
 $app->put('/user', function() use ($app){
     $user = json_decode($app->request->getBody());
-    $result = UserController::UpdateUser($user);
-    CrossDomainAjax::PrintCrossDomainCall($app,$result);
+    $result = Rath\Controllers\UserController::UpdateUser($user);
+    Rath\helpers\CrossDomainAjax::PrintCrossDomainCall($app,$result);
 })->name(API_USER_UPDATE_ROUTE);
 
 $app->get('/user/delete/:hash', function($hash) use ($app){
-    $result = UserController::DeleteUser($hash);
-    CrossDomainAjax::PrintCrossDomainCall($app,$result);
+    $result = Rath\Controllers\UserController::DeleteUser($hash);
+    Rath\helpers\CrossDomainAjax::PrintCrossDomainCall($app,$result);
 })->name(API_USER_DELETE_ROUTE);
 
 

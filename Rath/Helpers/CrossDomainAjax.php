@@ -6,11 +6,17 @@
  * Time: 20:02
  */
 
-//namespace Rath\helpers;
+namespace Rath\helpers;
 
+use Slim;
+use Rath\Entities\ApiResponse;
 
 class CrossDomainAjax
 {
+    /**
+     * @param $app Slim\Slim
+     * @param $data array
+     */
     static function PrintCrossDomainCall($app, $data){
         $callback = $app->request()->get('callback');
         $app->contentType('application/javascript');

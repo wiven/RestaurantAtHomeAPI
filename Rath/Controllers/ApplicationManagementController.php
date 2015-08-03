@@ -6,8 +6,9 @@
  * Time: 11:02
  */
 
-//namespace Rath\Controllers;
+namespace Rath\Controllers;
 
+use Rath\Entities\ApiResponse;
 
 class ApplicationManagementController
 {

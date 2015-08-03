@@ -7,6 +7,8 @@ $baseDir = dirname($vendorDir);
 
 return array(
     'Slim' => array($baseDir . '/'),
+    'Rath\\Tests' => array($baseDir . '/Rath/Tests'),
+    'Rath' => array($baseDir . '/Rath'),
     'Doctrine\\Common\\Lexer\\' => array($vendorDir . '/doctrine/lexer/lib'),
     'Doctrine\\Common\\Annotations\\' => array($vendorDir . '/doctrine/annotations/lib'),
 );

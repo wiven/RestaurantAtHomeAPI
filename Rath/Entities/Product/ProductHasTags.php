@@ -6,7 +6,7 @@
  * Time: 18:19
  */
 
-//namespace Rath\Entities\Product;
+namespace Rath\Entities\Product;
 
 
 class ProductHasTags

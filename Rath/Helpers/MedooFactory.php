@@ -6,17 +6,23 @@
  * Time: 20:23
  */
 
-//namespace Rath\helpers;
+namespace Rath\helpers;
 
-require_once APPLICATION_PATH.'/Rath/Libraries/medoo.min.php';
+use Rath\Libraries\medoo;
+use Exception;
+//require_once APP_PATH.'/Rath/Libraries/medoo.php';
 
 class MedooFactory
 {
     //TODO: Create developer variable.
 
+    /**
+     * @return medoo
+     * @throws Exception
+     */
     static function CreateMedooInstance(){
-        if(APPLICATION_MODE == 'LOCAL')
-            return new \medoo([
+        if(APP_MODE == 'LOCAL')
+            return new medoo([
                 // required
                 'database_type' => 'mysql',
                 'database_name' => 'rathdev',
@@ -32,8 +38,8 @@ class MedooFactory
     //                PDO::ATTR_CASE => PDO::CASE_NATURAL
     //            ]
             ]);
-        else if(APPLICATION_MODE == 'APIDEV')
-            return new \medoo([
+        else if(APP_MODE == 'APIDEV')
+            return new medoo([
                 // required
                 'database_type' => 'mysql',
                 'database_name' => 'deb84843n3_rathdev',

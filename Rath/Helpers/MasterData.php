@@ -6,16 +6,23 @@
  * Time: 20:40
  */
 
-//namespace Rath\helpers;
-//use Rath\helpers\MedooFactory as MedooFactory;
+namespace Rath\helpers;
 
-require_once APPLICATION_PATH.'/Rath/Libraries/medoo.min.php';
+use Rath\helpers\MedooFactory;
+use Rath\Entities\User\User;
+use Rath\Entities\User\UserPermission;
+use Rath\Controllers\UserController;
+use Rath\Controllers\UserPermissionController;
+use Rath\Libraries\medoo;
+use Exception;
 
-//include_once 'MedooFactory.php';
-require_once APPLICATION_PATH.'/Rath/Entities/User.php';
-require_once APPLICATION_PATH.'/Rath/Entities/Base.php';
-require_once APPLICATION_PATH.'/Rath/Entities/UserPermission.php';
-require_once 'MedooFactory.php';
+//require_once APP_PATH.'/Rath/Libraries/medoo.php';
+//
+////include_once 'MedooFactory.php';
+//require_once APP_PATH . '/Rath/Entities/User.php';
+//require_once APP_PATH.'/Rath/Entities/Base.php';
+//require_once APP_PATH . '/Rath/Entities/UserPermission.php';
+//require_once 'MedooFactory.php';
 
 class MasterData
 {
@@ -27,6 +34,9 @@ class MasterData
 
     }
 
+    /**
+     * @param medoo $db
+     */
     private static function InsertDemoUsers(medoo $db){
         $user = new User();
         $user->name = "Thomas";
@@ -62,10 +72,14 @@ class MasterData
         UserController::CreateUser($user);
     }
 
+    /**
+     * @param medoo $db
+     * @throws Exception
+     */
     private static function InsertDefaultRoutPermissions(medoo $db){
         $permissions = [];
         $row = 1;
-        if (($handle = fopen(APPLICATION_PATH."/Resources/Database/DefaultUserPermissions.csv.txt", "r")) !== FALSE) {
+        if (($handle = fopen(APP_PATH."/Resources/Database/DefaultUserPermissions.csv.txt", "r")) !== FALSE) {
             while (($data = fgetcsv($handle, 1000, ",")) !== FALSE) {
 //                $num = count($data);
 //                echo "<p> $num fields in line $row: <br /></p>\n";

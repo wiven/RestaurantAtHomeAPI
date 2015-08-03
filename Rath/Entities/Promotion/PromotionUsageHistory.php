@@ -6,7 +6,7 @@
  * Time: 18:13
  */
 
-//namespace Rath\Entities\Promotion;
+namespace Rath\Entities\Promotion;
 
 
 class PromotionUsageHistory

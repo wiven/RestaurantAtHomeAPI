@@ -1,8 +1,8 @@
 <?php
 
-require_once APPLICATION_PATH.'/Rath/Entities/ApiResponse.php';
-require_once APPLICATION_PATH.'/Rath/Libraries/medoo.min.php';
-require_once APPLICATION_PATH.'/Rath/Helpers/MedooFactory.php';
+//require_once APP_PATH.'/Rath/Entities/ApiResponse.php';
+//require_once APP_PATH . '/Rath/Libraries/medoo.php';
+//require_once APP_PATH.'/Rath/Helpers/MedooFactory.php';
 /**
  * Created by PhpStorm.
  * User: Thomas
@@ -10,8 +10,12 @@ require_once APPLICATION_PATH.'/Rath/Helpers/MedooFactory.php';
  * Time: 20:42
  */
 
-//namespace Rath\Controllers;
+namespace Rath\Controllers;
 
+use Rath\helpers\MedooFactory;
+use Rath\Entities\User\UserPermission;
+use Rath\Entities\User\User;
+use Rath\Entities\ApiResponse;
 
 class UserPermissionController
 {

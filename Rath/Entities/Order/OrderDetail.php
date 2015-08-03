@@ -1,11 +1,14 @@
 <?php
-
 /**
  * Created by PhpStorm.
  * User: Thomas
  * Date: 3/08/2015
- * Time: 17:59
+ * Time: 20:55
  */
+
+namespace Rath\Entities\Order;
+
+
 class OrderDetail
 {
     const TABLE_NAME = "orderdetail";
