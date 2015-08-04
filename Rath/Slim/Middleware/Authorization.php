@@ -34,6 +34,8 @@ class Authorization extends \Slim\Middleware
     public function onBeforeDispatch(){
         $route = $this->app->router()->getCurrentRoute();
         $routeName = $route->getName();
+        if(empty($routeName))
+            return; //Skip all unamed routes. //TODO: build in Role model
         $publicRoutes = [
             API_LOGIN_ROUTE,
             API_UNAUTHORISED_ROUTE,

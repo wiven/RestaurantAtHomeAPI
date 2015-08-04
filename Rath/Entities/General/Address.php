@@ -21,5 +21,27 @@ class Address
     const CITY_COL = "city";
     const USER_ID_COL = "userId";
 
+    public $id;
+    public $street;
+    public $number;
+    public $addition;
+    public $postcode;
+    public $city;
+    public $userId;
+
+    /**
+     * @param $address Address
+     */
+    public static function addressToDbArray($address){
+        return [
+            Address::STREET_COL => $address->street,
+            Address::NUMBER_COL => $address->number,
+            Address::ADDITION_COL => $address->addition,
+            Address::POSTCODE_COL => $address->postcode,
+            Address::CITY_COL => $address->city,
+            Address::USER_ID_COL => $address->userId
+        ];
+    }
+
 
 }

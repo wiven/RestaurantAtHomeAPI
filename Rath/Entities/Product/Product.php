@@ -22,4 +22,27 @@ class Product
     const PRICE_COL = "price";
     const SLOTS_COL = "slots";
 
+    public $id;
+    public $restaurantId;
+    public $producttypeId;
+    public $name;
+    public $description;
+    public $price;
+    public $slots;
+
+    /**
+     * @param $product Product
+     * @return array
+     */
+    static function productToDbArray($product){
+        return [
+            Product::RESTAURANT_ID_COL => $product->restaurantId,
+            Product::PRODUCT_TYPE_ID => $product->producttypeId,
+            Product::NAME_COL => $product->name,
+            Product::DESCRIPTION_COL => $product->description,
+            Product::PRICE_COL => $product->price,
+            Product::SLOTS_COL => $product->slots
+        ];
+    }
+
 }

@@ -24,4 +24,34 @@ class Restaurant
     const PHOTO_COL = "photo";
     const DOMINATING_COLOR_COL ="dominatingColor";
     const COMMENT_COL = "comment";
+
+    public $id;
+    public $userId;
+    public $kitchentypeId;
+    public $addressId;
+    public $phone;
+    public $email;
+    public $url;
+    public $photo;
+    public $dominatingColor;
+    public $comment;
+
+
+    /**
+     * @param $resto Restaurant
+     * @return array
+     */
+    static function restaurantToDbArray($resto){
+        return [
+            USER_ID_COL => $resto->userId,
+            KITCHEN_TYPE_ID_COL => $resto->kitchentypeId,
+            ADDRESS_ID_COL => $resto->addressId,
+            PHONE_COL => $resto->phone,
+            EMAIL_COL => $resto->email,
+            URL_COL => $resto->url,
+            PHOTO_COL => $resto->photo,
+            DOMINATING_COLOR_COL => $resto->dominatingColor,
+            COMMENT_COL => $resto->comment
+        ];
+    }
 }
