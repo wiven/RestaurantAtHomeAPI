@@ -42,16 +42,19 @@ class Restaurant
      * @return array
      */
     static function restaurantToDbArray($resto){
-        return [
-            USER_ID_COL => $resto->userId,
-            KITCHEN_TYPE_ID_COL => $resto->kitchentypeId,
-            ADDRESS_ID_COL => $resto->addressId,
-            PHONE_COL => $resto->phone,
-            EMAIL_COL => $resto->email,
-            URL_COL => $resto->url,
-            PHOTO_COL => $resto->photo,
-            DOMINATING_COLOR_COL => $resto->dominatingColor,
-            COMMENT_COL => $resto->comment
+        $array =  [
+            Restaurant::KITCHEN_TYPE_ID_COL => $resto->kitchentypeId,
+            Restaurant::ADDRESS_ID_COL => $resto->addressId,
+            Restaurant::PHONE_COL => $resto->phone,
+            Restaurant::EMAIL_COL => $resto->email,
+            Restaurant::URL_COL => $resto->url,
+            Restaurant::PHOTO_COL => $resto->photo,
+            Restaurant::DOMINATING_COLOR_COL => $resto->dominatingColor,
+            Restaurant::COMMENT_COL => $resto->comment
         ];
+        if(!empty($resto->userId))
+            $array[Restaurant::USER_ID_COL] = $resto->userId;
+
+        return $array;
     }
 }

@@ -27,20 +27,25 @@ class Address
     public $addition;
     public $postcode;
     public $city;
+    /**
+     * @var int
+     */
     public $userId;
 
     /**
      * @param $address Address
      */
-    public static function addressToDbArray($address){
-        return [
+    public static function toDbArray($address){
+        $array = [
             Address::STREET_COL => $address->street,
             Address::NUMBER_COL => $address->number,
             Address::ADDITION_COL => $address->addition,
             Address::POSTCODE_COL => $address->postcode,
-            Address::CITY_COL => $address->city,
-            Address::USER_ID_COL => $address->userId
+            Address::CITY_COL => $address->city
         ];
+        if(!empty($address->userId))
+            $array[Address::USER_ID_COL] = $address->userId;
+        return $array;
     }
 
 

@@ -8,6 +8,10 @@
 
 namespace Rath\helpers;
 
+use Rath\Entities\General\Address;
+use Rath\Entities\Restaurant\Holiday;
+use Rath\Entities\Restaurant\OpeningHours;
+use Rath\Entities\Restaurant\Restaurant;
 use Rath\helpers\MedooFactory;
 use Rath\Entities\User\User;
 use Rath\Entities\User\UserPermission;
@@ -99,5 +103,59 @@ class MasterData
         }
         var_dump($permissions);
         UserPermissionController::InsertUserPermissionSets($permissions);
+    }
+
+    public static function echoObjectContent(){
+        echo json_encode([
+            MasterData::echoAddress(),
+            MasterData::echoRestaurant(),
+            MasterData::echoHoliday(),
+            MasterData::echoOpeningHour()
+        ]);
+
+    }
+
+    private static function echoAddress(){
+        $address = new Address();
+        $address->street = "Hoekskensstraat";
+        $address->number = 3;
+        $address->addition = "102";
+        $address->postcode = "9080";
+        $address->city = "Lochristi";
+        $address->userId = 1;
+        return $address;
+    }
+
+    private static function echoRestaurant(){
+        $resto = new Restaurant();
+        $resto->addressId = 4;
+        $resto->kitchentypeId = 1;
+        $resto->phone = "0494168007";
+        $resto->email ="Restau@email.com";
+        $resto->url = "http://test.be";
+        $resto->photo = "url to photo";
+        $resto->dominatingColor = "#5584";
+        $resto->comment = "no comments will have a blank result";
+        return $resto;
+    }
+
+    private static function echoHoliday(){
+        $date = new \DateTime('now');
+        $holiday = new Holiday();
+        $holiday->restaurantId = 2;
+        $holiday->fromDate = $date->format("Y-m-d H:i:s");
+        $holiday->toDate = $date->format("Y-m-d H:i:s");
+        return $holiday;
+    }
+
+    private static function echoOpeningHour(){
+        $time = new \DateTime('now');
+        $openingHour = new OpeningHours();
+        $openingHour->restaurantId = 2;
+        $openingHour->dayOfWeek = 0;
+        $openingHour->fromTime = $time->format("H:i:s");
+        $openingHour->toTime = $time->format("H:i:s");
+        $openingHour->open = 1;
+        return $openingHour;
     }
 }

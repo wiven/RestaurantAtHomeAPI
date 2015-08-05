@@ -10,6 +10,7 @@ namespace Rath\Controllers;
 
 
 use Rath\Entities\General\Address;
+use Rath\Slim\Middleware\Authorization;
 
 class GeneralController extends ControllerBase
 {
@@ -19,7 +20,14 @@ class GeneralController extends ControllerBase
      */
     public function getAddress($id){
         return $this->db->select(Address::TABLE_NAME,
-            ["*"],
+            [
+                Address::ID_COL,
+                Address::STREET_COL,
+                Address::NUMBER_COL,
+                Address::ADDITION_COL,
+                Address::POSTCODE_COL,
+                Address::CITY_COL
+            ],
             [
                 Address::ID_COL => $id
             ]);
@@ -30,8 +38,9 @@ class GeneralController extends ControllerBase
      * @return array|bool
      */
     public function addAddress($address){
+        $address->userId = Authorization::$userId;
         $lastId = $this->db->insert(Address::TABLE_NAME,
-            Address::addressToDbArray($address)
+            Address::toDbArray($address)
         );
         if($lastId != 0)
             return $this->getAddress($lastId);
@@ -45,11 +54,15 @@ class GeneralController extends ControllerBase
      */
     public function updateAddress($address){
         $this->db->update(Address::TABLE_NAME,
-            Address::addressToDbArray($address),
+            Address::toDbArray($address),
             [
-                Address::ID_COL => $address->id
+                "AND" => [
+                    Address::ID_COL => $address->id,
+                    Address::USER_ID_COL => Authorization::$userId
+                ]
             ]
         );
+//        return $this->db->last_query();
         return $this->db->error();
     }
 
@@ -60,7 +73,10 @@ class GeneralController extends ControllerBase
     public function deleteAddress($id){
         $this->db->delete(Address::TABLE_NAME,
             [
-                Address::ID_COL => $id
+                "AND" => [
+                    Address::ID_COL => $id,
+                    Address::USER_ID_COL => Authorization::$userId
+                ]
             ]
         );
         return $this->db->error();

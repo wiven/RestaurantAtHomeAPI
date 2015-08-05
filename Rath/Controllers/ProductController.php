@@ -17,11 +17,11 @@ class ProductController extends ControllerBase
      * @param $id
      * @return array|bool
      */
-    public function GetProduct($id){
+    public function getProduct($id){
         return $this->db->select(Product::TABLE_NAME,
-            [
+
                 "*"
-            ],
+            ,
             [
                 Product::ID_COL => $id
             ]
@@ -32,12 +32,12 @@ class ProductController extends ControllerBase
      * @param $product Product
      * @return array|bool
      */
-    public function AddProduct($product){
+    public function addProduct($product){
         $lastId = $this->db->insert(Product::TABLE_NAME,
                 Product::productToDbArray($product)
             );
         if($lastId != 0)
-            return $this->GetProduct($lastId);
+            return $this->getProduct($lastId);
         else
             return $this->db->error();
     }
@@ -46,7 +46,7 @@ class ProductController extends ControllerBase
      * @param $product Product
      * @return array
      */
-    public function UpdateProduct($product){
+    public function updateProduct($product){
         $this->db->update(Product::TABLE_NAME,
             Product::productToDbArray($product),
             [
@@ -56,7 +56,7 @@ class ProductController extends ControllerBase
         return $this->db->error();
     }
 
-    public function DeleteProduct($id){
+    public function deleteProduct($id){
         $this->db->delete(Product::TABLE_NAME,
             [
                 Product::ID_COL => $id

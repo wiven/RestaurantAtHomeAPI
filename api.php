@@ -41,16 +41,24 @@ const API_MASTERDATA_ROUTE = "masterdata";
 const API_UNAUTHORISED_ROUTE = "unauthorised";
 
 
+$app->group('/masterdata', function() use ($app){
+    $app->POST('', function() use ($app){
+        Rath\helpers\MasterData::CreateDemoData();
+        Rath\helpers\CrossDomainAjax::PrintCrossDomainCall($app,['Datageneration success']);
+    })->name(API_MASTERDATA_ROUTE);
+
+    $app->get('/echodataobjects', function() use ($app){
+        \Rath\helpers\MasterData::echoObjectContent();
+    });
+});
 /**
  * @SWG\Post(
  *     path="/api/resource.json",
  *     @SWG\Response(response="200", description="An example resource")
  * )
  */
-$app->POST('/masterdata', function() use ($app){
-    Rath\helpers\MasterData::CreateDemoData();
-    Rath\helpers\CrossDomainAjax::PrintCrossDomainCall($app,['Datageneration success']);
-})->name(API_MASTERDATA_ROUTE);
+
+
 
 $app->get('/unauthorised/:route', function($route) use ($app){
     Rath\helpers\CrossDomainAjax::PrintCrossDomainCall($app,Rath\Controllers\UserPermissionController::GetPermissionErrorMessage($route));
@@ -200,6 +208,70 @@ $app->group('/restaurant', function() use ($app){
             $resto->deleteRestaurant($id)
         );
     });
+
+    $app->group('/holiday', function() use ($app,$resto){
+        $app->get('/:id', function($id) use ($app,$resto){
+            CrossDomainAjax::PrintCrossDomainCall(
+                $app,
+                $resto->getHoliday($id)
+            );
+        });
+
+        $app->post('' ,function() use ($app,$resto){
+            $ho = json_decode($app->request->getBody());
+            CrossDomainAjax::PrintCrossDomainCall(
+                $app,
+                $resto->addHoliday($ho)
+            );
+        });
+
+        $app->put('', function() use ($app,$resto){
+            $ho = json_decode($app->request->getBody());
+            CrossDomainAjax::PrintCrossDomainCall(
+                $app,
+                $resto->updateHoliday($ho)
+            );
+        });
+
+        $app->get('/delete/:id', function($id) use ($app,$resto){
+            CrossDomainAjax::PrintCrossDomainCall(
+                $app,
+                $resto->deleteHoliday($id)
+            );
+        });
+    });
+
+    $app->group('/openinghour', function() use ($app,$resto){
+        $app->get('/:id', function($id) use ($app,$resto){
+            CrossDomainAjax::PrintCrossDomainCall(
+                $app,
+                $resto->getOpeningHour($id)
+            );
+        });
+
+        $app->post('' ,function() use ($app,$resto){
+            $ho = json_decode($app->request->getBody());
+            CrossDomainAjax::PrintCrossDomainCall(
+                $app,
+                $resto->addOpeningHour($ho)
+            );
+        });
+
+        $app->put('', function() use ($app,$resto){
+            $ho = json_decode($app->request->getBody());
+            CrossDomainAjax::PrintCrossDomainCall(
+                $app,
+                $resto->updateOpeningHour($ho)
+            );
+        });
+
+        $app->get('/delete/:id', function($id) use ($app,$resto){
+            CrossDomainAjax::PrintCrossDomainCall(
+                $app,
+                $resto->deleteOpeningHour($id)
+            );
+        });
+    });
 });
 
 $app->group('/product', function () use ($app) {
@@ -208,7 +280,7 @@ $app->group('/product', function () use ($app) {
     $app->get('/:id', function($id) use ($app,$prod){
         CrossDomainAjax::PrintCrossDomainCall(
             $app,
-            $prod->GetProduct($id)
+            $prod->getProduct($id)
         );
     });
 
@@ -216,7 +288,7 @@ $app->group('/product', function () use ($app) {
         $pr = json_decode($app->request->getBody());
         CrossDomainAjax::PrintCrossDomainCall(
             $app,
-            $prod->AddProduct($pr)
+            $prod->addProduct($pr)
         );
     });
 
@@ -224,18 +296,17 @@ $app->group('/product', function () use ($app) {
         $pr = json_decode($app->request->getBody());
         CrossDomainAjax::PrintCrossDomainCall(
             $app,
-            $prod->UpdateProduct($pr)
+            $prod->updateProduct($pr)
         );
     });
 
     $app->get('/delete/:id', function($id) use ($app,$prod){
         CrossDomainAjax::PrintCrossDomainCall(
             $app,
-            $prod->DeleteProduct($id)
+            $prod->deleteProduct($id)
         );
     });
 });
-
 
 
 

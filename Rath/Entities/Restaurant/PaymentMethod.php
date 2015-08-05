@@ -15,4 +15,17 @@ class PaymentMethod
 
     const ID_COL = "id";
     const NAME_COL = "name";
+
+    public $id;
+    public $name;
+
+    /**
+     * @param $payment PaymentMethod
+     * @return array
+     */
+    public static function toDbArray($payment){
+        return [
+            PaymentMethod::NAME_COL => $payment->name
+        ];
+    }
 }

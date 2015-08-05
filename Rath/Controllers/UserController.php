@@ -253,6 +253,19 @@ class UserController
             return false;
         return ($result[0][UserPermission::DISABLED_COL] == 0);
     }
+
+    static function GetUserIdByHash($hash){
+        $db = MedooFactory::CreateMedooInstance();
+        $user = $db->select(User::TABLE_NAME,
+            [
+                User::ID_COL
+            ],
+            [
+                User::HASH_COL => $hash
+            ]);
+        return array_filter($user);
+    }
+
 }
 
 //$para = [

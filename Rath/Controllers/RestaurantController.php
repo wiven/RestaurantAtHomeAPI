@@ -11,8 +11,11 @@ namespace Rath\Controllers;
 use Rath\Entities\Restaurant\Holiday;
 use Rath\Entities\Restaurant\KitchenType;
 use Rath\Entities\Restaurant\OpeningHours;
+use Rath\Entities\Restaurant\PaymentMethod;
 use Rath\Entities\Restaurant\Restaurant;
+use Rath\Entities\Restaurant\RestaurantHasPaymentMethod;
 use Rath\helpers\MedooFactory;
+use Rath\Slim\Middleware\Authorization;
 
 class RestaurantController extends ControllerBase
 {
@@ -24,7 +27,17 @@ class RestaurantController extends ControllerBase
      */
     public function getRestaurant($id){
         return $this->db->select(Restaurant::TABLE_NAME,
-            ["*"],
+            [
+                Restaurant::ID_COL,
+                Restaurant::KITCHEN_TYPE_ID_COL,
+                Restaurant::ADDRESS_ID_COL,
+                Restaurant::PHONE_COL,
+                Restaurant::EMAIL_COL,
+                Restaurant::URL_COL,
+                Restaurant::PHOTO_COL,
+                Restaurant::DOMINATING_COLOR_COL,
+                Restaurant::COMMENT_COL
+            ],
             [
                 Restaurant::ID_COL => $id
             ]);
@@ -35,6 +48,7 @@ class RestaurantController extends ControllerBase
      * @return array|bool
      */
     public function addRestaurant($resto){
+        $resto->userId = Authorization::$userId;
         $lastId = $this->db->insert(Restaurant::TABLE_NAME,
             Restaurant::restaurantToDbArray($resto)
         );
@@ -53,7 +67,11 @@ class RestaurantController extends ControllerBase
         $this->db->update(Restaurant::TABLE_NAME,
             Restaurant::restaurantToDbArray($resto),
             [
-                Restaurant::ID_COL => $resto->id
+                "AND" => [
+                    Restaurant::ID_COL => $resto->id,
+                    Restaurant::USER_ID_COL =>  Authorization::$userId
+                ]
+
             ]);
         return $this->db->error();
     }
@@ -65,7 +83,10 @@ class RestaurantController extends ControllerBase
     public function deleteRestaurant($id){
         $this->db->delete(Restaurant::TABLE_NAME,
             [
-                Restaurant::ID_COL => $id
+                "AND" => [
+                    Restaurant::ID_COL => $id,
+                    Restaurant::USER_ID_COL =>  Authorization::$userId
+                ]
             ]);
         return $this->db->error();
     }
@@ -137,7 +158,7 @@ class RestaurantController extends ControllerBase
      */
     public function getHoliday($id){
         return $this->db->select(Holiday::TABLE_NAME,
-            ["*"],
+            "*",
             [
                 Holiday::ID_COL => $id
             ]);
@@ -149,7 +170,7 @@ class RestaurantController extends ControllerBase
      */
     public function getHolidays($restoId){
         return $this->db->select(Holiday::TABLE_NAME,
-            ["*"],
+            "*",
             [
                 Holiday::RESTAURANT_ID_COL => $restoId
             ]);
@@ -196,9 +217,10 @@ class RestaurantController extends ControllerBase
     }
     //endregion
 
+    //region OpeningHours
     public function getOpeningHour($id){
         return $this->db->select(OpeningHours::TABLE_NAME,
-            ["*"],
+            "*",
             [
                 OpeningHours::ID_COL => $id
             ]);
@@ -206,7 +228,7 @@ class RestaurantController extends ControllerBase
 
     public function getOpeningHours($restoId){
         return $this->db->select(OpeningHours::TABLE_NAME,
-            ["*"],
+            "*",
             [
                 OpeningHours::RESTAURANT_ID_COL => $restoId
             ]);
@@ -239,4 +261,63 @@ class RestaurantController extends ControllerBase
             ]);
         return $this->db->error();
     }
+    //endregion
+
+    //region Restaurant PaymentMethod
+
+    public function getRestaurantPaymentMethods($restoId){
+        return $this->db->select(RestaurantHasPaymentMethod::TABLE_NAME,
+            [
+             "[><]".PaymentMethod::TABLE_NAME =>
+                 [
+                     RestaurantHasPaymentMethod::PAYMENT_METHOD_ID_COL => PaymentMethod::ID_COL
+                 ]
+            ],
+            "*",
+            [
+                RestaurantHasPaymentMethod::RESTAURANT_ID_COL => $restoId
+            ]);
+    }
+
+    public function addRestaurantPaymentMethod($restoId,$payMeth){
+        $this->db->insert(RestaurantHasPaymentMethod::TABLE_NAME,
+            [
+                RestaurantHasPaymentMethod::RESTAURANT_ID_COL => $restoId,
+                RestaurantHasPaymentMethod::PAYMENT_METHOD_ID_COL => $payMeth
+            ]
+        );
+        return $this->db->error();
+    }
+
+    public function deleteRestaurantPaymentMethod($restoId,$payMeth){
+        $this->db->delete(RestaurantHasPaymentMethod::TABLE_NAME,
+            [
+                "AND" => [
+                    RestaurantHasPaymentMethod::RESTAURANT_ID_COL => $restoId,
+                    RestaurantHasPaymentMethod::PAYMENT_METHOD_ID_COL => $payMeth
+                ]
+            ]);
+        return $this->db->error();
+    }
+    //endregion
+
+    //region App management
+    public function getPaymentMethod($id){
+        return $this->db->select(OpeningHours::TABLE_NAME,
+            "*",
+            [
+                OpeningHours::ID_COL => $id
+            ]);
+    }
+
+    public function updatePaymentMethod($oH){
+        $this->db->update(OpeningHours::TABLE_NAME,
+            OpeningHours::toDbArray($oH),
+            [
+                OpeningHours::ID_COL => $oH->id
+            ]
+        );
+        return $this->db->error();
+    }
+    //endregion
 }

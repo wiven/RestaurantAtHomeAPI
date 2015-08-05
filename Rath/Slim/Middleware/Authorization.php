@@ -13,10 +13,17 @@ namespace Rath\Slim\Middleware;
 
 use Rath\Controllers\UserController;
 use Rath\Controllers\UserPermissionController;
+use Rath\Entities\User\User;
 
 
 class Authorization extends \Slim\Middleware
 {
+    /**
+     * @var int
+     */
+    public static $userId = 0;
+    private $hash = "";
+
     public function __construct(){
 
     }
@@ -32,6 +39,8 @@ class Authorization extends \Slim\Middleware
     }
 
     public function onBeforeDispatch(){
+        $this->loadUserIdFromHash();
+
         $route = $this->app->router()->getCurrentRoute();
         $routeName = $route->getName();
         if(empty($routeName))
@@ -43,10 +52,11 @@ class Authorization extends \Slim\Middleware
             API_USER_CREATE_ROUTE,
             API_MASTERDATA_ROUTE
         ];
+
         //die(var_dump($routeName));
         if(!in_array($routeName,$publicRoutes)){
-            $headers = $this->app->request->headers;
-            if(!UserController::CheckUserPermissions($headers["hash"],$route->getName())){
+
+            if(!UserController::CheckUserPermissions($this->hash,$route->getName())){
                 $response = UserPermissionController::GetPermissionErrorMessage($routeName);
                 $this->app->halt(401,json_encode($response));
 //                $res = $this->app->response();
@@ -59,5 +69,17 @@ class Authorization extends \Slim\Middleware
                 //throw new HttpUnauthorizedException();
             }
         }
+    }
+
+    private function loadUserIdFromHash(){
+        $headers = $this->app->request->headers;
+        $this->hash = $headers["hash"];
+        if(!empty($this->hash)){
+            $result = UserController::GetUserIdByHash($this->hash);
+            if(!empty($result))
+                Authorization::$userId = intval($result[0][User::ID_COL]);
+        }
+        else
+            Authorization::$userId = -1;
     }
 }
