@@ -34,8 +34,8 @@ class ProductController extends ControllerBase
      */
     public function addProduct($product){
         $lastId = $this->db->insert(Product::TABLE_NAME,
-                Product::productToDbArray($product)
-            );
+            Product::productToDbArray($product)
+        );
         if($lastId != 0)
             return $this->getProduct($lastId);
         else

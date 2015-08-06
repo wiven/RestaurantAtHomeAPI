@@ -14,6 +14,8 @@ use Rath\Entities\Restaurant\OpeningHours;
 use Rath\Entities\Restaurant\PaymentMethod;
 use Rath\Entities\Restaurant\Restaurant;
 use Rath\Entities\Restaurant\RestaurantHasPaymentMethod;
+use Rath\Entities\Restaurant\RestaurantHasSpeciality;
+use Rath\Entities\Restaurant\Speciality;
 use Rath\helpers\MedooFactory;
 use Rath\Slim\Middleware\Authorization;
 
@@ -273,7 +275,10 @@ class RestaurantController extends ControllerBase
                      RestaurantHasPaymentMethod::PAYMENT_METHOD_ID_COL => PaymentMethod::ID_COL
                  ]
             ],
-            "*",
+            [
+                PaymentMethod::ID_COL,
+                PaymentMethod::NAME_COL
+            ],
             [
                 RestaurantHasPaymentMethod::RESTAURANT_ID_COL => $restoId
             ]);
@@ -301,23 +306,120 @@ class RestaurantController extends ControllerBase
     }
     //endregion
 
-    //region App management
-    public function getPaymentMethod($id){
-        return $this->db->select(OpeningHours::TABLE_NAME,
-            "*",
+    //region Restaurant Speciality
+
+    public function getRestaurantSpecialities($restoId){
+        return $this->db->select(RestaurantHasSpeciality::TABLE_NAME,
             [
-                OpeningHours::ID_COL => $id
+                "[><]".Speciality::TABLE_NAME =>
+                    [
+                        RestaurantHasSpeciality::SPECIALITY_ID_COL => Speciality::ID_COL
+                    ]
+            ],
+            [
+                Speciality::ID_COL,
+                Speciality::NAME_COL
+            ],
+            [
+                RestaurantHasSpeciality::RESTAURANT_ID_COL => $restoId
             ]);
     }
 
-    public function updatePaymentMethod($oH){
-        $this->db->update(OpeningHours::TABLE_NAME,
-            OpeningHours::toDbArray($oH),
+    public function getAllSpecialities(){
+        return $this->db->select(Speciality::TABLE_NAME,"*");
+
+    }
+
+    public function addRestaurantSpeciality($restoId,$specId){
+        $this->db->insert(RestaurantHasSpeciality::TABLE_NAME,
             [
-                OpeningHours::ID_COL => $oH->id
+                RestaurantHasSpeciality::RESTAURANT_ID_COL => $restoId,
+                RestaurantHasSpeciality::SPECIALITY_ID_COL => $specId
             ]
         );
         return $this->db->error();
     }
+
+    /**
+     * @param $restoId
+     * @param $specName
+     * @return array
+     */
+    public function addNewRestaurantSpeciality($restoId,$specName){
+        $lastId = $this->db->insert(Speciality::TABLE_NAME,
+            [
+                Speciality::NAME_COL => $specName
+            ]);
+        if($lastId != 0)
+            return $this->addRestaurantSpeciality($restoId,$lastId);
+        else
+            return $this->db->error();
+    }
+
+    public function deleteRestaurantSpeciality($restoId,$specId){
+        $this->db->delete(RestaurantHasSpeciality::TABLE_NAME,
+            [
+                "AND" => [
+                    RestaurantHasSpeciality::RESTAURANT_ID_COL => $restoId,
+                    RestaurantHasSpeciality::SPECIALITY_ID_COL => $specId
+                ]
+            ]);
+        return $this->db->error();
+    }
     //endregion
+
+
+
+    //region PaymentMethod (App management)
+    //TODO: move to App mgt
+    /**
+     * @param $payMeth PaymentMethod
+     * @comments Has no auto increment set
+     * @return array
+     */
+    public function addPaymentMethod($payMeth){
+        $this->db->insert(PaymentMethod::TABLE_NAME,
+            PaymentMethod::toDbArray($payMeth)
+        );
+        return $this->db->error();
+    }
+
+    /**
+     * @param $id
+     * @return array|bool
+     */
+    public function getPaymentMethod($id){
+        return $this->db->select(PaymentMethod::TABLE_NAME,
+            "*",
+            [
+                PaymentMethod::ID_COL => $id
+            ]);
+    }
+
+    /**
+     * @param $payMeth PaymentMethod
+     * @return array
+     */
+    public function updatePaymentMethod($payMeth){
+        $this->db->update(PaymentMethod::TABLE_NAME,
+            PaymentMethod::toDbArray($payMeth),
+            [
+                PaymentMethod::ID_COL => $payMeth->id
+            ]
+        );
+        return $this->db->error();
+    }
+
+    /**
+     * @param $id
+     * @return array
+     */
+    public function deletePaymentMethod($id){
+        $this->db->delete(PaymentMethod::TABLE_NAME,
+            [
+                PaymentMethod::ID_COL => $id
+            ]);
+        return $this->db->error();
+    }
+    //endregion //TODO
 }

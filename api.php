@@ -64,39 +64,76 @@ $app->get('/unauthorised/:route', function($route) use ($app){
     Rath\helpers\CrossDomainAjax::PrintCrossDomainCall($app,Rath\Controllers\UserPermissionController::GetPermissionErrorMessage($route));
 })->name(API_UNAUTHORISED_ROUTE);
 
-$app->group('/kitchenType' , function() use ($app){
-    $resto = new \Rath\Controllers\RestaurantController();
+$app->group('/manage', function() use ($app){
+    $app->group('/kitchentype' , function() use ($app){
+        $resto = new \Rath\Controllers\RestaurantController();
 
-    $app->get('/:id', function($id) use ($app,$resto){
-        CrossDomainAjax::PrintCrossDomainCall(
-            $app,
-            $resto->getKitchenType($id)
-        );
+        $app->get('/:id', function($id) use ($app,$resto){
+            CrossDomainAjax::PrintCrossDomainCall(
+                $app,
+                $resto->getKitchenType($id)
+            );
+        });
+
+        $app->post('', function() use ($app,$resto){
+            $kt = json_decode($app->request->getBody());
+            CrossDomainAjax::PrintCrossDomainCall(
+                $app,
+                $resto->addKitchenType($kt)
+            );
+        });
+
+        $app->put('',function() use ($app,$resto){
+            $kt = json_decode($app->request->getBody());
+            CrossDomainAjax::PrintCrossDomainCall(
+                $app,
+                $resto->updateKitchenType($kt)
+            );
+        });
+
+        $app->get('/delete/:id',function($id) use ($app,$resto){
+            CrossDomainAjax::PrintCrossDomainCall(
+                $app,
+                $resto->deleteKitchenType($id)
+            );
+        });
     });
 
-    $app->post('', function() use ($app,$resto){
-        $kt = json_decode($app->request->getBody());
-        CrossDomainAjax::PrintCrossDomainCall(
-            $app,
-            $resto->addKitchenType($kt)
-        );
-    });
+    $app->group('/paymentmethod' , function() use ($app){
+        $resto = new \Rath\Controllers\RestaurantController();
 
-    $app->put('',function() use ($app,$resto){
-        $kt = json_decode($app->request->getBody());
-        CrossDomainAjax::PrintCrossDomainCall(
-            $app,
-            $resto->updateKitchenType($kt)
-        );
-    });
+        $app->get('/:id', function($id) use ($app,$resto){
+            CrossDomainAjax::PrintCrossDomainCall(
+                $app,
+                $resto->getPaymentMethod($id)
+            );
+        });
 
-    $app->get('/delete/:id',function($id) use ($app,$resto){
-        CrossDomainAjax::PrintCrossDomainCall(
-            $app,
-            $resto->deleteKitchenType($id)
-        );
+        $app->post('', function() use ($app,$resto){
+            $pm = json_decode($app->request->getBody());
+            CrossDomainAjax::PrintCrossDomainCall(
+                $app,
+                $resto->addPaymentMethod($pm)
+            );
+        });
+
+        $app->put('',function() use ($app,$resto){
+            $pm = json_decode($app->request->getBody());
+            CrossDomainAjax::PrintCrossDomainCall(
+                $app,
+                $resto->updatePaymentMethod($pm)
+            );
+        });
+
+        $app->get('/delete/:id',function($id) use ($app,$resto){
+            CrossDomainAjax::PrintCrossDomainCall(
+                $app,
+                $resto->deletePaymentMethod($id)
+            );
+        });
     });
 });
+
 
 //</editor-fold>
 
@@ -269,6 +306,67 @@ $app->group('/restaurant', function() use ($app){
             CrossDomainAjax::PrintCrossDomainCall(
                 $app,
                 $resto->deleteOpeningHour($id)
+            );
+        });
+    });
+
+    $app->group('/paymentmethod', function() use ($app,$resto){
+        $app->get('/:restoId', function($restoId) use ($app,$resto){
+            CrossDomainAjax::PrintCrossDomainCall(
+                $app,
+                $resto->getRestaurantPaymentMethods($restoId)
+            );
+        });
+
+        $app->post('/:restoId/:payId' ,function($restoId,$payId) use ($app,$resto){
+            CrossDomainAjax::PrintCrossDomainCall(
+                $app,
+                $resto->addRestaurantPaymentMethod($restoId,$payId)
+            );
+        });
+
+        $app->get('/delete/:restoId/:payId', function($restoId,$payId) use ($app,$resto){
+            CrossDomainAjax::PrintCrossDomainCall(
+                $app,
+                $resto->deleteRestaurantPaymentMethod($restoId,$payId)
+            );
+        });
+    });
+
+    $app->group('/speciality', function() use ($app,$resto){
+        $app->get('/:restoId', function($restoId) use ($app,$resto){
+            CrossDomainAjax::PrintCrossDomainCall(
+                $app,
+                $resto->getRestaurantSpecialities($restoId)
+            );
+        });
+
+        $app->get('/all/', function() use ($app,$resto){
+//            die('test');
+            CrossDomainAjax::PrintCrossDomainCall(
+                $app,
+                $resto->getAllSpecialities()
+            );
+        });
+
+        $app->post('/:restoId/:specId' ,function($restoId,$specId) use ($app,$resto){
+            CrossDomainAjax::PrintCrossDomainCall(
+                $app,
+                $resto->addRestaurantSpeciality($restoId,$specId)
+            );
+        });
+
+        $app->post('/new/:restoId/:name' ,function($restoId,$name) use ($app,$resto){
+            CrossDomainAjax::PrintCrossDomainCall(
+                $app,
+                $resto->addNewRestaurantSpeciality($restoId,$name)
+            );
+        });
+
+        $app->get('/delete/:restoId/:specId', function($restoId,$specId) use ($app,$resto){
+            CrossDomainAjax::PrintCrossDomainCall(
+                $app,
+                $resto->deleteRestaurantSpeciality($restoId,$specId)
             );
         });
     });

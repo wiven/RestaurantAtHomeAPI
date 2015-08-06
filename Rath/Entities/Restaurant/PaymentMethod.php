@@ -25,6 +25,7 @@ class PaymentMethod
      */
     public static function toDbArray($payment){
         return [
+            PaymentMethod::ID_COL => $payment->id,
             PaymentMethod::NAME_COL => $payment->name
         ];
     }

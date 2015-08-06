@@ -15,4 +15,18 @@ class Speciality
 
     const ID_COL = "id";
     const NAME_COL = "name";
+
+    public $id;
+    public $name;
+
+    /**
+     * @param $payment PaymentMethod
+     * @return array
+     */
+    public static function toDbArray($payment){
+        return [
+            PaymentMethod::ID_COL => $payment->id,
+            PaymentMethod::NAME_COL => $payment->name
+        ];
+    }
 }

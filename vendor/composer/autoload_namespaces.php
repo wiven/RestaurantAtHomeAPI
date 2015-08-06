@@ -11,4 +11,5 @@ return array(
     'Rath' => array($baseDir . '/Rath'),
     'Doctrine\\Common\\Lexer\\' => array($vendorDir . '/doctrine/lexer/lib'),
     'Doctrine\\Common\\Annotations\\' => array($vendorDir . '/doctrine/annotations/lib'),
+    '' => array($vendorDir . '/mollie/mollie-api-php/src'),
 );
