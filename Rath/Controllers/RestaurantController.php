@@ -327,7 +327,6 @@ class RestaurantController extends ControllerBase
 
     public function getAllSpecialities(){
         return $this->db->select(Speciality::TABLE_NAME,"*");
-
     }
 
     public function addRestaurantSpeciality($restoId,$specId){

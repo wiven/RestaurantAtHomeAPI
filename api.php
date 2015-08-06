@@ -65,9 +65,10 @@ $app->get('/unauthorised/:route', function($route) use ($app){
 })->name(API_UNAUTHORISED_ROUTE);
 
 $app->group('/manage', function() use ($app){
-    $app->group('/kitchentype' , function() use ($app){
-        $resto = new \Rath\Controllers\RestaurantController();
+    $resto = new \Rath\Controllers\RestaurantController();
+    $prod = new \Rath\Controllers\ProductController();
 
+    $app->group('/kitchentype' , function() use ($app,$resto){
         $app->get('/:id', function($id) use ($app,$resto){
             CrossDomainAjax::PrintCrossDomainCall(
                 $app,
@@ -99,8 +100,7 @@ $app->group('/manage', function() use ($app){
         });
     });
 
-    $app->group('/paymentmethod' , function() use ($app){
-        $resto = new \Rath\Controllers\RestaurantController();
+    $app->group('/paymentmethod' , function() use ($app,$resto){
 
         $app->get('/:id', function($id) use ($app,$resto){
             CrossDomainAjax::PrintCrossDomainCall(
@@ -129,6 +129,39 @@ $app->group('/manage', function() use ($app){
             CrossDomainAjax::PrintCrossDomainCall(
                 $app,
                 $resto->deletePaymentMethod($id)
+            );
+        });
+    });
+
+    $app->group('/tag' , function() use ($app, $prod){
+
+        $app->get('/:id', function($id) use ($app,$prod){
+            CrossDomainAjax::PrintCrossDomainCall(
+                $app,
+                $prod->getTag($id)
+            );
+        });
+
+        $app->post('', function() use ($app,$prod){
+            $tag = json_decode($app->request->getBody());
+            CrossDomainAjax::PrintCrossDomainCall(
+                $app,
+                $prod->addTag($tag)
+            );
+        });
+
+        $app->put('', function() use ($app,$prod){
+            $tag = json_decode($app->request->getBody());
+            CrossDomainAjax::PrintCrossDomainCall(
+                $app,
+                $prod->updateTag($tag)
+            );
+        });
+
+        $app->get('/delete/:id',function($id) use ($app,$prod){
+            CrossDomainAjax::PrintCrossDomainCall(
+                $app,
+                $prod->deleteTag($id)
             );
         });
     });
@@ -403,6 +436,30 @@ $app->group('/product', function () use ($app) {
             $app,
             $prod->deleteProduct($id)
         );
+    });
+
+    $app->group('/tag' , function() use ($app, $prod){
+
+        $app->get('/:id', function($id) use ($app,$prod){
+            CrossDomainAjax::PrintCrossDomainCall(
+                $app,
+                $prod->getProductTags($id)
+            );
+        });
+
+        $app->post('/:prodId/:tagId', function($prodId,$tagId) use ($app,$prod){
+            CrossDomainAjax::PrintCrossDomainCall(
+                $app,
+                $prod->addProductTag($prodId,$tagId)
+            );
+        });
+
+        $app->get('/delete/:prodId/:tagId',function($prodId,$tagId) use ($app,$prod){
+            CrossDomainAjax::PrintCrossDomainCall(
+                $app,
+                $prod->deleteProductTag($prodId,$tagId)
+            );
+        });
     });
 });
 

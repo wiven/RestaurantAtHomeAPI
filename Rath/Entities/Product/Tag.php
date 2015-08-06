@@ -15,4 +15,17 @@ class Tag
 
     const ID_COL = "id";
     const NAME_COL = "name";
+
+    public $id;
+    public $name;
+
+    /**
+     * @param $payment Tag
+     * @return array
+     */
+    public static function toDbArray($payment){
+        return [
+            Tag::NAME_COL => $payment->name
+        ];
+    }
 }

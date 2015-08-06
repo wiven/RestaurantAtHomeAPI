@@ -15,4 +15,18 @@ class ProductType
 
     const ID_COL = "id";
     const NAME_COL = "name";
+
+    public $id;
+    public $name;
+
+    /**
+     * @param $prodType ProductType
+     * @return array
+     */
+    public static function toDbArray($prodType){
+        return [
+            Product::ID_COL => $prodType->id,
+            Product::NAME_COL => $prodType->name
+        ];
+    }
 }

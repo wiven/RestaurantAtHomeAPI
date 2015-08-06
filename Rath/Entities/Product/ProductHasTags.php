@@ -11,6 +11,8 @@ namespace Rath\Entities\Product;
 
 class ProductHasTags
 {
+    const TABLE_NAME = "product_has_tag";
+
     const PRODUCT_ID_COL = "productId";
     const TAG_ID_COL = "tagId";
 }

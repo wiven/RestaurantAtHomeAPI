@@ -18,4 +18,27 @@ class ProductStock
 
     const AMOUNT_COL = "amount";
     const DAY_OF_WEEK_COL = "dayOfWeek";
+
+    public $id;
+    public $productId;
+    public $amount;
+    public $dayOfWeek;
+
+
+    /**
+     * @param $prodStock ProductStock
+     * @return array
+     */
+    public static function toDbArray($prodStock){
+        $array = [
+            ProductStock::PRODUCT_ID_COL => $prodStock->productId,
+            ProductStock::AMOUNT_COL => $prodStock->amount,
+            ProductStock::DAY_OF_WEEK_COL => $prodStock->dayOfWeek
+        ];
+
+//        if(!empty($prodStock->id))
+//            $array[ProductStock::ID_COL] = $prodStock->id;
+
+        return $array;
+    }
 }
