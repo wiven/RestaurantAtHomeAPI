@@ -15,4 +15,9 @@ class RelatedProducts
 
     const PRODUCT_ID_COL = "productId";
     const RELATED_PRODUCT_ID_COL = "relatedProductId";
+
+    public $productId;
+    public $relatedProductId;
+
+
 }

@@ -13,11 +13,13 @@ use Rath\Entities\Product\Product;
 use Rath\Entities\Product\ProductHasTags;
 use Rath\Entities\Product\ProductStock;
 use Rath\Entities\Product\ProductType;
+use Rath\Entities\Product\RelatedProducts;
 use Rath\Entities\Product\Tag;
 
 class ProductController extends ControllerBase
 {
     //region General
+
     /**
      * @param $id
      * @return array|bool
@@ -102,6 +104,9 @@ class ProductController extends ControllerBase
             [
                 Tag::ID_COL,
                 Tag::NAME_COL
+            ],
+            [
+                ProductHasTags::PRODUCT_ID_COL => $productId
             ]);
     }
 
@@ -109,17 +114,24 @@ class ProductController extends ControllerBase
     {
         $this->db->delete(ProductHasTags::TABLE_NAME,
             [
-                ProductHasTags::PRODUCT_ID_COL => $productId,
-                ProductHasTags::TAG_ID_COL => $tagId
+                "AND"=>[
+                    ProductHasTags::PRODUCT_ID_COL => $productId,
+                    ProductHasTags::TAG_ID_COL => $tagId
+                ]
+
             ]);
         return $this->db->error();
     }
     //endregion
 
     //region Product Stock
+    /**
+     * @param $prodId
+     * @return array|bool
+     */
     public function getProductStock($prodId)
     {
-        $this->db->select(ProductStock::TABLE_NAME,
+        return $this->db->select(ProductStock::TABLE_NAME,
             [
                 ProductStock::ID_COL,
                 ProductStock::DAY_OF_WEEK_COL,
@@ -130,15 +142,28 @@ class ProductController extends ControllerBase
             ]);
     }
 
+    public function getSingleProductStock($id)
+    {
+        return $this->db->select(ProductStock::TABLE_NAME,
+            "*",
+            [
+                ProductStock::ID_COL => $id
+            ]);
+    }
+
     /**
      * @param $prodStock ProductStock
      * @return array
      */
     public function addProductStock($prodStock)
     {
-        $this->db->insert(ProductStock::TABLE_NAME,
+        $lastId = $this->db->insert(ProductStock::TABLE_NAME,
             ProductStock::toDbArray($prodStock));
-        return $this->db->error();
+
+        if($lastId != 0)
+            return $this->getSingleProductStock($lastId);
+        else
+            return $this->db->error();
     }
 
     /**
@@ -169,10 +194,66 @@ class ProductController extends ControllerBase
     }
     //endregion
 
+    //region Related Products
+    public function getRelatedProducts($productId)
+    {
+        return $this->db->select(RelatedProducts::TABLE_NAME,
+            [
+                "[><]".Product::TABLE_NAME =>
+                [
+                    RelatedProducts::RELATED_PRODUCT_ID_COL => Product::ID_COL
+                ]
+            ],
+            [
+                Product::ID_COL,
+                Product::PRODUCT_TYPE_ID,
+                Product::NAME_COL,
+                Product::DESCRIPTION_COL,
+                Product::PRICE_COL,
+                Product::SLOTS_COL
+            ],
+            [
+                RelatedProducts::PRODUCT_ID_COL => $productId
+            ]
+            );
+    }
+
+    public function addRelatedProduct($productId, $relProdId)
+    {
+        $this->db->insert(RelatedProducts::TABLE_NAME,
+            [
+                RelatedProducts::PRODUCT_ID_COL => $productId,
+                RelatedProducts::RELATED_PRODUCT_ID_COL => $relProdId
+            ]);
+        return $this->db->error();
+    }
+
+    public function deleteRelatedProduct($prodId, $relProdId)
+    {
+        $this->db->delete(RelatedProducts::TABLE_NAME,
+            [
+                "AND" =>
+                [
+                    RelatedProducts::PRODUCT_ID_COL => $prodId,
+                    RelatedProducts::RELATED_PRODUCT_ID_COL => $relProdId
+                ]
+            ]);
+        return $this->db->error();
+    }
+    //endregion
+
     //region Product Type (App Management)
     public function getProductTypes()
     {
-        $this->db->select(ProductType::TABLE_NAME,"*");
+        return $this->db->select(ProductType::TABLE_NAME,"*");
+    }
+
+    public function getProductType($id){
+        return $this->db->get(ProductType::TABLE_NAME,
+            "*",
+            [
+                ProductType::ID_COL => $id
+            ]);
     }
 
     /**

@@ -165,6 +165,46 @@ $app->group('/manage', function() use ($app){
             );
         });
     });
+
+    $app->group('/producttype' , function() use ($app, $prod){
+
+        $app->get('/:id', function($id) use ($app,$prod){
+            CrossDomainAjax::PrintCrossDomainCall(
+                $app,
+                $prod->getProductType($id)
+            );
+        });
+
+        $app->get('/all/', function() use ($app,$prod){
+            CrossDomainAjax::PrintCrossDomainCall(
+                $app,
+                $prod->getProductTypes()
+            );
+        });
+
+        $app->post('', function() use ($app,$prod){
+            $prodType = json_decode($app->request->getBody());
+            CrossDomainAjax::PrintCrossDomainCall(
+                $app,
+                $prod->addProductType($prodType)
+            );
+        });
+
+        $app->put('', function() use ($app,$prod){
+            $prodType = json_decode($app->request->getBody());
+            CrossDomainAjax::PrintCrossDomainCall(
+                $app,
+                $prod->updateProductType($prodType)
+            );
+        });
+
+        $app->get('/delete/:id',function($id) use ($app,$prod){
+            CrossDomainAjax::PrintCrossDomainCall(
+                $app,
+                $prod->deletePoductType($id)
+            );
+        });
+    });
 });
 
 
@@ -440,10 +480,10 @@ $app->group('/product', function () use ($app) {
 
     $app->group('/tag' , function() use ($app, $prod){
 
-        $app->get('/:id', function($id) use ($app,$prod){
+        $app->get('/:productId', function($productId) use ($app,$prod){
             CrossDomainAjax::PrintCrossDomainCall(
                 $app,
-                $prod->getProductTags($id)
+                $prod->getProductTags($productId)
             );
         });
 
@@ -458,6 +498,70 @@ $app->group('/product', function () use ($app) {
             CrossDomainAjax::PrintCrossDomainCall(
                 $app,
                 $prod->deleteProductTag($prodId,$tagId)
+            );
+        });
+    });
+
+    $app->group('/stock' , function() use ($app, $prod){
+
+        $app->get('/:productId', function($productId) use ($app,$prod){
+            CrossDomainAjax::PrintCrossDomainCall(
+                $app,
+                $prod->getProductStock($productId)
+            );
+        });
+
+        $app->get('/single/:productStockId', function($productStockId) use ($app,$prod){
+            CrossDomainAjax::PrintCrossDomainCall(
+                $app,
+                $prod->getSingleProductStock($productStockId)
+            );
+        });
+
+        $app->post('/', function() use ($app,$prod){
+            $ps = json_decode($app->request->getBody());
+            CrossDomainAjax::PrintCrossDomainCall(
+                $app,
+                $prod->addProductStock($ps)
+            );
+        });
+
+        $app->put('/', function() use ($app,$prod){
+            $ps = json_decode($app->request->getBody());
+            CrossDomainAjax::PrintCrossDomainCall(
+                $app,
+                $prod->updateProductStock($ps)
+            );
+        });
+
+        $app->get('/delete/:id',function($id) use ($app,$prod){
+            CrossDomainAjax::PrintCrossDomainCall(
+                $app,
+                $prod->deletePoductStock($id)
+            );
+        });
+    });
+
+    $app->group('/related' , function() use ($app, $prod){
+
+        $app->get('/:productId', function($productId) use ($app,$prod){
+            CrossDomainAjax::PrintCrossDomainCall(
+                $app,
+                $prod->getRelatedProducts($productId)
+            );
+        });
+
+        $app->post('/:prodId/:relProdId', function($prodId,$relProdId) use ($app,$prod){
+            CrossDomainAjax::PrintCrossDomainCall(
+                $app,
+                $prod->addRelatedProduct($prodId,$relProdId)
+            );
+        });
+
+        $app->get('/delete/:prodId/:relProdId',function($prodId,$relProdId) use ($app,$prod){
+            CrossDomainAjax::PrintCrossDomainCall(
+                $app,
+                $prod->deleteRelatedProduct($prodId,$relProdId)
             );
         });
     });

@@ -9,6 +9,8 @@
 namespace Rath\helpers;
 
 use Rath\Entities\General\Address;
+use Rath\Entities\Product\Product;
+use Rath\Entities\Product\ProductStock;
 use Rath\Entities\Restaurant\Holiday;
 use Rath\Entities\Restaurant\OpeningHours;
 use Rath\Entities\Restaurant\Restaurant;
@@ -110,7 +112,9 @@ class MasterData
             MasterData::echoAddress(),
             MasterData::echoRestaurant(),
             MasterData::echoHoliday(),
-            MasterData::echoOpeningHour()
+            MasterData::echoOpeningHour(),
+            MasterData::echoProduct(),
+            MasterData::echoProductStock()
         ]);
 
     }
@@ -157,5 +161,24 @@ class MasterData
         $openingHour->toTime = $time->format("H:i:s");
         $openingHour->open = 1;
         return $openingHour;
+    }
+
+    private static function echoProduct(){
+        $prod = new Product();
+        $prod->restaurantId = 4;
+        $prod->producttypeId = 1;
+        $prod->name = 'Tomaten soep met brood';
+        $prod->description = "Een heerlijk tomatensoepje afgekruid met pepermix voor de pittege smaak";
+        $prod->price = 2.49;
+        $prod->slots = 1;
+        return $prod;
+    }
+
+    private static function echoProductStock(){
+        $prods = new ProductStock();
+        $prods->productId = 1;
+        $prods->amount = 5;
+        $prods->dayOfWeek = 0;
+        return $prods;
     }
 }

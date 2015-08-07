@@ -19,6 +19,7 @@ class Product
 
     const NAME_COL = "name";
     const DESCRIPTION_COL ="description";
+    const PHOTO_COL = "photo";
     const PRICE_COL = "price";
     const SLOTS_COL = "slots";
 
@@ -27,6 +28,7 @@ class Product
     public $producttypeId;
     public $name;
     public $description;
+    public $photo;
     public $price;
     public $slots;
 
@@ -40,9 +42,11 @@ class Product
             Product::PRODUCT_TYPE_ID => $product->producttypeId,
             Product::NAME_COL => $product->name,
             Product::DESCRIPTION_COL => $product->description,
+
             Product::PRICE_COL => $product->price,
             Product::SLOTS_COL => $product->slots
         ];
+        //Product::PHOTO_COL => $product->photo,
     }
 
 }
