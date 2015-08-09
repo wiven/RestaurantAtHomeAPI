@@ -27,4 +27,36 @@ class Promotion
     const DISCOUNT_AMOUNT_COL = "discountAmount";
     const NEW_PRODUCT_PRICE = "newProductPrice";
 
+    public $id;
+    public $promotiontypeId;
+    public $restaurantId;
+    public $productId;
+
+    public $fromDate;
+    public $toDate;
+    public $description;
+    public $discountType;
+    public $discountAmount;
+    public $newProductPrice;
+
+
+    /**
+     * @param $promotion Promotion
+     * @return array
+     */
+    public static function toDbArray($promotion)
+    {
+        return [
+            Promotion::PROMOTION_TYPE_ID_COL => $promotion->promotiontypeId,
+            Promotion::RESTAURANT_ID_COL => $promotion->restaurantId,
+            Promotion::PRODUCT_ID_COL => $promotion->productId,
+            Promotion::FROM_DATE_COL => $promotion->fromDate,
+            Promotion::TO_DATE_COL => $promotion->toDate,
+            Promotion::DESCRIPTION_COL => $promotion->description,
+            Promotion::DISCOUNT_TYPE_COL => $promotion->discountType,
+            Promotion::DISCOUNT_AMOUNT_COL => $promotion->discountAmount,
+            Promotion::NEW_PRODUCT_PRICE => $promotion->newProductPrice
+        ];
+    }
+
 }

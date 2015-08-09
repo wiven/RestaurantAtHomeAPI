@@ -17,4 +17,22 @@ class PromotionUsageHistory
     const PROMOTION_ID_COL = "promotionId";
     const ORDER_ID_COL = "orderId";
     const QUANTITY_COL = "quantity";
+
+    public $id;
+    public $promotionId;
+    public $orderId;
+    public $quantity;
+
+    /**
+     * @param $promHisto PromotionUsageHistory
+     * @return array
+     */
+    public static function toDbArray($promHisto)
+    {
+        return [
+            PromotionUsageHistory::PROMOTION_ID_COL => $promHisto->promotionId,
+            PromotionUsageHistory::ORDER_ID_COL => $promHisto->orderId,
+            PromotionUsageHistory::QUANTITY_COL => $promHisto->quantity
+        ];
+    }
 }

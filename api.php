@@ -67,6 +67,7 @@ $app->get('/unauthorised/:route', function($route) use ($app){
 $app->group('/manage', function() use ($app){
     $resto = new \Rath\Controllers\RestaurantController();
     $prod = new \Rath\Controllers\ProductController();
+    $promo = new \Rath\Controllers\PromotionController();
 
     $app->group('/kitchentype' , function() use ($app,$resto){
         $app->get('/:id', function($id) use ($app,$resto){
@@ -202,6 +203,39 @@ $app->group('/manage', function() use ($app){
             CrossDomainAjax::PrintCrossDomainCall(
                 $app,
                 $prod->deletePoductType($id)
+            );
+        });
+    });
+
+    $app->group('/promotiontype' , function() use ($app, $promo){
+
+        $app->get('/:id', function($id) use ($app,$promo){
+            CrossDomainAjax::PrintCrossDomainCall(
+                $app,
+                $promo->getPromotionType($id)
+            );
+        });
+
+        $app->post('/', function() use ($app,$promo){
+            $ps = json_decode($app->request->getBody());
+            CrossDomainAjax::PrintCrossDomainCall(
+                $app,
+                $promo->addPromotionType($ps)
+            );
+        });
+
+        $app->put('/', function() use ($app,$promo){
+            $ps = json_decode($app->request->getBody());
+            CrossDomainAjax::PrintCrossDomainCall(
+                $app,
+                $promo->updatePromotionType($ps)
+            );
+        });
+
+        $app->get('/delete/:id',function($id) use ($app,$promo){
+            CrossDomainAjax::PrintCrossDomainCall(
+                $app,
+                $promo->deletePromotionType($id)
             );
         });
     });
@@ -567,6 +601,64 @@ $app->group('/product', function () use ($app) {
     });
 });
 
+$app->group('/promotion', function () use ($app) {
+    $promo = new \Rath\Controllers\PromotionController();
+
+    $app->get('/:id', function($id) use ($app,$promo){
+        CrossDomainAjax::PrintCrossDomainCall(
+            $app,
+            $promo->getPromotion($id)
+        );
+    });
+
+    $app->post('/', function() use ($app,$promo){
+        $ps = json_decode($app->request->getBody());
+        CrossDomainAjax::PrintCrossDomainCall(
+            $app,
+            $promo->addPromotion($ps)
+        );
+    });
+
+    $app->put('/', function() use ($app,$promo){
+        $ps = json_decode($app->request->getBody());
+        CrossDomainAjax::PrintCrossDomainCall(
+            $app,
+            $promo->updatePromotion($ps)
+        );
+    });
+
+    $app->get('/delete/:id',function($id) use ($app,$promo){
+        CrossDomainAjax::PrintCrossDomainCall(
+            $app,
+            $promo->deletePromotion($id)
+        );
+    });
+
+    $app->group('/history' , function() use ($app, $promo){
+
+        $app->get('/:id', function($id) use ($app,$promo){
+            CrossDomainAjax::PrintCrossDomainCall(
+                $app,
+                $promo->getPromotionUsageCount($id)
+            );
+        });
+
+        $app->post('/', function() use ($app,$promo){
+            $ps = json_decode($app->request->getBody());
+            CrossDomainAjax::PrintCrossDomainCall(
+                $app,
+                $promo->addPromotionUsageHistory($ps)
+            );
+        });
+
+        $app->get('/delete/:id',function($id) use ($app,$promo){
+            CrossDomainAjax::PrintCrossDomainCall(
+                $app,
+                $promo->deletePromotionUsageHistory($id)
+            );
+        });
+    });
+});
 
 
 

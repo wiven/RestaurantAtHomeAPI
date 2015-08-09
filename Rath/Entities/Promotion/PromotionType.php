@@ -15,4 +15,18 @@ class PromotionType
 
     const ID_COL = "id";
     const NAME_COL = "name";
+
+    public $id;
+    public $name;
+
+    /**
+     * @param $promoType PromotionType
+     * @return array
+     */
+    public static function toDbArray($promoType)
+    {
+        return [
+            PromotionType::NAME_COL => $promoType->name
+        ];
+    }
 }

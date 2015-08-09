@@ -9,13 +9,12 @@
 namespace Rath\helpers;
 
 use Slim;
-use Rath\Entities\ApiResponse;
 
 class CrossDomainAjax
 {
     /**
      * @param $app Slim\Slim
-     * @param $data array
+     * @param $data
      */
     static function PrintCrossDomainCall($app, $data){
         $callback = $app->request()->get('callback');

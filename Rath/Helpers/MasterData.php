@@ -11,15 +11,14 @@ namespace Rath\helpers;
 use Rath\Entities\General\Address;
 use Rath\Entities\Product\Product;
 use Rath\Entities\Product\ProductStock;
+use Rath\Entities\Promotion\Promotion;
 use Rath\Entities\Restaurant\Holiday;
 use Rath\Entities\Restaurant\OpeningHours;
 use Rath\Entities\Restaurant\Restaurant;
-use Rath\helpers\MedooFactory;
 use Rath\Entities\User\User;
 use Rath\Entities\User\UserPermission;
 use Rath\Controllers\UserController;
 use Rath\Controllers\UserPermissionController;
-use Rath\Libraries\medoo;
 use Exception;
 
 //require_once APP_PATH.'/Rath/Libraries/medoo.php';
@@ -33,17 +32,14 @@ use Exception;
 class MasterData
 {
     static  function CreateDemoData(){
-        $db = MedooFactory::CreateMedooInstance();
 
-        MasterData::InsertDemoUsers($db);
-        MasterData::InsertDefaultRoutPermissions($db);
+        MasterData::InsertDemoUsers();
+        MasterData::InsertDefaultRoutPermissions();
 
     }
 
-    /**
-     * @param medoo $db
-     */
-    private static function InsertDemoUsers(medoo $db){
+
+    private static function InsertDemoUsers(){
         $user = new User();
         $user->name = "Thomas";
         $user->password = md5("10Centimeter");
@@ -79,10 +75,9 @@ class MasterData
     }
 
     /**
-     * @param medoo $db
      * @throws Exception
      */
-    private static function InsertDefaultRoutPermissions(medoo $db){
+    private static function InsertDefaultRoutPermissions(){
         $permissions = [];
         $row = 1;
         if (($handle = fopen(APP_PATH."/Resources/Database/DefaultUserPermissions.csv.txt", "r")) !== FALSE) {
@@ -114,7 +109,8 @@ class MasterData
             MasterData::echoHoliday(),
             MasterData::echoOpeningHour(),
             MasterData::echoProduct(),
-            MasterData::echoProductStock()
+            MasterData::echoProductStock(),
+            MasterData::echoPromotion()
         ]);
 
     }
@@ -180,5 +176,21 @@ class MasterData
         $prods->amount = 5;
         $prods->dayOfWeek = 0;
         return $prods;
+    }
+
+    private static function echoPromotion()
+    {
+        $date = new \DateTime('now');
+        $promo = new Promotion();
+        $promo->promotiontypeId = 1;
+        $promo->restaurantId = 4;
+        $promo->productId =1;
+        $promo->fromDate = $date->format("Y-m-d");
+        $promo->toDate = $date->format("Y-m-d");
+        $promo->description = "Laatste van het sezoen!";
+        $promo->discountType = Promotion::DISCOUNT_TYPE_VAL_PERS;
+        $promo->discountAmount = 10;
+        $promo->newProductPrice = 8.99;
+        return $promo;
     }
 }

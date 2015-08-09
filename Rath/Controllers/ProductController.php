@@ -249,7 +249,7 @@ class ProductController extends ControllerBase
     }
 
     public function getProductType($id){
-        return $this->db->get(ProductType::TABLE_NAME,
+        return $this->db->select(ProductType::TABLE_NAME,
             "*",
             [
                 ProductType::ID_COL => $id
