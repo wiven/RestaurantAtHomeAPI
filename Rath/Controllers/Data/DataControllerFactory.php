@@ -12,6 +12,11 @@ namespace Rath\Controllers\Data;
 class DataControllerFactory
 {
     /**
+     * @var UserController
+     */
+    private static $userController;
+
+    /**
      * @var ProductController
      */
     private static $productController;
@@ -32,11 +37,21 @@ class DataControllerFactory
     private static $orderController;
 
     /**
+     * @return UserController
+     */
+    public static function getUserController()
+    {
+        if(empty(self::$userController))
+            self::$userController = new UserController();
+        return self::$userController;
+    }
+
+    /**
      * @return ProductController
      */
     public static function getProductController()
     {
-        if(isEmpty(self::$productController))
+        if(empty(self::$productController))
             self::$productController = new ProductController();
         return self::$productController;
     }
@@ -46,7 +61,7 @@ class DataControllerFactory
      */
     public static function getPromotionController()
     {
-        if(isEmpty(self::$promotionController))
+        if(empty(self::$promotionController))
             self::$promotionController = new PromotionController();
         return self::$promotionController;
     }
@@ -56,7 +71,7 @@ class DataControllerFactory
      */
     public static function getRestaurantController()
     {
-        if(isEmpty(self::$restaurantController))
+        if(empty(self::$restaurantController))
             self::$restaurantController = new RestaurantController();
         return self::$restaurantController;
     }
@@ -66,7 +81,7 @@ class DataControllerFactory
      */
     public static function getOrderController()
     {
-        if(isEmpty(self::$orderController))
+        if(empty(self::$orderController))
             self::$orderController = new OrderController();
         return self::$orderController;
     }

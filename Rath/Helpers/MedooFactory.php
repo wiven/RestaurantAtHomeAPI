@@ -24,7 +24,7 @@ class MedooFactory
      * @throws Exception
      */
     static function getMedooInstance(){
-        if(isEmpty(MedooFactory::$db))
+        if(empty(MedooFactory::$db))
             MedooFactory::createMedooInstance();
         return MedooFactory::$db;
     }

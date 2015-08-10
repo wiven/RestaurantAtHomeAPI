@@ -6,7 +6,7 @@
  * Time: 20:20
  */
 
-namespace Rath\Controllers;
+namespace Rath\Controllers\Data;
 
 use Rath\helpers\MedooFactory;
 use Rath\Entities\User\User;
@@ -15,7 +15,7 @@ use Rath\Entities\ApiResponse;
 use Rath\Libraries\medoo;
 
 
-class UserController
+class UserController extends ControllerBase
 {
 
     /**
@@ -51,9 +51,7 @@ class UserController
      *     )
      * )
      */
-    static function AuthenticateUser($email,$password,$socialLogin){
-        $db = MedooFactory::CreateMedooInstance();
-
+    public function authenticateUser($email,$password,$socialLogin){
         $para = [
             User::EMAIL_COL => $email,
             User::SOCIAL_LOGIN_COL => $socialLogin
@@ -62,7 +60,7 @@ class UserController
         if(!$socialLogin)
             $para[User::PASSWORD_COL] = $password;
 
-        $user = $db->select(User::TABLE_NAME,
+        $user = $this->db->select(User::TABLE_NAME,
             [
                 User::HASH_COL,
                 User::EMAIL_COL,
@@ -86,14 +84,13 @@ class UserController
      * @param $user
      * @return string
      */
-    static function CreateUser($user){
+    public function createUser($user){
 //        var_dump($user); //TODO: Remove
         $response = new ApiResponse();
-        $db = MedooFactory::CreateMedooInstance();
 
         $email = $user->email;//[User::EMAIL_COL]; //TODO: Validate Email;
 
-        $dbUser = $db->select(User::TABLE_NAME,
+        $dbUser = $this->db->select(User::TABLE_NAME,
             [
                 User::ID_COL,
                 User::EMAIL_COL,
@@ -113,7 +110,7 @@ class UserController
         }
 
 //        echo "Insert user";
-        $userId = UserController::GetNextUserId($db);
+        $userId = $this->getNextUserId();
         $hashString = sha1($userId.$user->email.time());
 //        var_dump($hashString);
         $data = [
@@ -129,16 +126,15 @@ class UserController
             $data[User::PASSWORD_COL]= $user->password; //Already MD5
 //        echo "Data to insert: ";
 //        var_dump($data);
-        $a = $db->insert(User::TABLE_NAME,$data);
+        $a = $this->db->insert(User::TABLE_NAME,$data);
 //        var_dump('Insert Result: '.$a);
 
-        return UserController::GetUserByEmail($user->email);
+        return UserController::getUserByEmail($user->email);
     }
 
-    static function UpdateUser($user)
+    public function updateUser($user)
     {
         //TODO: add validation and fault capture
-        $db = MedooFactory::CreateMedooInstance();
 
         $data = [
             User::NAME_COL => $user->name,
@@ -150,20 +146,19 @@ class UserController
         if(property_exists($user,"password"))
             $data[User::PASSWORD_COL] = $user->password; //Already MD5
 
-        $db->update(User::TABLE_NAME,
+        $this->db->update(User::TABLE_NAME,
             $data,
             [
                 User::HASH_COL => $user->hash,
             ]);
-        return UserController::GetuserByHash($user->hash);
+        return UserController::getUserByHash($user->hash);
     }
 
-    static function DeleteUser($hash)
+    public function deleteUser($hash)
     {
         $response = new ApiResponse();
-        $db = MedooFactory::CreateMedooInstance();
 
-        $db->delete(User::TABLE_NAME,
+        $this->db->delete(User::TABLE_NAME,
             [
                 User::HASH_COL => $hash,
             ]);
@@ -172,9 +167,8 @@ class UserController
         return $response;
     }
 
-    static function GetUserByEmail($email){
-        $db = MedooFactory::CreateMedooInstance();
-        $user = $db->select(User::TABLE_NAME,
+    public function getUserByEmail($email){
+        $user = $this->db->select(User::TABLE_NAME,
             [
                 User::HASH_COL,
                 User::EMAIL_COL,
@@ -190,9 +184,8 @@ class UserController
         return $user;
     }
 
-    static function GetuserByHash($hash){
-        $db = MedooFactory::CreateMedooInstance();
-        $user = $db->select(User::TABLE_NAME,
+    public function getUserByHash($hash){
+        $user = $this->db->select(User::TABLE_NAME,
             [
                 User::HASH_COL,
                 User::EMAIL_COL,
@@ -210,8 +203,8 @@ class UserController
         return $user;
     }
 
-    private static function GetNextUserId(medoo $db){
-        $lastId = $db->get(User::TABLE_NAME,
+    private function getNextUserId(){
+        $lastId = $this->db->get(User::TABLE_NAME,
             User::ID_COL,
             [
                 "ORDER" => [User::ID_COL.' DESC']
@@ -220,11 +213,10 @@ class UserController
         return $lastId+1;
     }
 
-    static function CheckUserPermissions($hash,$route){
-        $result = UserController::GetuserByHash($hash);
+    public function checkUserPermissions($hash,$route){
+        $result = UserController::getUserByHash($hash);
         $result = array_filter($result);
 //        var_dump($result);
-
 
         if(!empty($result)>0)
             $user = $result[0];
@@ -237,8 +229,8 @@ class UserController
         if($user[User::EXCLUSIVE_PERMISSION_COL])
             return false; //TODO: implement possibility to add user specific permissions
 
-        $db = MedooFactory::CreateMedooInstance();
-        $result = $db->select(UserPermission::TABLE_NAME,
+
+        $result = $this->db->select(UserPermission::TABLE_NAME,
             [
                 UserPermission::DISABLED_COL
             ],
@@ -254,9 +246,8 @@ class UserController
         return ($result[0][UserPermission::DISABLED_COL] == 0);
     }
 
-    static function GetUserIdByHash($hash){
-        $db = MedooFactory::CreateMedooInstance();
-        $user = $db->select(User::TABLE_NAME,
+    public function getUserIdByHash($hash){
+        $user = $this->db->select(User::TABLE_NAME,
             [
                 User::ID_COL
             ],
