@@ -14,4 +14,19 @@ class OrderStatus
 
     const ID_COL = "id";
     const NAME_COL = "name";
+
+    public $id;
+    public $name;
+
+    /**
+     * @param $os OrderStatus
+     * @return array
+     */
+    public function toDbArray($os)
+    {
+        return [
+            OrderStatus::ID_COL => $os->id,
+            OrderStatus::NAME_COL => $os->id
+        ];
+    }
 }
