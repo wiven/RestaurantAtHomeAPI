@@ -6,7 +6,7 @@
  * Time: 18:46
  */
 
-namespace Rath\Controllers;
+namespace Rath\Controllers\Data;
 
 
 use Rath\helpers\MedooFactory;
@@ -20,6 +20,6 @@ abstract class ControllerBase
     protected $db;
 
     public function __construct(){
-        $this->db = MedooFactory::CreateMedooInstance();
+        $this->db = MedooFactory::getMedooInstance();
     }
 }

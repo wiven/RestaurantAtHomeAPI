@@ -6,9 +6,10 @@
  * Time: 21:14
  */
 
-namespace Rath\Controllers;
+namespace Rath\Controllers\Data;
 
 
+use Rath\Controllers\Data\ControllerBase;
 use Rath\Entities\General\Address;
 use Rath\Slim\Middleware\Authorization;
 

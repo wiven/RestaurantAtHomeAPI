@@ -6,9 +6,10 @@
  * Time: 19:39
  */
 
-namespace Rath\Controllers;
+namespace Rath\Controllers\Data;
 
 
+use Rath\Controllers\Data\ControllerBase;
 use Rath\Entities\Product\Product;
 use Rath\Entities\Product\ProductHasTags;
 use Rath\Entities\Product\ProductStock;
@@ -33,6 +34,20 @@ class ProductController extends ControllerBase
                 Product::ID_COL => $id
             ]
         );
+    }
+
+    public function getRestaurantProducts($restoId, $count, $skip)
+    {
+        return $this->db->select(Product::TABLE_NAME,
+            [
+                Product::ID_COL,
+                Product::NAME_COL,
+                Product::PHOTO_COL
+            ],
+            [
+                Product::RESTAURANT_ID_COL => $restoId,
+                "LIMIT" => [$skip,$count]
+            ]);
     }
 
     /**
@@ -172,6 +187,7 @@ class ProductController extends ControllerBase
      */
     public function updateProductStock($prodStock)
     {
+        //TODO: update promotion price if this changed
         $this->db->update(ProductStock::TABLE_NAME,
             ProductStock::toDbArray($prodStock),
             [
@@ -329,6 +345,7 @@ class ProductController extends ControllerBase
 
     /**
      * @param $tag Tag
+     * @return array
      */
     public function updateTag($tag)
     {

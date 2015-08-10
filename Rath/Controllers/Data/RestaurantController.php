@@ -6,8 +6,11 @@
  * Time: 18:40
  */
 
-namespace Rath\Controllers;
+namespace Rath\Controllers\Data;
 
+use Rath\Controllers\Data\ControllerBase;
+use Rath\Entities\Promotion\Promotion;
+use Rath\Entities\Promotion\PromotionType;
 use Rath\Entities\Restaurant\Holiday;
 use Rath\Entities\Restaurant\KitchenType;
 use Rath\Entities\Restaurant\OpeningHours;
@@ -16,7 +19,7 @@ use Rath\Entities\Restaurant\Restaurant;
 use Rath\Entities\Restaurant\RestaurantHasPaymentMethod;
 use Rath\Entities\Restaurant\RestaurantHasSpeciality;
 use Rath\Entities\Restaurant\Speciality;
-use Rath\helpers\MedooFactory;
+use Rath\Helpers\General;
 use Rath\Slim\Middleware\Authorization;
 
 class RestaurantController extends ControllerBase
@@ -367,7 +370,50 @@ class RestaurantController extends ControllerBase
     }
     //endregion
 
+    //region Promotions
+    public function getActivePromotions($restoId){
+        return $this->db->select(Promotion::TABLE_NAME,
+            [
+                "[><]".PromotionType::TABLE_NAME =>
+                    [
+                        Promotion::PROMOTION_TYPE_ID_COL => PromotionType::ID_COL
+                    ]
+            ],
+            [
+                Promotion::ID_COL,
+                PromotionType::NAME_COL,
+                Promotion::TO_DATE_COL
+            ],
+            [
+                "AND"=>
+                    [
+                        Promotion::RESTAURANT_ID_COL => $restoId,
+                        Promotion::FROM_DATE_COL.">=" => General::getCurrentDate(),
+                        Promotion::TO_DATE_COL."<=" => General::getCurrentDate()
+                    ]
+            ]);
+    }
 
+    public function getPromotions($restoId,$count, $skip)
+    {
+        return $this->db->select(Promotion::TABLE_NAME,
+            [
+                "[><]".PromotionType::TABLE_NAME =>
+                    [
+                        Promotion::PROMOTION_TYPE_ID_COL => PromotionType::ID_COL
+                    ]
+            ],
+            [
+                Promotion::ID_COL,
+                PromotionType::NAME_COL,
+                Promotion::TO_DATE_COL
+            ],
+            [
+                Promotion::RESTAURANT_ID_COL => $restoId,
+                "LIMIT" => [$count,$skip]
+            ]);
+    }
+    //endregion
 
     //region PaymentMethod (App management)
     //TODO: move to App mgt

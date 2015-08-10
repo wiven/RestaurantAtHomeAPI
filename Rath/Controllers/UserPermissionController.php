@@ -20,7 +20,7 @@ use Rath\Entities\ApiResponse;
 class UserPermissionController
 {
     static function InsertUserPermissionSet(UserPermission $permission){
-        $db = MedooFactory::CreateMedooInstance();
+        $db = MedooFactory::getMedooInstance();
         $db->insert(UserPermission::TABLE_NAME,
             [
                 UserPermission::USER_TYPE_COL => $permission->userType,
@@ -33,7 +33,7 @@ class UserPermissionController
      * @param $permissions UserPermission[]
      */
     static  function InsertUserPermissionSets(array $permissions){
-        $db = MedooFactory::CreateMedooInstance();
+        $db = MedooFactory::getMedooInstance();
         foreach($permissions as $permission ){
 //            echo "inserting:";
 //            var_dump($permission);

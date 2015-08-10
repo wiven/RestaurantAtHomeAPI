@@ -6,12 +6,14 @@
  * Time: 14:37
  */
 
-namespace Rath\Controllers;
+namespace Rath\Controllers\Data;;
 
 
+use Rath\Controllers\Data\ControllerBase;
 use Rath\Entities\Promotion\Promotion;
 use Rath\Entities\Promotion\PromotionType;
 use Rath\Entities\Promotion\PromotionUsageHistory;
+use Rath\Helpers\General;
 
 class PromotionController Extends ControllerBase
 {
@@ -26,6 +28,7 @@ class PromotionController Extends ControllerBase
 
     /**
      * @param $promo Promotion
+     * @return array|bool
      */
     public function addPromotion($promo)
     {

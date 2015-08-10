@@ -10,19 +10,28 @@ namespace Rath\helpers;
 
 use Rath\Libraries\medoo;
 use Exception;
-//require_once APP_PATH.'/Rath/Libraries/medoo.php';
+
 
 class MedooFactory
 {
-    //TODO: Create developer variable.
+    /**
+     * @var medoo
+     */
+    private static $db;
 
     /**
      * @return medoo
      * @throws Exception
      */
-    static function CreateMedooInstance(){
+    static function getMedooInstance(){
+        if(isEmpty(MedooFactory::$db))
+            MedooFactory::createMedooInstance();
+        return MedooFactory::$db;
+    }
+
+    private static function createMedooInstance(){
         if(APP_MODE == 'LOCAL')
-            return new medoo([
+            MedooFactory::$db =  new medoo([
                 // required
                 'database_type' => 'mysql',
                 'database_name' => 'rathdev',
@@ -34,12 +43,12 @@ class MedooFactory
                 // optional
                 'port' => 3306,
                 // driver_option for connection, read more from http://www.php.net/manual/en/pdo.setattribute.php
-    //            'option' => [
-    //                PDO::ATTR_CASE => PDO::CASE_NATURAL
-    //            ]
+                //            'option' => [
+                //                PDO::ATTR_CASE => PDO::CASE_NATURAL
+                //            ]
             ]);
         else if(APP_MODE == 'APIDEV')
-            return new medoo([
+            MedooFactory::$db =  new medoo([
                 // required
                 'database_type' => 'mysql',
                 'database_name' => 'deb84843n3_rathdev',
@@ -51,9 +60,9 @@ class MedooFactory
                 // optional
                 'port' => 3306,
                 // driver_option for connection, read more from http://www.php.net/manual/en/pdo.setattribute.php
-    //            'option' => [
-    //                PDO::ATTR_CASE => PDO::CASE_NATURAL
-    //            ]
+                //            'option' => [
+                //                PDO::ATTR_CASE => PDO::CASE_NATURAL
+                //            ]
             ]);
         else
             throw new Exception("Application Mode not defined.");

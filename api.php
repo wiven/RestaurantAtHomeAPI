@@ -65,9 +65,9 @@ $app->get('/unauthorised/:route', function($route) use ($app){
 })->name(API_UNAUTHORISED_ROUTE);
 
 $app->group('/manage', function() use ($app){
-    $resto = new \Rath\Controllers\RestaurantController();
-    $prod = new \Rath\Controllers\ProductController();
-    $promo = new \Rath\Controllers\PromotionController();
+    $resto = \Rath\Controllers\Data\DataControllerFactory::getRestaurantController();
+    $prod = \Rath\Controllers\Data\DataControllerFactory::getProductController();
+    $promo = \Rath\Controllers\Data\DataControllerFactory::getPromotionController();
 
     $app->group('/kitchentype' , function() use ($app,$resto){
         $app->get('/:id', function($id) use ($app,$resto){
@@ -254,35 +254,35 @@ const API_USER_UPDATE_ROUTE = "userUpdate";
 const API_USER_DELETE_ROUTE = "userDelete";
 
 $app->get('/login/:email/:password/:socialLogin',function($email,$password,$socialLogin) use ($app){
-    $result = Rath\Controllers\UserController::AuthenticateUser($email,$password,$socialLogin);
+    $result = Rath\Controllers\Data\UserController::AuthenticateUser($email,$password,$socialLogin);
     Rath\helpers\CrossDomainAjax::PrintCrossDomainCall($app,$result);
 })->name(API_LOGIN_ROUTE);
 
 $app->group('/user', function() use ($app){
     $app->get('/:hash', function($hash) use ($app){
-        $result = Rath\Controllers\UserController::GetuserByHash($hash);
+        $result = Rath\Controllers\Data\UserController::GetuserByHash($hash);
         Rath\helpers\CrossDomainAjax::PrintCrossDomainCall($app,$result);
     })->name(API_USER_GET_ROUTE);
 
     $app->post('',function() use ($app){
         $user = json_decode($app->request->getBody());
-        $result = Rath\Controllers\UserController::CreateUser($user);
+        $result = Rath\Controllers\Data\UserController::CreateUser($user);
         Rath\helpers\CrossDomainAjax::PrintCrossDomainCall($app,$result);
     })->name(API_USER_CREATE_ROUTE);
 
     $app->put('', function() use ($app){
         $user = json_decode($app->request->getBody());
-        $result = Rath\Controllers\UserController::UpdateUser($user);
+        $result = Rath\Controllers\Data\UserController::UpdateUser($user);
         Rath\helpers\CrossDomainAjax::PrintCrossDomainCall($app,$result);
     })->name(API_USER_UPDATE_ROUTE);
 
     $app->get('/delete/:hash', function($hash) use ($app){
-        $result = Rath\Controllers\UserController::DeleteUser($hash);
+        $result = Rath\Controllers\Data\UserController::DeleteUser($hash);
         Rath\helpers\CrossDomainAjax::PrintCrossDomainCall($app,$result);
     })->name(API_USER_DELETE_ROUTE);
 
     $app->group('/address', function() use ($app){
-        $gen = new \Rath\Controllers\GeneralController();
+        $gen = new \Rath\Controllers\Data\GeneralController();
         $app->get('/:id', function($id) use ($app,$gen){
             CrossDomainAjax::PrintCrossDomainCall(
                 $app,
@@ -321,7 +321,7 @@ $app->group('/user', function() use ($app){
 
 
 $app->group('/restaurant', function() use ($app){
-    $resto = new \Rath\Controllers\RestaurantController();
+    $resto = \Rath\Controllers\Data\DataControllerFactory::getRestaurantController();
 
     $app->get('/:id', function($id) use ($app,$resto){
         CrossDomainAjax::PrintCrossDomainCall(
@@ -480,7 +480,7 @@ $app->group('/restaurant', function() use ($app){
 });
 
 $app->group('/product', function () use ($app) {
-    $prod = new \Rath\Controllers\ProductController();
+    $prod = \Rath\Controllers\Data\DataControllerFactory::getProductController();
 
     $app->get('/:id', function($id) use ($app,$prod){
         CrossDomainAjax::PrintCrossDomainCall(
@@ -602,7 +602,7 @@ $app->group('/product', function () use ($app) {
 });
 
 $app->group('/promotion', function () use ($app) {
-    $promo = new \Rath\Controllers\PromotionController();
+    $promo = \Rath\Controllers\Data\DataControllerFactory::getPromotionController();
 
     $app->get('/:id', function($id) use ($app,$promo){
         CrossDomainAjax::PrintCrossDomainCall(
