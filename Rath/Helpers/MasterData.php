@@ -140,11 +140,10 @@ class MasterData
     }
 
     private static function echoHoliday(){
-        $date = new \DateTime('now');
         $holiday = new Holiday();
         $holiday->restaurantId = 2;
-        $holiday->fromDate = $date->format("Y-m-d H:i:s");
-        $holiday->toDate = $date->format("Y-m-d H:i:s");
+        $holiday->fromDate = date("Y-m-d");
+        $holiday->toDate = date("Y-m-d");
         return $holiday;
     }
 
@@ -153,8 +152,8 @@ class MasterData
         $openingHour = new OpeningHours();
         $openingHour->restaurantId = 2;
         $openingHour->dayOfWeek = 0;
-        $openingHour->fromTime = $time->format("H:i:s");
-        $openingHour->toTime = $time->format("H:i:s");
+        $openingHour->fromTime = date("H:i:s");
+        $openingHour->toTime = date("H:i:s");
         $openingHour->open = 1;
         return $openingHour;
     }
@@ -180,13 +179,12 @@ class MasterData
 
     private static function echoPromotion()
     {
-        $date = new \DateTime('now');
         $promo = new Promotion();
         $promo->promotiontypeId = 1;
         $promo->restaurantId = 4;
         $promo->productId =1;
-        $promo->fromDate = $date->format("Y-m-d");
-        $promo->toDate = $date->format("Y-m-d");
+        $promo->fromDate = date("Y-m-d");
+        $promo->toDate = date("Y-m-d");
         $promo->description = "Laatste van het sezoen!";
         $promo->discountType = Promotion::DISCOUNT_TYPE_VAL_PERS;
         $promo->discountAmount = 10;

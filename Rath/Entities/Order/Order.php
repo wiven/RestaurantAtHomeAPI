@@ -22,6 +22,7 @@ class Order
     const COMMENT_COL = "comment";
     const ADDRESS_ID_COL = "addressId";
     const COUPON_ID = "couponId";
+    const CREATION_DATE_TIME_COL = "creationDateTime";
 
     public $id;
     public $userId;
@@ -32,6 +33,7 @@ class Order
     public $comment;
     public $addressId;
     public $couponId;
+    public $creationDateTime;
 
     public $lines;
 
@@ -49,7 +51,8 @@ class Order
             Order::ORDER_DATETIME_COL => $order->orderDateTime,
             Order::COMMENT_COL => $order->comment,
             Order::ADDRESS_ID_COL => $order->addressId,
-            Order::COUPON_ID => $order->couponId
+            Order::COUPON_ID => $order->couponId,
+            Order::CREATION_DATE_TIME_COL => date("Y-m-d H:i:s")
         ];
     }
 }

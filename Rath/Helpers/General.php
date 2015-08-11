@@ -11,13 +11,16 @@ namespace Rath\Helpers;
 
 class General
 {
+    const dateFormat = "Y-m-d";
+    const timeFormat = "H:i:s";
+    const dateTimeFormat = "Y-m-d H:i:s";
+
     /**
      * @return string
      */
     public static function getCurrentDate()
     {
-        $date = new \DateTime('now');
-        return $date->format("Y-m-d");
+        return date(self::dateFormat);
     }
 
     /**
@@ -25,7 +28,10 @@ class General
      */
     public static function getCurrentTime()
     {
-        $time = new \DateTime('now');
-        return $time->format("H:i:s");
+        return date(self::timeFormat);
+    }
+
+    public static function getCurrentDateTime(){
+        return date(self::dateTimeFormat);
     }
 }

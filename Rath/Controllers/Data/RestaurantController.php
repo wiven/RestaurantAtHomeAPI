@@ -9,6 +9,8 @@
 namespace Rath\Controllers\Data;
 
 use Rath\Controllers\Data\ControllerBase;
+use Rath\Entities\Order\Order;
+use Rath\Entities\Order\OrderStatus;
 use Rath\Entities\Promotion\Promotion;
 use Rath\Entities\Promotion\PromotionType;
 use Rath\Entities\Restaurant\Holiday;
@@ -19,6 +21,7 @@ use Rath\Entities\Restaurant\Restaurant;
 use Rath\Entities\Restaurant\RestaurantHasPaymentMethod;
 use Rath\Entities\Restaurant\RestaurantHasSpeciality;
 use Rath\Entities\Restaurant\Speciality;
+use Rath\Entities\User\User;
 use Rath\Helpers\General;
 use Rath\Slim\Middleware\Authorization;
 
@@ -411,6 +414,57 @@ class RestaurantController extends ControllerBase
             [
                 Promotion::RESTAURANT_ID_COL => $restoId,
                 "LIMIT" => [$count,$skip]
+            ]);
+    }
+    //endregion
+
+    //region Orders
+    /**
+     * @param $restoId int
+     * @return bool|int
+     */
+    public function getNewOrderCount($restoId)
+    {
+        return $this->db->count(Order::TABLE_NAME,
+            [
+                Order::ID_COL
+            ],
+            [
+                Order::RESTAURANT_ID_COL => $restoId,
+                Order::ORDER_STATUS_ID_COL =>OrderStatus::val_New
+            ]);
+    }
+
+    /**
+     * @param $restoId
+     * @return array|bool
+     */
+    public function getOrdersForToday($restoId,$statusStart,$statusEnd){
+        return $this->db->select(Order::TABLE_NAME,
+            [
+                "[><]".User::TABLE_NAME =>
+                    [
+                        Order::USER_ID_COL => User::ID_COL
+                    ]
+            ],
+            [
+                Order::ID_COL,
+                User::NAME_COL,
+                User::SURNAME_COL,
+                Order::ORDER_DATETIME_COL,
+                Order::AMOUNT_COL
+            ],
+            [
+                "AND"=> [
+                    Order::RESTAURANT_ID_COL => $restoId,
+                    Order::ORDER_STATUS_ID_COL."[<>]" => [$statusStart,$statusEnd],
+                    Order::ORDER_DATETIME_COL."[><]" =>
+                        [
+                            date(General::dateTimeFormat,mktime(0,0,0)),
+                            date(General::dateTimeFormat,mktime(23,59,59)),
+                        ]
+                ],
+                "ORDER" => Order::ORDER_DATETIME_COL." ASC"
             ]);
     }
     //endregion

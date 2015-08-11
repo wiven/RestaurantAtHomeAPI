@@ -10,10 +10,18 @@ namespace Rath\Controllers;
 
 
 use Rath\Controllers\Data\DataControllerFactory;
+use Rath\Entities\Order\Order;
+use Rath\Entities\Order\OrderStatus;
 use Rath\Entities\Promotion\Promotion;
 
 class DashboardController
 {
+    public function getNewOrderCount($restoId)
+    {
+        $rc = DataControllerFactory::getRestaurantController();
+        return $rc->getNewOrderCount($restoId);
+    }
+
     public function getOverviewContent($restoId)
     {
         $rc = DataControllerFactory::getRestaurantController();
@@ -21,12 +29,23 @@ class DashboardController
 
         //Geather promotion info
         $activePromo = $rc->getActivePromotions($restoId);
-        foreach ($activePromo as $promotion) {
-            $promotion["usage"] = $promo->getPromotionUsageCount($promotion[Promotion::ID_COL]);
-        }
+        if(!empty($activePromo))
+            foreach ($activePromo as $promotion) {
+                $promotion["usage"] = $promo->getPromotionUsageCount($promotion[Promotion::ID_COL]);
+            }
+        else
+            $activePromo = [];
+
+        $newOrderCount = $rc->getNewOrderCount($restoId);
+
+        $openOrdersForToday = $rc->getOrdersForToday($restoId,OrderStatus::val_Accepted,OrderStatus::val_OnRoute);
+        //$ordersFinished =  $rc->getOrdersForToday($restoId,OrderStatus::val_Finished,OrderStatus::val_Finished);
 
         return[
-            $activePromo
+            $newOrderCount,
+            $activePromo,
+            $openOrdersForToday
+
         ];
     }
 

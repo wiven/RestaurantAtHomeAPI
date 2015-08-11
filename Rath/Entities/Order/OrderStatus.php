@@ -29,4 +29,13 @@ class OrderStatus
             OrderStatus::NAME_COL => $os->id
         ];
     }
+
+    //region Default Values
+    const val_New = 10;
+    const val_Accepted = 20;
+    const val_InProgress = 30;
+    const val_Ready = 40;
+    const val_OnRoute = 50;
+    const val_Finished = 100;
+    //endregion
 }

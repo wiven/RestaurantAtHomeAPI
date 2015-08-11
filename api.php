@@ -13,6 +13,7 @@ if(!defined('APP_MODE'))
 
 require_once __DIR__.'/vendor/autoload.php';
 
+use Rath\Controllers\ControllerFactory;
 use Rath\Controllers\Data\DataControllerFactory;
 use Rath\helpers\CrossDomainAjax;
 
@@ -665,6 +666,27 @@ $app->group('/promotion', function () use ($app) {
     });
 });
 //endregion
+
+
+$app->group('/dashboard', function() use ($app){
+    $dash = ControllerFactory::getDashboardController();
+
+    $app->get('/neworders/:restoId', function($restoId) use ($app,$dash){
+        CrossDomainAjax::PrintCrossDomainCall(
+            $app,
+            $dash->getNewOrderCount($restoId)
+        );
+    });
+
+    $app->get('/overview/:restoId', function($restoId) use ($app,$dash){
+        CrossDomainAjax::PrintCrossDomainCall(
+            $app,
+            $dash->getOverviewContent($restoId)
+        );
+    });
+});
+
+
 
 
 
