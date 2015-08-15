@@ -520,6 +520,39 @@ $app->group('/restaurant', function() use ($app){
             );
         });
     });
+
+    //TODO: test photo upload
+    $app->group('/photo', function() use ($app,$resto){
+        $app->get('/:id', function($id) use ($app,$resto){
+            CrossDomainAjax::PrintCrossDomainCall(
+                $app,
+                $resto->getPhoto($id)
+            );
+        });
+
+        $app->post('' ,function() use ($app,$resto){
+            $ho = json_decode($app->request->getBody());
+            CrossDomainAjax::PrintCrossDomainCall(
+                $app,
+                $resto->addPhoto($ho)
+            );
+        });
+
+        $app->put('', function() use ($app,$resto){
+            $ho = json_decode($app->request->getBody());
+            CrossDomainAjax::PrintCrossDomainCall(
+                $app,
+                $resto->updatePhoto($ho)
+            );
+        });
+
+        $app->get('/delete/:id', function($id) use ($app,$resto){
+            CrossDomainAjax::PrintCrossDomainCall(
+                $app,
+                $resto->deletePhoto($id)
+            );
+        });
+    });
 });
 //endregion
 
@@ -725,6 +758,14 @@ $app->group('/dashboard', function() use ($app){
             $dash->getOverviewContent($restoId)
         );
     });
+
+    $app->get('/profile/:restoId',function($restoId) use ($app,$dash){
+        CrossDomainAjax::PrintCrossDomainCall(
+            $app,
+            $dash->getProfileContent($restoId)
+        );
+    });
+
 });
 
 

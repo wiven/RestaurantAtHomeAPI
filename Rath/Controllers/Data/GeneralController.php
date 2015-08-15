@@ -121,6 +121,15 @@ class GeneralController extends ControllerBase
             "*");
     }
 
+    public function getAllPartnersPaged($count,$skip)
+    {
+        return $this->db->select(Partner::TABLE_NAME,
+            "*",
+            [
+                "LIMIT" => [$count,$skip]
+            ]);
+    }
+
     /**
      * @param $part Partner
      * @return array

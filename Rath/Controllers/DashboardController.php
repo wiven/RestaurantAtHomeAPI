@@ -13,6 +13,8 @@ use Rath\Controllers\Data\DataControllerFactory;
 use Rath\Entities\Order\Order;
 use Rath\Entities\Order\OrderStatus;
 use Rath\Entities\Promotion\Promotion;
+use Rath\Entities\Restaurant\Restaurant;
+use Rath\Helpers\General;
 
 class DashboardController
 {
@@ -26,31 +28,52 @@ class DashboardController
     {
         $rc = DataControllerFactory::getRestaurantController();
         $promo = DataControllerFactory::getPromotionController();
+        $gen = DataControllerFactory::getGeneralController();
 
         //Geather promotion info
         $activePromo = $rc->getActivePromotions($restoId);
-        if(!empty($activePromo))
-            foreach ($activePromo as $promotion) {
-                $promotion["usage"] = $promo->getPromotionUsageCount($promotion[Promotion::ID_COL]);
-            }
-        else
-            $activePromo = [];
+//        if(!empty($activePromo))
+//            foreach ($activePromo as $promotion) {
+//                $promotion["usage"] = $promo->getPromotionUsageCount($promotion[Promotion::ID_COL]);
+//            }
+//        else
+//            $activePromo = [];
 
         $newOrderCount = $rc->getNewOrderCount($restoId);
-
         $openOrdersForToday = $rc->getOrdersForToday($restoId,OrderStatus::val_Accepted,OrderStatus::val_OnRoute);
-        //$ordersFinished =  $rc->getOrdersForToday($restoId,OrderStatus::val_Finished,OrderStatus::val_Finished);
+        $partners = $gen->getAllPartnersPaged(0,4);
 
         return[
-            $newOrderCount,
-            $activePromo,
-            $openOrdersForToday
+            "newOrders" => $newOrderCount,
+            "activePromos" => $activePromo,
+            "openOrders" => $openOrdersForToday,
+            "partners" => $partners
+        ];
+    }
 
+    public function getProfileContent($restoId)
+    {
+        $rc = DataControllerFactory::getRestaurantController();
+
+        $restaurant = $rc->getRestaurant($restoId);
+        $openingHours = $rc->getOpeningHours($restoId);
+        $photos = $rc->getPhotos($restoId);
+        $address = $rc->getAddress($restaurant[Restaurant::ADDRESS_ID_COL]);
+        $paymentMethods = $rc->getRestaurantPaymentMethods($restoId);
+        //TODO: social media
+
+        return[
+            "restaurantInfo" => $restaurant,
+            "addressInfo" => $address,
+            "openingHours" => $openingHours,
+            "paymentMethods" => $paymentMethods,
+            "photos" => $photos
         ];
     }
 
     public function getProductContent($restoId,$count,$skip)
     {
+        //TODO: add filter
         $prod = DataControllerFactory::getProductController();
         return $prod->getRestaurantProducts($restoId,$count,$skip);
     }

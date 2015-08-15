@@ -8,7 +8,9 @@
 
 namespace Rath\Controllers\Data;
 
+use PDO;
 use Rath\Controllers\Data\ControllerBase;
+use Rath\Entities\General\Address;
 use Rath\Entities\Order\Order;
 use Rath\Entities\Order\OrderStatus;
 use Rath\Entities\Promotion\Promotion;
@@ -20,6 +22,7 @@ use Rath\Entities\Restaurant\PaymentMethod;
 use Rath\Entities\Restaurant\Restaurant;
 use Rath\Entities\Restaurant\RestaurantHasPaymentMethod;
 use Rath\Entities\Restaurant\RestaurantHasSpeciality;
+use Rath\Entities\Restaurant\RestaurantPhoto;
 use Rath\Entities\Restaurant\Speciality;
 use Rath\Entities\User\User;
 use Rath\Helpers\General;
@@ -34,15 +37,17 @@ class RestaurantController extends ControllerBase
      * @return array|bool
      */
     public function getRestaurant($id){
-        return $this->db->select(Restaurant::TABLE_NAME,
+        return $this->db->get(Restaurant::TABLE_NAME,
             [
                 Restaurant::ID_COL,
+                Restaurant::NAME_COL,
                 Restaurant::KITCHEN_TYPE_ID_COL,
                 Restaurant::ADDRESS_ID_COL,
+                Restaurant::LOGO_PHOTO_COL,
                 Restaurant::PHONE_COL,
                 Restaurant::EMAIL_COL,
                 Restaurant::URL_COL,
-                Restaurant::PHOTO_COL,
+                Restaurant::LOGO_PHOTO_COL,
                 Restaurant::DOMINATING_COLOR_COL,
                 Restaurant::COMMENT_COL
             ],
@@ -234,6 +239,10 @@ class RestaurantController extends ControllerBase
             ]);
     }
 
+    /**
+     * @param $restoId
+     * @return array|bool
+     */
     public function getOpeningHours($restoId){
         return $this->db->select(OpeningHours::TABLE_NAME,
             "*",
@@ -375,6 +384,24 @@ class RestaurantController extends ControllerBase
 
     //region Promotions
     public function getActivePromotions($restoId){
+//        /** @noinspection SqlDialectInspection */
+//        $query = printf(
+//            "SELECT promotion.id,promotion.name,toDate,fromDate, (select count(quantity) from promotionusagehistory".
+//            " WHERE promotionId = promotionId) as 'usage' FROM promotion".
+//            " INNER JOIN promotiontype ON promotion.promotiontypeId = promotiontype.id".
+//            ' WHERE restaurantId = %1$s'.
+//            ' AND fromDate <= %2$s'.
+//            ' AND toDate >= %2$s'
+//            ,$this->db->quote($restoId)
+//            ,$this->db->quote(General::getCurrentDate())
+//        );
+//        var_dump($query);
+//        $pdoQuery =  $this->db->query($query);
+//        var_dump($pdoQuery);
+//        var_dump($this->db->error());
+//        return $pdoQuery->fetchAll(PDO::FETCH_ASSOC);
+
+
         return $this->db->select(Promotion::TABLE_NAME,
             [
                 "[><]".PromotionType::TABLE_NAME =>
@@ -383,16 +410,16 @@ class RestaurantController extends ControllerBase
                     ]
             ],
             [
-                Promotion::ID_COL,
-                PromotionType::NAME_COL,
-                Promotion::TO_DATE_COL
+                Promotion::TABLE_NAME.".".Promotion::ID_COL,
+                Promotion::TABLE_NAME.".".PromotionType::NAME_COL,
+                Promotion::TO_DATE_COL,
             ],
             [
                 "AND"=>
                     [
                         Promotion::RESTAURANT_ID_COL => $restoId,
-                        Promotion::FROM_DATE_COL.">=" => General::getCurrentDate(),
-                        Promotion::TO_DATE_COL."<=" => General::getCurrentDate()
+                        Promotion::FROM_DATE_COL."[<=]" => General::getCurrentDate(),
+                        Promotion::TO_DATE_COL."[>=]" => General::getCurrentDate()
                     ]
             ]);
     }
@@ -421,7 +448,7 @@ class RestaurantController extends ControllerBase
     //region Orders
     /**
      * @param $restoId int
-     * @return bool|int
+     * @return int
      */
     public function getNewOrderCount($restoId)
     {
@@ -430,8 +457,10 @@ class RestaurantController extends ControllerBase
                 Order::ID_COL
             ],
             [
-                Order::RESTAURANT_ID_COL => $restoId,
-                Order::ORDER_STATUS_ID_COL =>OrderStatus::val_New
+                "AND"=>[
+                    Order::RESTAURANT_ID_COL => $restoId,
+                    Order::ORDER_STATUS_ID_COL =>OrderStatus::val_New
+                ]
             ]);
     }
 
@@ -448,7 +477,7 @@ class RestaurantController extends ControllerBase
                     ]
             ],
             [
-                Order::ID_COL,
+                Order::TABLE_NAME.".".Order::ID_COL,
                 User::NAME_COL,
                 User::SURNAME_COL,
                 Order::ORDER_DATETIME_COL,
@@ -466,6 +495,71 @@ class RestaurantController extends ControllerBase
                 ],
                 "ORDER" => Order::ORDER_DATETIME_COL." ASC"
             ]);
+    }
+    //endregion
+
+    //region Photo TODO: add function to actual upload the photo
+    /**
+     * @param $restoPhoto RestaurantPhoto
+     * @return array
+     */
+    public function addPhoto($restoPhoto){
+        $this->db->insert(RestaurantPhoto::TABLE_NAME,
+            RestaurantPhoto::toDbArray($restoPhoto)
+        );
+        return $this->db->error();
+    }
+
+    /**
+     * @param $id
+     * @return array|bool
+     */
+    public function getPhoto($id){
+        return $this->db->select(RestaurantPhoto::TABLE_NAME,
+            "*",
+            [
+                RestaurantPhoto::ID_COL => $id
+            ]);
+    }
+
+    /**
+     * @param $restoId
+     * @return array
+     */
+    public function getPhotos($restoId)
+    {
+        return  $this->db->select(RestaurantPhoto::TABLE_NAME,
+            "*",
+            [
+                RestaurantPhoto::RESTAURANT_ID_COL => $restoId,
+                "LIMIT" => [0,10]
+            ]);
+    }
+
+    /**
+     * @param $restoPhoto RestaurantPhoto
+     * @return array
+     */
+    public function updatePhoto($restoPhoto){
+        $this->db->update(RestaurantPhoto::TABLE_NAME,
+            RestaurantPhoto::toDbArray($restoPhoto),
+            [
+                RestaurantPhoto::ID_COL => $restoPhoto->id
+            ]
+        );
+        return $this->db->error();
+    }
+
+    /**
+     * @param $id
+     * @return array
+     */
+    public function deletePhoto($id){
+        $this->db->delete(RestaurantPhoto::TABLE_NAME,
+            [
+                RestaurantPhoto::ID_COL => $id
+            ]);
+        return $this->db->error();
     }
     //endregion
 
@@ -521,4 +615,24 @@ class RestaurantController extends ControllerBase
         return $this->db->error();
     }
     //endregion //TODO
+
+    /**
+     * @param $resto int
+     * @return array|bool
+     */
+    public function getAddress($restoAddressId)
+    {
+        return $this->db->get(Address::TABLE_NAME,
+            [
+                Address::ID_COL,
+                Address::STREET_COL,
+                Address::NUMBER_COL,
+                Address::ADDITION_COL,
+                Address::POSTCODE_COL,
+                Address::CITY_COL
+            ],
+            [
+                Address::ID_COL => $restoAddressId
+            ]);
+    }
 }

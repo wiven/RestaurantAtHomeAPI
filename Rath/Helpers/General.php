@@ -34,4 +34,14 @@ class General
     public static function getCurrentDateTime(){
         return date(self::dateTimeFormat);
     }
+
+    const booleanType = "boolean";
+    const integerType = "integer";
+    const doubleType = "double";
+    const stringType = "string";
+    const arrayType = "array";
+    const objectType = "object";
+    const resourceType = "resource";
+    const nullType = "NULL";
+    const unknownType = "unknown type";
 }
