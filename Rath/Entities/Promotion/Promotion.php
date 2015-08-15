@@ -16,7 +16,6 @@ class Promotion
     const ID_COL = "id";
     const PROMOTION_TYPE_ID_COL = "promotiontypeId";
     const RESTAURANT_ID_COL = "restaurantId";
-    const PRODUCT_ID_COL = "productId";
 
     const FROM_DATE_COL = "fromDate";
     const TO_DATE_COL = "toDate";
@@ -25,19 +24,17 @@ class Promotion
         const DISCOUNT_TYPE_VAL_PERS = "Percentage";
         const DISCOUNT_TYPE_VAL_AMOUNT = "Amount";
     const DISCOUNT_AMOUNT_COL = "discountAmount";
-    const NEW_PRODUCT_PRICE = "newProductPrice";
 
     public $id;
     public $promotiontypeId;
     public $restaurantId;
-    public $productId;
 
     public $fromDate;
     public $toDate;
     public $description;
     public $discountType;
     public $discountAmount;
-    public $newProductPrice;
+
 
 
     /**
@@ -49,13 +46,11 @@ class Promotion
         return [
             Promotion::PROMOTION_TYPE_ID_COL => $promotion->promotiontypeId,
             Promotion::RESTAURANT_ID_COL => $promotion->restaurantId,
-            Promotion::PRODUCT_ID_COL => $promotion->productId,
             Promotion::FROM_DATE_COL => $promotion->fromDate,
             Promotion::TO_DATE_COL => $promotion->toDate,
             Promotion::DESCRIPTION_COL => $promotion->description,
             Promotion::DISCOUNT_TYPE_COL => $promotion->discountType,
             Promotion::DISCOUNT_AMOUNT_COL => $promotion->discountAmount,
-            Promotion::NEW_PRODUCT_PRICE => $promotion->newProductPrice
         ];
     }
 

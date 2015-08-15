@@ -104,12 +104,19 @@ class MasterData
 
     public static function echoObjectContent(){
         echo json_encode([
+            "Address Object",
             MasterData::echoAddress(),
+            "Restaurant Object",
             MasterData::echoRestaurant(),
+            "Holiday Object",
             MasterData::echoHoliday(),
+            "OpeningHour Object",
             MasterData::echoOpeningHour(),
+            "Product Object",
             MasterData::echoProduct(),
+            "ProductStock Object",
             MasterData::echoProductStock(),
+            "Promotion Object",
             MasterData::echoPromotion()
         ]);
 
@@ -166,6 +173,7 @@ class MasterData
         $prod->description = "Een heerlijk tomatensoepje afgekruid met pepermix voor de pittege smaak";
         $prod->price = 2.49;
         $prod->slots = 1;
+        $prod->promotionId = 2;
         return $prod;
     }
 
@@ -182,7 +190,6 @@ class MasterData
         $promo = new Promotion();
         $promo->promotiontypeId = 1;
         $promo->restaurantId = 4;
-        $promo->productId =1;
         $promo->fromDate = date("Y-m-d");
         $promo->toDate = date("Y-m-d");
         $promo->description = "Laatste van het sezoen!";

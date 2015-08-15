@@ -16,6 +16,7 @@ class Product
     const ID_COL = "id";
     const RESTAURANT_ID_COL = "restaurantId";
     const PRODUCT_TYPE_ID = "producttypeId";
+    const PROMOTION_ID_COL = "promotionId";
 
     const NAME_COL = "name";
     const DESCRIPTION_COL ="description";
@@ -26,6 +27,7 @@ class Product
     public $id;
     public $restaurantId;
     public $producttypeId;
+    public $promotionId;
     public $name;
     public $description;
     public $photo;
@@ -37,7 +39,7 @@ class Product
      * @return array
      */
     static function productToDbArray($product){
-        return [
+        $data =  [
             Product::RESTAURANT_ID_COL => $product->restaurantId,
             Product::PRODUCT_TYPE_ID => $product->producttypeId,
             Product::NAME_COL => $product->name,
@@ -46,7 +48,14 @@ class Product
             Product::PRICE_COL => $product->price,
             Product::SLOTS_COL => $product->slots
         ];
-        //Product::PHOTO_COL => $product->photo,
+
+        if(!empty($product->promotionId))
+            $data[self::PROMOTION_ID_COL] = $product->promotionId;
+
+        if(!empty($product->photo))
+            $data[self::PHOTO_COL] = $product->photo;
+
+        return data;
     }
 
 }
