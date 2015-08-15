@@ -144,9 +144,10 @@ $app->group('/user', function() use ($app){
 
 //region management
 $app->group('/manage', function() use ($app){
-    $resto = \Rath\Controllers\Data\DataControllerFactory::getRestaurantController();
-    $prod = \Rath\Controllers\Data\DataControllerFactory::getProductController();
-    $promo = \Rath\Controllers\Data\DataControllerFactory::getPromotionController();
+    $resto = DataControllerFactory::getRestaurantController();
+    $prod = DataControllerFactory::getProductController();
+    $promo = DataControllerFactory::getPromotionController();
+    $gen = DataControllerFactory::getGeneralController();
 
     $app->group('/kitchentype' , function() use ($app,$resto){
         $app->get('/:id', function($id) use ($app,$resto){
@@ -315,6 +316,46 @@ $app->group('/manage', function() use ($app){
             CrossDomainAjax::PrintCrossDomainCall(
                 $app,
                 $promo->deletePromotionType($id)
+            );
+        });
+    });
+
+    $app->group('/partner' , function() use ($app, $gen){
+
+        $app->get('/:id', function($id) use ($app,$gen){
+            CrossDomainAjax::PrintCrossDomainCall(
+                $app,
+                $gen->getPartner($id)
+            );
+        });
+
+        $app->get('/all/', function() use ($app,$gen){
+            CrossDomainAjax::PrintCrossDomainCall(
+                $app,
+                $gen->getAllPartners()
+            );
+        });
+
+        $app->post('', function() use ($app,$gen){
+            $prodType = json_decode($app->request->getBody());
+            CrossDomainAjax::PrintCrossDomainCall(
+                $app,
+                $gen->addPartner($prodType)
+            );
+        });
+
+        $app->put('', function() use ($app,$gen){
+            $prodType = json_decode($app->request->getBody());
+            CrossDomainAjax::PrintCrossDomainCall(
+                $app,
+                $gen->updatePartner($prodType)
+            );
+        });
+
+        $app->get('/delete/:id',function($id) use ($app,$gen){
+            CrossDomainAjax::PrintCrossDomainCall(
+                $app,
+                $gen->deletePartner($id)
             );
         });
     });

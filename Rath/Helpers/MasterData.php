@@ -9,6 +9,7 @@
 namespace Rath\helpers;
 
 use Rath\Entities\General\Address;
+use Rath\Entities\General\Partner;
 use Rath\Entities\Product\Product;
 use Rath\Entities\Product\ProductStock;
 use Rath\Entities\Promotion\Promotion;
@@ -35,7 +36,6 @@ class MasterData
 
         MasterData::InsertDemoUsers();
         MasterData::InsertDefaultRoutPermissions();
-
     }
 
 
@@ -117,7 +117,9 @@ class MasterData
             "ProductStock Object",
             MasterData::echoProductStock(),
             "Promotion Object",
-            MasterData::echoPromotion()
+            MasterData::echoPromotion(),
+            "Partner Object",
+            MasterData::echoPartner()
         ]);
 
     }
@@ -197,5 +199,17 @@ class MasterData
         $promo->discountAmount = 10;
         $promo->newProductPrice = 8.99;
         return $promo;
+    }
+
+    /**
+     * @return Partner
+     */
+    private static function echoPartner()
+    {
+        $partner = new Partner();
+        $partner->name = "Moonen";
+        $partner->photo = "url to photo";
+        $partner->url = "url to partner site";
+        return $partner;
     }
 }

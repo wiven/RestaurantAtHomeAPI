@@ -37,6 +37,11 @@ class DataControllerFactory
     private static $orderController;
 
     /**
+     * @var GeneralController
+     */
+    private static $generalController;
+
+    /**
      * @return UserController
      */
     public static function getUserController()
@@ -86,5 +91,13 @@ class DataControllerFactory
         return self::$orderController;
     }
 
-
+    /**
+     * @return GeneralController
+     */
+    public static function getGeneralController()
+    {
+        if(empty(self::$generalController))
+            self::$generalController = new GeneralController();
+        return self::$generalController;
+    }
 }

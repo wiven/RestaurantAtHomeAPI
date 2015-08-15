@@ -11,10 +11,12 @@ namespace Rath\Controllers\Data;
 
 use Rath\Controllers\Data\ControllerBase;
 use Rath\Entities\General\Address;
+use Rath\Entities\General\Partner;
 use Rath\Slim\Middleware\Authorization;
 
 class GeneralController extends ControllerBase
 {
+    //region Addresses
     /**
      * @param $id
      * @return array|bool
@@ -82,4 +84,68 @@ class GeneralController extends ControllerBase
         );
         return $this->db->error();
     }
+    //endregion
+
+    //region Partners
+
+    /**
+     * @param $part Partner
+     * @return array|bool
+     */
+    public function addPartner($part)
+    {
+        $lastId = $this->db->insert(Partner::TABLE_NAME,
+            Partner::toDbArray($part));
+        if($lastId != 0)
+            return $this->getPartner($lastId);
+        else
+            return $this->db->error();
+    }
+
+    /**
+     * @param $partId
+     * @return array|bool
+     */
+    public function getPartner($partId)
+    {
+        return $this->db->select(Partner::TABLE_NAME,
+            "*",
+            [
+                Partner::ID_COL => $partId
+            ]);
+    }
+
+    public function getAllPartners()
+    {
+        return $this->db->select(Partner::TABLE_NAME,
+            "*");
+    }
+
+    /**
+     * @param $part Partner
+     * @return array
+     */
+    public function updatePartner($part)
+    {
+        $this->db->update(Partner::TABLE_NAME,
+            Partner::toDbArray($part),
+            [
+                Partner::ID_COL => $part->id
+            ]);
+        return $this->db->error();
+    }
+
+    /**
+     * @param $partId
+     * @return array
+     */
+    public function deletePartner($partId)
+    {
+        $this->db->delete(Partner::TABLE_NAME,
+            [
+                Partner::ID_COL => $partId
+            ]);
+        return $this->db->error();
+    }
+    //endregion
 }
