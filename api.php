@@ -359,6 +359,46 @@ $app->group('/manage', function() use ($app){
             );
         });
     });
+
+    $app->group('/socialmediatype' , function() use ($app, $gen){
+
+        $app->get('/:id', function($id) use ($app,$gen){
+            CrossDomainAjax::PrintCrossDomainCall(
+                $app,
+                $gen->getSocialMediaType($id)
+            );
+        });
+
+        $app->get('/all/', function() use ($app,$gen){
+            CrossDomainAjax::PrintCrossDomainCall(
+                $app,
+                $gen->getAllSocialMediaTypes()
+            );
+        });
+
+        $app->post('', function() use ($app,$gen){
+            $socType = json_decode($app->request->getBody());
+            CrossDomainAjax::PrintCrossDomainCall(
+                $app,
+                $gen->addSocialMediaType($socType)
+            );
+        });
+
+        $app->put('', function() use ($app,$gen){
+            $socType = json_decode($app->request->getBody());
+            CrossDomainAjax::PrintCrossDomainCall(
+                $app,
+                $gen->updateSocialMediaType($socType)
+            );
+        });
+
+        $app->get('/delete/:id',function($id) use ($app,$gen){
+            CrossDomainAjax::PrintCrossDomainCall(
+                $app,
+                $gen->deleteSocialMediaType($id)
+            );
+        });
+    });
 });
 //endregion
 
@@ -550,6 +590,45 @@ $app->group('/restaurant', function() use ($app){
             CrossDomainAjax::PrintCrossDomainCall(
                 $app,
                 $resto->deletePhoto($id)
+            );
+        });
+    });
+
+    $app->group('/socialmedia', function() use ($app,$resto){
+        $app->get('/:id', function($id) use ($app,$resto){
+            CrossDomainAjax::PrintCrossDomainCall(
+                $app,
+                $resto->getSocialMedia($id)
+            );
+        });
+
+        $app->get('/all/:id', function($id) use ($app,$resto){
+            CrossDomainAjax::PrintCrossDomainCall(
+                $app,
+                $resto->getAllSocialMedia($id)
+            );
+        });
+
+        $app->post('' ,function() use ($app,$resto){
+            $ho = json_decode($app->request->getBody());
+            CrossDomainAjax::PrintCrossDomainCall(
+                $app,
+                $resto->addSocialMedia($ho)
+            );
+        });
+
+        $app->put('', function() use ($app,$resto){
+            $ho = json_decode($app->request->getBody());
+            CrossDomainAjax::PrintCrossDomainCall(
+                $app,
+                $resto->updateSocialMedia($ho)
+            );
+        });
+
+        $app->get('/delete/:id', function($id) use ($app,$resto){
+            CrossDomainAjax::PrintCrossDomainCall(
+                $app,
+                $resto->deleteSocialMedia($id)
             );
         });
     });

@@ -23,6 +23,7 @@ class Order
     const ADDRESS_ID_COL = "addressId";
     const COUPON_ID = "couponId";
     const CREATION_DATE_TIME_COL = "creationDateTime";
+    const SUBMITTED_COL = "submitted";
 
     public $id;
     public $userId;
@@ -34,6 +35,7 @@ class Order
     public $addressId;
     public $couponId;
     public $creationDateTime;
+    public $submitted;
 
     public $lines;
 
@@ -43,7 +45,7 @@ class Order
      */
     public function toDbArray($order)
     {
-        return[
+        $data =[
             Order::USER_ID_COL => $order->userId,
             Order::RESTAURANT_ID_COL => $order->restaurantId,
             Order::ORDER_STATUS_ID_COL => $order->orderStatusId,
@@ -54,5 +56,10 @@ class Order
             Order::COUPON_ID => $order->couponId,
             Order::CREATION_DATE_TIME_COL => date("Y-m-d H:i:s")
         ];
+
+        if(!empty($order->submitted))
+            $data[Order::SUBMITTED_COL] = $order->submitted;
+
+        return $data;
     }
 }

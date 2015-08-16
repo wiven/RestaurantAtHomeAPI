@@ -9,6 +9,7 @@
 namespace Rath\Controllers\Data;
 
 
+use Rath\Entities\General\SocialMediaType;
 use Rath\Entities\Order\OrderStatus;
 
 class DefaultDataController extends ControllerBase
@@ -43,5 +44,25 @@ class DefaultDataController extends ControllerBase
                 ],
             ]);
         return $this->db->error();
+    }
+
+    public function insertSocialMediaTypes()
+    {
+        $this->db->insert(SocialMediaType::TABLE_NAME,
+            [
+                [
+                    SocialMediaType::ID_COL => SocialMediaType::val_Facebook,
+                    SocialMediaType::NAME_COL => "Facebook"
+                ],
+                [
+                    SocialMediaType::ID_COL => SocialMediaType::val_Twitter,
+                    SocialMediaType::NAME_COL => "Twitter"
+                ],
+                [
+                    SocialMediaType::ID_COL => SocialMediaType::val_Instagram,
+                    SocialMediaType::NAME_COL => "Instagram"
+                ]
+            ]);
+        $this->db->error();
     }
 }

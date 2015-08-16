@@ -10,6 +10,7 @@ namespace Rath\helpers;
 
 use Rath\Entities\General\Address;
 use Rath\Entities\General\Partner;
+use Rath\Entities\General\RestaurantSocialMedia;
 use Rath\Entities\Product\Product;
 use Rath\Entities\Product\ProductStock;
 use Rath\Entities\Promotion\Promotion;
@@ -119,7 +120,9 @@ class MasterData
             "Promotion Object",
             MasterData::echoPromotion(),
             "Partner Object",
-            MasterData::echoPartner()
+            MasterData::echoPartner(),
+            "Socialmedia Object",
+            MasterData::echoSocialMedia()
         ]);
 
     }
@@ -211,5 +214,17 @@ class MasterData
         $partner->photo = "url to photo";
         $partner->url = "url to partner site";
         return $partner;
+    }
+
+    /**
+     * @return RestaurantSocialMedia
+     */
+    private static function echoSocialMedia()
+    {
+        $soc = new RestaurantSocialMedia();
+        $soc->restaurantId = 4;
+        $soc->socialmediatypeId = 1;
+        $soc->url = "Url to socialmedia page";
+        return $soc;
     }
 }

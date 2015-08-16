@@ -23,6 +23,7 @@ use Rath\Entities\Restaurant\Restaurant;
 use Rath\Entities\Restaurant\RestaurantHasPaymentMethod;
 use Rath\Entities\Restaurant\RestaurantHasSpeciality;
 use Rath\Entities\Restaurant\RestaurantPhoto;
+use Rath\Entities\Restaurant\RestaurantSocialMedia;
 use Rath\Entities\Restaurant\Speciality;
 use Rath\Entities\User\User;
 use Rath\Helpers\General;
@@ -384,44 +385,37 @@ class RestaurantController extends ControllerBase
 
     //region Promotions
     public function getActivePromotions($restoId){
-//        /** @noinspection SqlDialectInspection */
-//        $query = printf(
-//            "SELECT promotion.id,promotion.name,toDate,fromDate, (select count(quantity) from promotionusagehistory".
-//            " WHERE promotionId = promotionId) as 'usage' FROM promotion".
-//            " INNER JOIN promotiontype ON promotion.promotiontypeId = promotiontype.id".
-//            ' WHERE restaurantId = %1$s'.
-//            ' AND fromDate <= %2$s'.
-//            ' AND toDate >= %2$s'
-//            ,$this->db->quote($restoId)
-//            ,$this->db->quote(General::getCurrentDate())
-//        );
-//        var_dump($query);
-//        $pdoQuery =  $this->db->query($query);
-//        var_dump($pdoQuery);
-//        var_dump($this->db->error());
-//        return $pdoQuery->fetchAll(PDO::FETCH_ASSOC);
+        /** @noinspection SqlDialectInspection */
+        $date = $this->db->quote(General::getCurrentDate());
+        $query =
+            "SELECT promotion.id,promotion.name,toDate,fromDate, (select count(quantity) from promotionusagehistory".
+            " WHERE promotionId = promotion.id) as 'usage' FROM promotion".
+            " INNER JOIN promotiontype ON promotion.promotiontypeId = promotiontype.id".
+            ' WHERE restaurantId = '.$this->db->quote($restoId).
+            ' AND fromDate <= '.$date.
+            ' AND toDate >= '.$date;
+        return $this->db->query($query)->fetchAll(PDO::FETCH_ASSOC);
 
-
-        return $this->db->select(Promotion::TABLE_NAME,
-            [
-                "[><]".PromotionType::TABLE_NAME =>
-                    [
-                        Promotion::PROMOTION_TYPE_ID_COL => PromotionType::ID_COL
-                    ]
-            ],
-            [
-                Promotion::TABLE_NAME.".".Promotion::ID_COL,
-                Promotion::TABLE_NAME.".".PromotionType::NAME_COL,
-                Promotion::TO_DATE_COL,
-            ],
-            [
-                "AND"=>
-                    [
-                        Promotion::RESTAURANT_ID_COL => $restoId,
-                        Promotion::FROM_DATE_COL."[<=]" => General::getCurrentDate(),
-                        Promotion::TO_DATE_COL."[>=]" => General::getCurrentDate()
-                    ]
-            ]);
+//        return $this->db->select(Promotion::TABLE_NAME,
+//            [
+//                "[><]".PromotionType::TABLE_NAME =>
+//                    [
+//                        Promotion::PROMOTION_TYPE_ID_COL => PromotionType::ID_COL
+//                    ]
+//            ],
+//            [
+//                Promotion::TABLE_NAME.".".Promotion::ID_COL,
+//                Promotion::TABLE_NAME.".".PromotionType::NAME_COL,
+//                Promotion::TO_DATE_COL,
+//            ],
+//            [
+//                "AND"=>
+//                    [
+//                        Promotion::RESTAURANT_ID_COL => $restoId,
+//                        Promotion::FROM_DATE_COL."[<=]" => General::getCurrentDate(),
+//                        Promotion::TO_DATE_COL."[>=]" => General::getCurrentDate()
+//                    ]
+//            ]);
     }
 
     public function getPromotions($restoId,$count, $skip)
@@ -459,7 +453,8 @@ class RestaurantController extends ControllerBase
             [
                 "AND"=>[
                     Order::RESTAURANT_ID_COL => $restoId,
-                    Order::ORDER_STATUS_ID_COL =>OrderStatus::val_New
+                    Order::ORDER_STATUS_ID_COL =>OrderStatus::val_New,
+                    Order::SUBMITTED_COL => true
                 ]
             ]);
     }
@@ -491,7 +486,8 @@ class RestaurantController extends ControllerBase
                         [
                             date(General::dateTimeFormat,mktime(0,0,0)),
                             date(General::dateTimeFormat,mktime(23,59,59)),
-                        ]
+                        ],
+                    Order::SUBMITTED_COL => true
                 ],
                 "ORDER" => Order::ORDER_DATETIME_COL." ASC"
             ]);
@@ -616,6 +612,7 @@ class RestaurantController extends ControllerBase
     }
     //endregion //TODO
 
+    //region Address
     /**
      * @param $resto int
      * @return array|bool
@@ -635,4 +632,71 @@ class RestaurantController extends ControllerBase
                 Address::ID_COL => $restoAddressId
             ]);
     }
+    //endregion
+
+    //region Social Media
+
+    /**
+     * @param $part RestaurantSocialMedia
+     * @return array|bool
+     */
+    public function addSocialMedia($part)
+    {
+        $lastId = $this->db->insert(RestaurantSocialMedia::TABLE_NAME,
+            RestaurantSocialMedia::toDbArray($part));
+        if($lastId != 0)
+            return $this->getSocialMedia($lastId);
+        else
+            return $this->db->error();
+    }
+
+    /**
+     * @param $id
+     * @return array|bool
+     */
+    public function getSocialMedia($id)
+    {
+        return $this->db->select(RestaurantSocialMedia::TABLE_NAME,
+            "*",
+            [
+                RestaurantSocialMedia::ID_COL => $id
+            ]);
+    }
+
+    public function getAllSocialMedia($restoId)
+    {
+        return $this->db->select(RestaurantSocialMedia::TABLE_NAME,
+            "*",
+            [
+                RestaurantSocialMedia::RESTAURANT_ID_COL => $restoId
+            ]);
+    }
+
+    /**
+     * @param $part RestaurantSocialMedia
+     * @return array
+     */
+    public function updateSocialMedia($part)
+    {
+        $this->db->update(RestaurantSocialMedia::TABLE_NAME,
+            RestaurantSocialMedia::toDbArray($part),
+            [
+                RestaurantSocialMedia::ID_COL => $part->id
+            ]);
+        return $this->db->error();
+    }
+
+    /**
+     * @param $id
+     * @return array
+     */
+    public function deleteSocialMedia($id)
+    {
+        $this->db->delete(RestaurantSocialMedia::TABLE_NAME,
+            [
+                RestaurantSocialMedia::ID_COL => $id
+            ]);
+        return $this->db->error();
+    }
+    //endregion
 }

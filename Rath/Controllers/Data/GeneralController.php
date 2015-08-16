@@ -12,6 +12,8 @@ namespace Rath\Controllers\Data;
 use Rath\Controllers\Data\ControllerBase;
 use Rath\Entities\General\Address;
 use Rath\Entities\General\Partner;
+use Rath\Entities\General\RestaurantSocialMedia;
+use Rath\Entities\General\SocialMediaType;
 use Rath\Slim\Middleware\Authorization;
 
 class GeneralController extends ControllerBase
@@ -153,6 +155,61 @@ class GeneralController extends ControllerBase
         $this->db->delete(Partner::TABLE_NAME,
             [
                 Partner::ID_COL => $partId
+            ]);
+        return $this->db->error();
+    }
+    //endregion
+
+    //region Social Media Types (Management)
+
+    /**
+     * @param $socType SocialMediaType
+     * @return array
+     */
+    public function addSocialMediaType($socType)
+    {
+        return $this->db->insert(SocialMediaType::TABLE_NAME,
+            SocialMediaType::toDbArray($socType));
+    }
+
+    /**
+     * @param $id
+     * @return bool|array
+     */
+    public function getSocialMediaType($id)
+    {
+        return $this->db->get(SocialMediaType::TABLE_NAME,
+            "*",
+            [
+                SocialMediaType::ID_COL => $id
+            ]);
+    }    
+    
+    public function getAllSocialMediaTypes()
+    {
+        return $this->db->select(SocialMediaType::TABLE_NAME,
+            "*");
+    }
+
+    /**
+     * @param $socType SocialMediaType
+     * @return array
+     */
+    public function updateSocialMediaType($socType)
+    {
+        $this->db->update(SocialMediaType::TABLE_NAME,
+            SocialMediaType::toDbArray($socType),
+            [
+                SocialMediaType::ID_COL => $socType->id
+            ]);
+        return $this->db->error();
+    }
+
+    public function deleteSocialMediaType($id)
+    {
+        $this->db->delete(SocialMediaType::TABLE_NAME,
+            [
+                SocialMediaType::ID_COL => $id
             ]);
         return $this->db->error();
     }

@@ -60,13 +60,16 @@ class DashboardController
         $photos = $rc->getPhotos($restoId);
         $address = $rc->getAddress($restaurant[Restaurant::ADDRESS_ID_COL]);
         $paymentMethods = $rc->getRestaurantPaymentMethods($restoId);
-        //TODO: social media
+        $socialMedia = $rc->getAllSocialMedia($restoId);
+        $specialities = $rc->getRestaurantSpecialities($restoId);
 
         return[
             "restaurantInfo" => $restaurant,
             "addressInfo" => $address,
             "openingHours" => $openingHours,
             "paymentMethods" => $paymentMethods,
+            "socialMedia" => $socialMedia,
+            "specialities" => $specialities,
             "photos" => $photos
         ];
     }
