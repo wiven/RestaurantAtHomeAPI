@@ -63,6 +63,6 @@ class DefaultDataController extends ControllerBase
                     SocialMediaType::NAME_COL => "Instagram"
                 ]
             ]);
-        $this->db->error();
+        return $this->db->error();
     }
 }

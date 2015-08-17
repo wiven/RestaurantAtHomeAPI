@@ -9,7 +9,7 @@
 
 namespace Rath\Entities;
 
-class Base
+class DynamicClass
 {
     private $_data;
 

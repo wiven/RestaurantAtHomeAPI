@@ -42,6 +42,11 @@ class DataControllerFactory
     private static $generalController;
 
     /**
+     * @var DefaultDataController
+     */
+    private static $defaultDataController;
+
+    /**
      * @return UserController
      */
     public static function getUserController()
@@ -100,4 +105,16 @@ class DataControllerFactory
             self::$generalController = new GeneralController();
         return self::$generalController;
     }
+
+    /**
+     * @return DefaultDataController
+     */
+    public static function getDefaultDataController()
+    {
+        if(empty(self::$defaultDataController))
+            self::$defaultDataController = new DefaultDataController();
+        return self::$defaultDataController;
+    }
+
+
 }

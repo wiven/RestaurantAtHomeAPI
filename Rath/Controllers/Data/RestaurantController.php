@@ -614,8 +614,9 @@ class RestaurantController extends ControllerBase
 
     //region Address
     /**
-     * @param $resto int
+     * @param $restoAddressId
      * @return array|bool
+     * @internal param int $resto
      */
     public function getAddress($restoAddressId)
     {

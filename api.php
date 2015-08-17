@@ -18,12 +18,14 @@ use Rath\Controllers\Data\DataControllerFactory;
 use Rath\helpers\CrossDomainAjax;
 
 
-//region Slim Init
+//region Init
 \Slim\Slim::registerAutoloader();
 
 $app = new \Slim\Slim();
 $app->setName("RestaurantAtHomeApi");
 $app->add(new \Rath\Slim\Middleware\Authorization()); //TODO; Authentication check
+
+bcscale(2); //Calculation decimals
 //endregion
 
 // Inject as Slim application middleware
@@ -51,7 +53,11 @@ $app->group('/masterdata', function() use ($app){
     })->name(API_MASTERDATA_ROUTE);
 
     $app->get('/echodataobjects', function() use ($app){
-        \Rath\helpers\MasterData::echoObjectContent();
+        CrossDomainAjax::PrintCrossDomainCall(
+            $app,
+            \Rath\helpers\MasterData::echoObjectContent()
+        );
+
     });
 });
 //endregion
@@ -148,6 +154,7 @@ $app->group('/manage', function() use ($app){
     $prod = DataControllerFactory::getProductController();
     $promo = DataControllerFactory::getPromotionController();
     $gen = DataControllerFactory::getGeneralController();
+    $default = DataControllerFactory::getDefaultDataController();
 
     $app->group('/kitchentype' , function() use ($app,$resto){
         $app->get('/:id', function($id) use ($app,$resto){
@@ -396,6 +403,23 @@ $app->group('/manage', function() use ($app){
             CrossDomainAjax::PrintCrossDomainCall(
                 $app,
                 $gen->deleteSocialMediaType($id)
+            );
+        });
+    });
+
+    $app->group('/defaults' , function() use ($app, $default) {
+
+        $app->post('/orderstatus', function () use ($app, $default) {
+            CrossDomainAjax::PrintCrossDomainCall(
+                $app,
+                $default->insertOrderStatus()
+            );
+        });
+
+        $app->post('/socialmediatypes', function () use ($app, $default) {
+            CrossDomainAjax::PrintCrossDomainCall(
+                $app,
+                $default->insertSocialMediaTypes()
             );
         });
     });
@@ -820,7 +844,77 @@ $app->group('/promotion', function () use ($app) {
 });
 //endregion
 
+//region Order
+$app->group('/order', function() use ($app){
+    $oc = DataControllerFactory::getOrderController();
 
+    $app->get('/:id', function($id) use ($app,$oc){
+        CrossDomainAjax::PrintCrossDomainCall(
+            $app,
+            $oc->getOrderWithLines($id)
+        );
+    });
+
+    $app->post('/', function() use ($app,$oc){
+        $o = json_decode($app->request->getBody());
+        CrossDomainAjax::PrintCrossDomainCall(
+            $app,
+            $oc->createOrder($o)
+        );
+    });
+
+    $app->put('/', function() use ($app,$oc){
+        $o = json_decode($app->request->getBody());
+        CrossDomainAjax::PrintCrossDomainCall(
+            $app,
+            $oc->updateOrder($o)
+        );
+    });
+
+    $app->get('/delete/:id', function($id) use ($app,$oc){
+        CrossDomainAjax::PrintCrossDomainCall(
+            $app,
+            $oc->deleteOrder($id)
+        );
+    });
+
+    $app->group('/line', function() use ($app,$oc){
+        $app->get('/:id', function($id) use ($app,$oc){
+            CrossDomainAjax::PrintCrossDomainCall(
+                $app,
+                $oc->getOrderDetailLine($id)
+            );
+        });
+
+        $app->post('/', function() use ($app,$oc){
+            $o = json_decode($app->request->getBody());
+            CrossDomainAjax::PrintCrossDomainCall(
+                $app,
+                $oc->addOrderDetailLine($o)
+            );
+        });
+
+        $app->put('/', function() use ($app,$oc){
+            $o = json_decode($app->request->getBody());
+            CrossDomainAjax::PrintCrossDomainCall(
+                $app,
+                $oc->updateOrderDetailLine($o)
+            );
+        });
+
+        $app->get('/delete/:id', function($id) use ($app,$oc){
+            CrossDomainAjax::PrintCrossDomainCall(
+                $app,
+                $oc->deleteOrderDetailLine($id)
+            );
+        });
+    });
+});
+//endregion
+
+
+//region Front-end data provider
+//region Dashboard
 $app->group('/dashboard', function() use ($app){
     $dash = ControllerFactory::getDashboardController();
 
@@ -845,7 +939,16 @@ $app->group('/dashboard', function() use ($app){
         );
     });
 
+    $app->get('/products/:restoId/:skip/:top',function($restoId,$skip,$top) use ($app,$dash){
+        CrossDomainAjax::PrintCrossDomainCall(
+            $app,
+            $dash->getProductContent($restoId,$skip,$top)
+        );
+    });
 });
+//endregion
+//endregion
+
 
 
 

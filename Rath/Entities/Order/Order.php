@@ -43,7 +43,7 @@ class Order
      * @param $order Order
      * @return array
      */
-    public function toDbArray($order)
+    public static function toDbArray($order)
     {
         $data =[
             Order::USER_ID_COL => $order->userId,
@@ -53,9 +53,11 @@ class Order
             Order::ORDER_DATETIME_COL => $order->orderDateTime,
             Order::COMMENT_COL => $order->comment,
             Order::ADDRESS_ID_COL => $order->addressId,
-            Order::COUPON_ID => $order->couponId,
             Order::CREATION_DATE_TIME_COL => date("Y-m-d H:i:s")
         ];
+
+        if(!empty($order->couponId))
+            $data[Order::COUPON_ID] = $order->couponId;
 
         if(!empty($order->submitted))
             $data[Order::SUBMITTED_COL] = $order->submitted;

@@ -9,9 +9,9 @@
 
 namespace Rath\Entities\User;
 
-use Rath\Entities\Base;
+use Rath\Entities\DynamicClass;
 
-class User extends Base
+class User extends DynamicClass
 {
     const TABLE_NAME = "user";
 

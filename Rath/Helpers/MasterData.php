@@ -10,16 +10,17 @@ namespace Rath\helpers;
 
 use Rath\Entities\General\Address;
 use Rath\Entities\General\Partner;
-use Rath\Entities\General\RestaurantSocialMedia;
+use Rath\Entities\Order\Order;
+use Rath\Entities\Order\OrderDetail;
 use Rath\Entities\Product\Product;
 use Rath\Entities\Product\ProductStock;
 use Rath\Entities\Promotion\Promotion;
 use Rath\Entities\Restaurant\Holiday;
 use Rath\Entities\Restaurant\OpeningHours;
 use Rath\Entities\Restaurant\Restaurant;
+use Rath\Entities\Restaurant\RestaurantSocialMedia;
 use Rath\Entities\User\User;
 use Rath\Entities\User\UserPermission;
-use Rath\Controllers\UserController;
 use Rath\Controllers\UserPermissionController;
 use Exception;
 
@@ -103,8 +104,11 @@ class MasterData
         UserPermissionController::InsertUserPermissionSets($permissions);
     }
 
+    /**
+     * @return array
+     */
     public static function echoObjectContent(){
-        echo json_encode([
+        return [
             "Address Object",
             MasterData::echoAddress(),
             "Restaurant Object",
@@ -122,9 +126,10 @@ class MasterData
             "Partner Object",
             MasterData::echoPartner(),
             "Socialmedia Object",
-            MasterData::echoSocialMedia()
-        ]);
-
+            MasterData::echoSocialMedia(),
+            "Order + Detail Object",
+            MasterData::echoOrder()
+        ];
     }
 
     private static function echoAddress(){
@@ -226,5 +231,30 @@ class MasterData
         $soc->socialmediatypeId = 1;
         $soc->url = "Url to socialmedia page";
         return $soc;
+    }
+
+    private static function echoOrder()
+    {
+        $orderDetail = new OrderDetail();
+        $orderDetail->productId = 2;
+        $orderDetail->unitPrice = 5;
+        $orderDetail->quantity = 2;
+        $orderDetail->lineTotal = 10;
+
+        $order = new Order();
+        $order->userId = 1;
+        $order->restaurantId = 4;
+        $order->addressId = 2;
+        $order->comment = "Extra saus";
+        $order->amount = 15.59;
+        $order->creationDateTime = General::getCurrentDateTime();
+        $order->orderStatusId = 10;
+        $order->submitted = false;
+        $order->lines = [
+            $orderDetail,
+            $orderDetail
+        ];
+
+        return $order;
     }
 }

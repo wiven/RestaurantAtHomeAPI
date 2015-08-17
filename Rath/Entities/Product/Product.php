@@ -40,7 +40,7 @@ class Product
      * @param $product Product
      * @return array
      */
-    static function productToDbArray($product){
+    public static function toDbArray($product){
         $data =  [
             Product::RESTAURANT_ID_COL => $product->restaurantId,
             Product::PRODUCT_TYPE_ID => $product->producttypeId,
@@ -60,7 +60,12 @@ class Product
         if(!empty($product->loyaltyPoints))
             $data[self::LOYALTY_POINTS_COL] = $product->loyaltyPoints;
 
-        return data;
+        return $data;
+    }
+
+    public static function toObject(Array $array)
+    {
+
     }
 
 }

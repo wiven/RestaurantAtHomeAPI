@@ -31,10 +31,10 @@ class OrderDetail
      * @param $od OrderDetail
      * @return array
      */
-    public function toDbArray($od)
+    public static function toDbArray($od)
     {
         return [
-            OrderDetail::ORDER_ID_COL => $od->id,
+            OrderDetail::ORDER_ID_COL => $od->orderId,
             OrderDetail::PRODUCT_ID_COL => $od->productId,
             OrderDetail::QUANTITY_COL => $od->quantity,
             OrderDetail::UNIT_PRICE_COL => $od->unitPrice,

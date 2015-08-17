@@ -26,8 +26,7 @@ class ProductController extends ControllerBase
      * @return array|bool
      */
     public function getProduct($id){
-        return $this->db->select(Product::TABLE_NAME,
-
+        return $this->db->get(Product::TABLE_NAME,
                 "*"
             ,
             [
@@ -36,9 +35,9 @@ class ProductController extends ControllerBase
         );
     }
 
-    public function getRestaurantProducts($restoId, $count, $skip)
+    public function getRestaurantProducts($restoId, $skip, $top)
     {
-        return $this->db->select(Product::TABLE_NAME,
+         return $this->db->select(Product::TABLE_NAME,
             [
                 Product::ID_COL,
                 Product::NAME_COL,
@@ -46,7 +45,7 @@ class ProductController extends ControllerBase
             ],
             [
                 Product::RESTAURANT_ID_COL => $restoId,
-                "LIMIT" => [$skip,$count]
+                "LIMIT" => [$skip,$top]
             ]);
     }
 
@@ -56,7 +55,7 @@ class ProductController extends ControllerBase
      */
     public function addProduct($product){
         $lastId = $this->db->insert(Product::TABLE_NAME,
-            Product::productToDbArray($product)
+            Product::toDbArray($product)
         );
         if($lastId != 0)
             return $this->getProduct($lastId);
@@ -70,7 +69,7 @@ class ProductController extends ControllerBase
      */
     public function updateProduct($product){
         $this->db->update(Product::TABLE_NAME,
-            Product::productToDbArray($product),
+            Product::toDbArray($product),
             [
                 Product::ID_COL => $product->id
             ]
