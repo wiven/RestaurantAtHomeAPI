@@ -384,38 +384,44 @@ class RestaurantController extends ControllerBase
     //endregion
 
     //region Promotions
-    public function getActivePromotions($restoId){
+    public function getActivePromotions($restoId, $skip,$top){
         /** @noinspection SqlDialectInspection */
         $date = $this->db->quote(General::getCurrentDate());
         $query =
-            "SELECT promotion.id,promotion.name,toDate,fromDate, (select count(quantity) from promotionusagehistory".
+            "SELECT promotion.id,promotion.name,toDate,fromDate, (select sum(quantity) from promotionusagehistory".
             " WHERE promotionId = promotion.id) as 'usage' FROM promotion".
             " INNER JOIN promotiontype ON promotion.promotiontypeId = promotiontype.id".
             ' WHERE restaurantId = '.$this->db->quote($restoId).
             ' AND fromDate <= '.$date.
-            ' AND toDate >= '.$date;
+            ' AND toDate >= '.$date.
+            'LIMIT '.$skip.",".$top;
         return $this->db->query($query)->fetchAll(PDO::FETCH_ASSOC);
+    }
 
-//        return $this->db->select(Promotion::TABLE_NAME,
-//            [
-//                "[><]".PromotionType::TABLE_NAME =>
-//                    [
-//                        Promotion::PROMOTION_TYPE_ID_COL => PromotionType::ID_COL
-//                    ]
-//            ],
-//            [
-//                Promotion::TABLE_NAME.".".Promotion::ID_COL,
-//                Promotion::TABLE_NAME.".".PromotionType::NAME_COL,
-//                Promotion::TO_DATE_COL,
-//            ],
-//            [
-//                "AND"=>
-//                    [
-//                        Promotion::RESTAURANT_ID_COL => $restoId,
-//                        Promotion::FROM_DATE_COL."[<=]" => General::getCurrentDate(),
-//                        Promotion::TO_DATE_COL."[>=]" => General::getCurrentDate()
-//                    ]
-//            ]);
+    public function getCommingPromotions($restoId, $skip,$top){
+        /** @noinspection SqlDialectInspection */
+        $date = $this->db->quote(General::getCurrentDate());
+        $query =
+            "SELECT promotion.id,promotion.name,toDate,fromDate, (select sum(quantity) from promotionusagehistory".
+            " WHERE promotionId = promotion.id) as 'usage' FROM promotion".
+            " INNER JOIN promotiontype ON promotion.promotiontypeId = promotiontype.id".
+            ' WHERE restaurantId = '.$this->db->quote($restoId).
+            ' AND fromDate >= '.$date.
+            'LIMIT '.$skip.",".$top;
+        return $this->db->query($query)->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function getPassedPromotions($restoId, $skip,$top){
+        /** @noinspection SqlDialectInspection */
+        $date = $this->db->quote(General::getCurrentDate());
+        $query =
+            "SELECT promotion.id,promotion.name,toDate,fromDate, (select sum(quantity) from promotionusagehistory".
+            " WHERE promotionId = promotion.id) as 'usage' FROM promotion".
+            " INNER JOIN promotiontype ON promotion.promotiontypeId = promotiontype.id".
+            ' WHERE restaurantId = '.$this->db->quote($restoId).
+            ' AND toDate <= '.$date.
+            'LIMIT '.$skip.",".$top;
+        return $this->db->query($query)->fetchAll(PDO::FETCH_ASSOC);
     }
 
     public function getPromotions($restoId,$count, $skip)
@@ -463,34 +469,25 @@ class RestaurantController extends ControllerBase
      * @param $restoId
      * @return array|bool
      */
-    public function getOrdersForToday($restoId,$statusStart,$statusEnd){
-        return $this->db->select(Order::TABLE_NAME,
-            [
-                "[><]".User::TABLE_NAME =>
-                    [
-                        Order::USER_ID_COL => User::ID_COL
-                    ]
-            ],
-            [
-                Order::TABLE_NAME.".".Order::ID_COL,
-                User::NAME_COL,
-                User::SURNAME_COL,
-                Order::ORDER_DATETIME_COL,
-                Order::AMOUNT_COL
-            ],
-            [
-                "AND"=> [
-                    Order::RESTAURANT_ID_COL => $restoId,
-                    Order::ORDER_STATUS_ID_COL."[<>]" => [$statusStart,$statusEnd],
-                    Order::ORDER_DATETIME_COL."[><]" =>
-                        [
-                            date(General::dateTimeFormat,mktime(0,0,0)),
-                            date(General::dateTimeFormat,mktime(23,59,59)),
-                        ],
-                    Order::SUBMITTED_COL => true
-                ],
-                "ORDER" => Order::ORDER_DATETIME_COL." ASC"
-            ]);
+    public function getOrders($restoId,$statusStart,$statusEnd,$skip,$top,$filterToday = true){
+        $dayStart = $this->db->quote(date(General::dateTimeFormat,mktime(0,0,0)));
+        $dayEnd = $this->db->quote(date(General::dateTimeFormat,mktime(23,59,59)));
+        $query =
+            "SELECT o.id, name, surname, orderDateTime,amount,
+            (SELECT sum(quantity) from orderDetail where orderId = o.id) as 'items',
+            (select count(slots) from orderDetail as od
+              INNER join product on od.productId = product.id
+              where od.OrderId = o.id) as 'slots'
+            FROM rathdev.order as o
+            INNER JOIN user ON o.userId = user.id WHERE
+            restaurantId = ".$this->db->quote($restoId)."
+            AND (orderStatusId BETWEEN ".$this->db->quote($statusStart)." AND ".$this->db->quote($statusEnd).")";
+         if($filterToday)
+            $query .= "AND (orderDateTime BETWEEN ".$dayStart." AND ".$dayEnd.")";
+         $query .= "AND submitted = 1
+            ORDER BY orderDateTime ASC
+            LIMIT ".$skip.",".$top;
+        return $this->db->query($query)->fetchAll(PDO::FETCH_ASSOC);
     }
     //endregion
 
@@ -616,7 +613,6 @@ class RestaurantController extends ControllerBase
     /**
      * @param $restoAddressId
      * @return array|bool
-     * @internal param int $resto
      */
     public function getAddress($restoAddressId)
     {

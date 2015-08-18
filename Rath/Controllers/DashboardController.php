@@ -21,26 +21,19 @@ class DashboardController
     public function getNewOrderCount($restoId)
     {
         $rc = DataControllerFactory::getRestaurantController();
-        return $rc->getNewOrderCount($restoId);
+        return [
+            "count" => $rc->getNewOrderCount($restoId)
+        ];
     }
 
     public function getOverviewContent($restoId)
     {
         $rc = DataControllerFactory::getRestaurantController();
-        $promo = DataControllerFactory::getPromotionController();
         $gen = DataControllerFactory::getGeneralController();
 
-        //Geather promotion info
-        $activePromo = $rc->getActivePromotions($restoId);
-//        if(!empty($activePromo))
-//            foreach ($activePromo as $promotion) {
-//                $promotion["usage"] = $promo->getPromotionUsageCount($promotion[Promotion::ID_COL]);
-//            }
-//        else
-//            $activePromo = [];
-
         $newOrderCount = $rc->getNewOrderCount($restoId);
-        $openOrdersForToday = $rc->getOrdersForToday($restoId,OrderStatus::val_Accepted,OrderStatus::val_OnRoute);
+        $activePromo = $rc->getActivePromotions($restoId,0,5);
+        $openOrdersForToday = $rc->getOrders($restoId,OrderStatus::val_Accepted,OrderStatus::val_OnRoute,0,5);
         $partners = $gen->getAllPartnersPaged(0,4);
 
         return[
@@ -74,17 +67,53 @@ class DashboardController
         ];
     }
 
-    public function getProductContent($restoId,$count,$skip)
+    public function getProductContent($restoId,$skip,$top)
     {
         //TODO: add filter
         $prod = DataControllerFactory::getProductController();
-        return $prod->getRestaurantProducts($restoId,$count,$skip);
+        return [
+            "products" => $prod->getRestaurantProducts($restoId,$skip,$top)
+            ];
     }
 
-    public function getPromotionContent($restoId, $count, $skip)
+    public function getOrderContent($restoId)
     {
         $rc = DataControllerFactory::getRestaurantController();
-        return $rc->getPromotions($restoId,$count,$skip);
+
+        $newOrders = $rc->getOrders($restoId,OrderStatus::val_New,OrderStatus::val_New,0,5,false);
+        $inProcess = $rc->getOrders($restoId,OrderStatus::val_Accepted,OrderStatus::val_InProgress,0,5,false);
+        $ready = $rc->getOrders($restoId,OrderStatus::val_Ready,OrderStatus::val_OnRoute,0,5,false);
+        $finished = $rc->getOrders($restoId,OrderStatus::val_Finished,OrderStatus::val_Finished,0,5,false);
+
+        return[
+            "new" => $newOrders,
+            "inProgress" => $inProcess,
+            "ready" => $ready,
+            "finished" => $finished
+        ];
+    }
+
+    public function getPromotionContent($restoId, $skip,$top)
+    {
+        $rc = DataControllerFactory::getRestaurantController();
+
+        $active = $rc->getActivePromotions($restoId,$skip,$top);
+        $comming = $rc->getCommingPromotions($restoId,$skip,$top);
+        $passed = $rc->getPassedPromotions($restoId,$skip,$top);
+
+        return [
+            "passed" => $passed,
+            "active" => $active,
+            "comming" => $comming
+        ];
+    }
+
+    public function getPartners($skip,$top)
+    {
+        $gen = DataControllerFactory::getGeneralController();
+        return[
+            "partners" => $gen->getAllPartnersPaged($skip,$top)
+        ];
     }
 
 }

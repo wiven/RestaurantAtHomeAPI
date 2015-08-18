@@ -123,12 +123,12 @@ class GeneralController extends ControllerBase
             "*");
     }
 
-    public function getAllPartnersPaged($count,$skip)
+    public function getAllPartnersPaged($skip,$top)
     {
         return $this->db->select(Partner::TABLE_NAME,
             "*",
             [
-                "LIMIT" => [$count,$skip]
+                "LIMIT" => [$skip,$top]
             ]);
     }
 

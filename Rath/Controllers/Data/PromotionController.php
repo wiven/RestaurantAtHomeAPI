@@ -10,6 +10,7 @@ namespace Rath\Controllers\Data;;
 
 
 use Rath\Controllers\Data\ControllerBase;
+use Rath\Entities\Product\Product;
 use Rath\Entities\Promotion\Promotion;
 use Rath\Entities\Promotion\PromotionType;
 use Rath\Entities\Promotion\PromotionUsageHistory;
@@ -20,10 +21,21 @@ class PromotionController Extends ControllerBase
     //region Promotions
     public function getPromotion($id)
     {
-        return $this->db->select(Promotion::TABLE_NAME,"*",
+        $promo = $this->db->get(Promotion::TABLE_NAME,"*",
             [
                 Promotion::ID_COL => $id
             ]);
+        $promo["products"] = $this->db->select(
+            Product::TABLE_NAME,
+            [
+                Product::ID_COL,
+                Product::NAME_COL
+            ],
+            [
+                Product::PROMOTION_ID_COL => $promo[Promotion::ID_COL]
+            ]
+        );
+        return $promo;
     }
 
     /**
@@ -155,4 +167,5 @@ class PromotionController Extends ControllerBase
         return $this->db->error();
     }
     //endregion
+
 }

@@ -945,6 +945,27 @@ $app->group('/dashboard', function() use ($app){
             $dash->getProductContent($restoId,$skip,$top)
         );
     });
+
+    $app->get('/orders/:restoId',function($restoId) use ($app,$dash){
+        CrossDomainAjax::PrintCrossDomainCall(
+            $app,
+            $dash->getOrderContent($restoId)
+        );
+    });
+
+    $app->get('/promotions/:restoId/:skip/:top',function($restoId,$skip,$top) use ($app,$dash){
+        CrossDomainAjax::PrintCrossDomainCall(
+            $app,
+            $dash->getPromotionContent($restoId,$skip,$top)
+        );
+    });
+
+    $app->get('/partners/:skip/:top',function($skip,$top) use ($app,$dash){
+        CrossDomainAjax::PrintCrossDomainCall(
+            $app,
+            $dash->getPartners($skip,$top)
+        );
+    });
 });
 //endregion
 //endregion
