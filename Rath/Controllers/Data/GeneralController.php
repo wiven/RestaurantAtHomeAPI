@@ -9,10 +9,8 @@
 namespace Rath\Controllers\Data;
 
 
-use Rath\Controllers\Data\ControllerBase;
 use Rath\Entities\General\Address;
 use Rath\Entities\General\Partner;
-use Rath\Entities\General\RestaurantSocialMedia;
 use Rath\Entities\General\SocialMediaType;
 use Rath\Slim\Middleware\Authorization;
 
@@ -31,7 +29,9 @@ class GeneralController extends ControllerBase
                 Address::NUMBER_COL,
                 Address::ADDITION_COL,
                 Address::POSTCODE_COL,
-                Address::CITY_COL
+                Address::CITY_COL,
+                Address::LATITUDE_COL,
+                Address::LONGITUDE_COL
             ],
             [
                 Address::ID_COL => $id

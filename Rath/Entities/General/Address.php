@@ -20,6 +20,8 @@ class Address
     const POSTCODE_COL = "postcode";
     const CITY_COL = "city";
     const USER_ID_COL = "userId";
+    const LATITUDE_COL = "latitude";
+    const LONGITUDE_COL = "longitude";
 
     public $id;
     public $street;
@@ -27,6 +29,9 @@ class Address
     public $addition;
     public $postcode;
     public $city;
+    public $latitude;
+    public $longitude;
+
     /**
      * @var int
      */
@@ -34,6 +39,7 @@ class Address
 
     /**
      * @param $address Address
+     * @return array
      */
     public static function toDbArray($address){
         $array = [
@@ -41,7 +47,9 @@ class Address
             Address::NUMBER_COL => $address->number,
             Address::ADDITION_COL => $address->addition,
             Address::POSTCODE_COL => $address->postcode,
-            Address::CITY_COL => $address->city
+            Address::CITY_COL => $address->city,
+            Address::LATITUDE_COL => $address->latitude,
+            Address::LONGITUDE_COL => $address->longitude
         ];
         if(!empty($address->userId))
             $array[Address::USER_ID_COL] = $address->userId;
