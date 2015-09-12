@@ -9,7 +9,7 @@
 namespace Rath\Controllers\Data;
 
 
-use Rath\helpers\MedooFactory;
+use Rath\Helpers\MedooFactory;
 use Rath\Libraries\medoo;
 
 abstract class ControllerBase

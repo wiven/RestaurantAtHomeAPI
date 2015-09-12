@@ -7,15 +7,19 @@
 if (!defined('APP_PATH'))
     define('APP_PATH', realpath(__DIR__ ));
 
+// available mode:
+// LOCAL
+// APIDEV
+
 if(!defined('APP_MODE'))
-    define('APP_MODE', 'LOCAL');
+    define('APP_MODE', 'APIDEV');
 //endregion
 
 require_once __DIR__.'/vendor/autoload.php';
 
 use Rath\Controllers\ControllerFactory;
 use Rath\Controllers\Data\DataControllerFactory;
-use Rath\helpers\CrossDomainAjax;
+use Rath\Helpers\CrossDomainAjax;
 
 
 //region Init
