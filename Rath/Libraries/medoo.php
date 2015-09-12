@@ -183,7 +183,7 @@ class medoo
 		}
 		return implode($stack, ',');
 	}
-	protected function array_quote($array)
+	public function array_quote($array)
 	{
 		$temp = array();
 		foreach ($array as $value)

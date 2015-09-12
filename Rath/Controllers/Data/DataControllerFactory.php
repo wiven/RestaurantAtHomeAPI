@@ -47,6 +47,11 @@ class DataControllerFactory
     private static $defaultDataController;
 
     /**
+     * @var FilterFieldController
+     */
+    private static $filterFieldController;
+
+    /**
      * @return UserController
      */
     public static function getUserController()
@@ -116,5 +121,11 @@ class DataControllerFactory
         return self::$defaultDataController;
     }
 
+    public static function getFilterFieldController()
+    {
+        if(empty(self::$filterFieldController))
+            self::$filterFieldController = new FilterFieldController();
+        return self::$filterFieldController;
+    }
 
 }

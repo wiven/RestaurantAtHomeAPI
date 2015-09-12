@@ -26,5 +26,19 @@ class ControllerFactory
         return self::$dashboardController;
     }
 
+    /**
+     * @var SearchController
+     */
+    private static $searchController;
+
+    /**
+     * @return SearchController
+     */
+    public static function getSearchController()
+    {
+        if(empty(self::$searchController))
+            self::$searchController = new SearchController();
+        return self::$searchController;
+    }
 
 }

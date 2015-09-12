@@ -939,10 +939,10 @@ $app->group('/dashboard', function() use ($app){
         );
     });
 
-    $app->get('/products/:restoId/:skip/:top',function($restoId,$skip,$top) use ($app,$dash){
+    $app->get('/products/:restoId/:skip/:top/:query',function($restoId,$skip,$top,$query) use ($app,$dash){
         CrossDomainAjax::PrintCrossDomainCall(
             $app,
-            $dash->getProductContent($restoId,$skip,$top)
+            $dash->getProductContent($restoId,$skip,$top,$query)
         );
     });
 
