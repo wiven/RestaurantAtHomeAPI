@@ -656,6 +656,15 @@ $app->group('/restaurant', function() use ($app){
             );
         });
     });
+
+    $app->group('/product', function() use ($app,$resto){
+        $app->get('/all/:id', function($id) use ($app,$resto){
+            CrossDomainAjax::PrintCrossDomainCall(
+                $app,
+                $resto->getProductsAll($id)
+            );
+        });
+    });
 });
 //endregion
 

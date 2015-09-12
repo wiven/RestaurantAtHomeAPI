@@ -69,10 +69,9 @@ class DashboardController
 
     public function getProductContent($restoId,$skip,$top,$query)
     {
-        //TODO: add filter
-        $prod = DataControllerFactory::getProductController();
+        $resto = DataControllerFactory::getRestaurantController();
         return [
-            "products" => $prod->getRestaurantProducts($restoId,$skip,$top,$query)
+            "products" => $resto->getProducts($restoId,$skip,$top,$query)
             ];
     }
 

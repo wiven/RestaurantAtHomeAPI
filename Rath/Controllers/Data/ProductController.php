@@ -36,25 +36,6 @@ class ProductController extends ControllerBase
         );
     }
 
-    public function getRestaurantProducts($restoId, $skip, $top,$query)
-    {
-        $search = ControllerFactory::getSearchController();
-        $where = $search->getFilterFieldsToMedooWhereArray($query);
-        $where["AND"][Product::RESTAURANT_ID_COL] = $restoId;
-        $where["LIMIT"] = [$skip,$top];
-        //var_dump($where);
-
-        $result = $this->db->select(Product::TABLE_NAME,
-            [
-                Product::ID_COL,
-                Product::NAME_COL,
-                Product::PHOTO_COL
-            ],
-            $where);
-        var_dump($this->db->last_query());
-        return $result;
-    }
-
     /**
      * @param $product Product
      * @return array|bool

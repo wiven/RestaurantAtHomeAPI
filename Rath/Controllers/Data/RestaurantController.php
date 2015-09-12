@@ -9,10 +9,12 @@
 namespace Rath\Controllers\Data;
 
 use PDO;
+use Rath\Controllers\ControllerFactory;
 use Rath\Controllers\Data\ControllerBase;
 use Rath\Entities\General\Address;
 use Rath\Entities\Order\Order;
 use Rath\Entities\Order\OrderStatus;
+use Rath\Entities\Product\Product;
 use Rath\Entities\Promotion\Promotion;
 use Rath\Entities\Promotion\PromotionType;
 use Rath\Entities\Restaurant\Holiday;
@@ -696,4 +698,36 @@ class RestaurantController extends ControllerBase
         return $this->db->error();
     }
     //endregion
+
+    public function getProducts($restoId, $skip, $top,$query)
+    {
+        $search = ControllerFactory::getSearchController();
+        $where = $search->getFilterFieldsToMedooWhereArray($query);
+        $where["AND"][Product::RESTAURANT_ID_COL] = $restoId;
+        $where["LIMIT"] = [$skip,$top];
+        //var_dump($where);
+
+        $result = $this->db->select(Product::TABLE_NAME,
+            [
+                Product::ID_COL,
+                Product::NAME_COL,
+                Product::PHOTO_COL
+            ],
+            $where);
+        return $result;
+    }
+
+    public function getProductsAll($restoId)
+    {
+        $result = $this->db->select(Product::TABLE_NAME,
+            [
+                Product::ID_COL,
+                Product::NAME_COL
+            ],
+            [
+                Product::RESTAURANT_ID_COL => $restoId
+            ]);
+
+        return $result;
+    }
 }
