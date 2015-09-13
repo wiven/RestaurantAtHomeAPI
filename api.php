@@ -11,8 +11,14 @@ if (!defined('APP_PATH'))
 // LOCAL
 // APIDEV
 
-if(!defined('APP_MODE'))
-    define('APP_MODE', 'APIDEV');
+if(!defined('APP_MODE')){
+    if(strpos($_SERVER["HTTP_HOST"],"localhost") !== false)
+        define('APP_MODE', 'LOCAL');
+    else
+        define('APP_MODE', 'APIDEV');
+}
+var_dump(APP_MODE);
+var_dump($_SERVER["HTTP_HOST"]);
 //endregion
 
 require_once __DIR__.'/vendor/autoload.php';
@@ -20,7 +26,6 @@ require_once __DIR__.'/vendor/autoload.php';
 use Rath\Controllers\ControllerFactory;
 use Rath\Controllers\Data\DataControllerFactory;
 use Rath\Helpers\CrossDomainAjax;
-
 
 //region Init
 \Slim\Slim::registerAutoloader();
