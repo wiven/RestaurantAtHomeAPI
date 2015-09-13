@@ -25,6 +25,7 @@ require_once __DIR__.'/vendor/autoload.php';
 
 use Rath\Controllers\ControllerFactory;
 use Rath\Controllers\Data\DataControllerFactory;
+use Rath\Entities\Order\OrderStatus;
 use Rath\Helpers\CrossDomainAjax;
 
 //region Init
@@ -674,6 +675,60 @@ $app->group('/restaurant', function() use ($app){
             );
         });
     });
+
+    $app->group('/order', function() use ($app,$resto){
+        $app->get('/new/:id/:skip/:top', function($id,$skip,$top) use ($app,$resto){
+            CrossDomainAjax::PrintCrossDomainCall(
+                $app,
+                $resto->getOrders($id,OrderStatus::val_New,OrderStatus::val_New,$skip,$top,false)
+            );
+        });
+
+        $app->get('/inprogress/:id/:skip/:top', function($id,$skip,$top) use ($app,$resto){
+            CrossDomainAjax::PrintCrossDomainCall(
+                $app,
+                $resto->getOrders($id,OrderStatus::val_Accepted,OrderStatus::val_InProgress,$skip,$top,false)
+            );
+        });
+
+        $app->get('/ready/:id/:skip/:top', function($id,$skip,$top) use ($app,$resto){
+            CrossDomainAjax::PrintCrossDomainCall(
+                $app,
+                $resto->getOrders($id,OrderStatus::val_Ready,OrderStatus::val_OnRoute,$skip,$top,false)
+            );
+        });
+
+        $app->get('/finished/:id/:skip/:top', function($id,$skip,$top) use ($app,$resto){
+            CrossDomainAjax::PrintCrossDomainCall(
+                $app,
+                $resto->getOrders($id,OrderStatus::val_Finished,OrderStatus::val_Finished,$skip,$top,false)
+            );
+        });
+    });
+
+    $app->group('/promotion', function() use ($app,$resto){
+        $app->get('/passed/:id/:skip/:top', function($id,$skip,$top) use ($app,$resto){
+            CrossDomainAjax::PrintCrossDomainCall(
+                $app,
+                $resto->getPassedPromotions($id,$skip,$top)
+            );
+        });
+
+        $app->get('/active/:id/:skip/:top', function($id,$skip,$top) use ($app,$resto){
+            CrossDomainAjax::PrintCrossDomainCall(
+                $app,
+                $resto->getActivePromotions($id,$skip,$top)
+            );
+        });
+
+        $app->get('/comming/:id/:skip/:top', function($id,$skip,$top) use ($app,$resto){
+            CrossDomainAjax::PrintCrossDomainCall(
+                $app,
+                $resto->getCommingPromotions($id,$skip,$top)
+            );
+        });
+    });
+
 });
 //endregion
 
