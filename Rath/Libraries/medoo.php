@@ -19,7 +19,7 @@ class medoo
 	// General
 	protected $database_type;
 	protected $charset;
-	protected $database_name;
+	public $database_name;
 	// For MySQL, MariaDB, MSSQL, Sybase, PostgreSQL, Oracle
 	protected $server;
 	protected $username;

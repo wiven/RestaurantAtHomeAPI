@@ -13,6 +13,7 @@ use Rath\Controllers\ControllerFactory;
 use Rath\Controllers\Data\ControllerBase;
 use Rath\Entities\General\Address;
 use Rath\Entities\Order\Order;
+use Rath\Entities\Order\OrderDetail;
 use Rath\Entities\Order\OrderStatus;
 use Rath\Entities\Product\Product;
 use Rath\Entities\Promotion\Promotion;
@@ -391,7 +392,7 @@ class RestaurantController extends ControllerBase
         $date = $this->db->quote(General::getCurrentDate());
         $query =
             "SELECT promotion.id,promotion.name,toDate,fromDate, (select sum(quantity) from promotionusagehistory".
-            " WHERE promotionId = promotion.id) as 'usage' FROM promotion".
+            " WHERE promotionId = promotion.id) as 'usage' FROM ".Promotion::TABLE_NAME.
             " INNER JOIN promotiontype ON promotion.promotiontypeId = promotiontype.id".
             ' WHERE restaurantId = '.$this->db->quote($restoId).
             ' AND fromDate <= '.$date.
@@ -405,7 +406,7 @@ class RestaurantController extends ControllerBase
         $date = $this->db->quote(General::getCurrentDate());
         $query =
             "SELECT promotion.id,promotion.name,toDate,fromDate, (select sum(quantity) from promotionusagehistory".
-            " WHERE promotionId = promotion.id) as 'usage' FROM promotion".
+            " WHERE promotionId = promotion.id) as 'usage' FROM ".Promotion::TABLE_NAME.
             " INNER JOIN promotiontype ON promotion.promotiontypeId = promotiontype.id".
             ' WHERE restaurantId = '.$this->db->quote($restoId).
             ' AND fromDate >= '.$date.
@@ -418,7 +419,7 @@ class RestaurantController extends ControllerBase
         $date = $this->db->quote(General::getCurrentDate());
         $query =
             "SELECT promotion.id,promotion.name,toDate,fromDate, (select sum(quantity) from promotionusagehistory".
-            " WHERE promotionId = promotion.id) as 'usage' FROM promotion".
+            " WHERE promotionId = promotion.id) as 'usage' FROM ".Promotion::TABLE_NAME.
             " INNER JOIN promotiontype ON promotion.promotiontypeId = promotiontype.id".
             ' WHERE restaurantId = '.$this->db->quote($restoId).
             ' AND toDate <= '.$date.
@@ -476,20 +477,26 @@ class RestaurantController extends ControllerBase
         $dayEnd = $this->db->quote(date(General::dateTimeFormat,mktime(23,59,59)));
         $query =
             "SELECT o.id, name, surname, orderDateTime,amount,
-            (SELECT sum(quantity) from orderDetail where orderId = o.id) as 'items',
-            (select count(slots) from orderDetail as od
+            (SELECT sum(quantity) from ".OrderDetail::TABLE_NAME." where orderId = o.id) as 'items',
+            (select count(slots) from ".OrderDetail::TABLE_NAME." as od
               INNER join product on od.productId = product.id
               where od.OrderId = o.id) as 'slots'
-            FROM rathdev.order as o
+            FROM ".$this->db->database_name.".".Order::TABLE_NAME." as o
             INNER JOIN user ON o.userId = user.id WHERE
             restaurantId = ".$this->db->quote($restoId)."
             AND (orderStatusId BETWEEN ".$this->db->quote($statusStart)." AND ".$this->db->quote($statusEnd).")";
-         if($filterToday)
+        if($filterToday)
             $query .= "AND (orderDateTime BETWEEN ".$dayStart." AND ".$dayEnd.")";
-         $query .= "AND submitted = 1
+        $query .= "AND submitted = 1
             ORDER BY orderDateTime ASC
             LIMIT ".$skip.",".$top;
-        return $this->db->query($query)->fetchAll(PDO::FETCH_ASSOC);
+
+        $pdoQuery = $this->db->query($query);
+        //var_dump($pdoQuery);
+        //var_dump($this->db->error());
+        //if(!$pdoQuery)
+        return $pdoQuery->fetchAll(PDO::FETCH_ASSOC);
+        //return $this->db->error();
     }
     //endregion
 
