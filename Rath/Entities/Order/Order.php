@@ -59,8 +59,9 @@ class Order
         if(!empty($order->couponId))
             $data[Order::COUPON_ID] = $order->couponId;
 
-        if(!empty($order->submitted))
-            $data[Order::SUBMITTED_COL] = $order->submitted;
+        //not allowed through api!
+        //if(!empty($order->submitted))
+            //$data[Order::SUBMITTED_COL] = $order->submitted;
 
         return $data;
     }

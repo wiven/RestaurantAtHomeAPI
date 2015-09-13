@@ -476,7 +476,7 @@ class RestaurantController extends ControllerBase
         $dayStart = $this->db->quote(date(General::dateTimeFormat,mktime(0,0,0)));
         $dayEnd = $this->db->quote(date(General::dateTimeFormat,mktime(23,59,59)));
         $query =
-            "SELECT o.id, name, surname, orderDateTime,amount,
+            "SELECT o.id, name, surname, orderDateTime,amount,orderStatusId,
             (SELECT sum(quantity) from ".OrderDetail::TABLE_NAME." where orderId = o.id) as 'items',
             (select count(slots) from ".OrderDetail::TABLE_NAME." as od
               INNER join product on od.productId = product.id
