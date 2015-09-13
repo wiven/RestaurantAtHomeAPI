@@ -17,8 +17,8 @@ if(!defined('APP_MODE')){
     else
         define('APP_MODE', 'APIDEV');
 }
-var_dump(APP_MODE);
-var_dump($_SERVER["HTTP_HOST"]);
+//var_dump(APP_MODE);
+//var_dump($_SERVER["HTTP_HOST"]);
 //endregion
 
 require_once __DIR__.'/vendor/autoload.php';
