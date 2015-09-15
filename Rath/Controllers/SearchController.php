@@ -17,7 +17,10 @@ use Rath\helpers\MedooFactory;
 
 class SearchController extends ControllerBase
 {
+    public function searchProducts($skip, $top, $query)
+    {
 
+    }
 
     /**
      * @param $query
@@ -66,5 +69,36 @@ class SearchController extends ControllerBase
             [
                 "AND" => $result
             ];
+    }
+
+    /*
+    *
+    * Geeft de afstand van A tot B adhv breedte- & lengtegraad
+    *
+    * @param	float		$lat1		Breedtegraad van A
+    * @param	float		$lat2		Breedtegraad van B
+    * @param	float		$lon1		Lengtegraad van A
+    * @param	float		$lon2		Lengtegraad van B
+    * @param	string	$unit		Afstand in kilometer (K) of mijlen (M)
+    *
+    */
+    function distance($lat1, $lon1, $lat2, $lon2, $unit)
+    {
+        $theta = $lon1 - $lon2;
+        $dist = sin(deg2rad($lat1)) * sin(deg2rad($lat2)) +  cos(deg2rad($lat1)) * cos(deg2rad($lat2)) * cos(deg2rad($theta));
+        $dist = acos($dist);
+        $dist = rad2deg($dist);
+        $miles = $dist * 60 * 1.1515;
+        $unit = strtoupper($unit);
+
+        if ($unit == "K")
+        {
+            return ($miles * 1.609344);
+        }
+        else
+        {
+            return $miles;
+        }
+
     }
 }
