@@ -1034,6 +1034,13 @@ $app->group('/dashboard', function() use ($app){
         );
     });
 
+    $app->get('/products/:restoId/:skip/:top',function($restoId,$skip,$top) use ($app,$dash){
+        CrossDomainAjax::PrintCrossDomainCall(
+            $app,
+            $dash->getProductContent($restoId,$skip,$top,"")
+        );
+    });
+
     $app->get('/orders/:restoId',function($restoId) use ($app,$dash){
         CrossDomainAjax::PrintCrossDomainCall(
             $app,
@@ -1069,6 +1076,19 @@ $app->group('/photo', function() use ($app){
             $pc->updateProductPhoto($id,$files[0]->name);
         else
             throw new Exception("Error Uploading file");
+    });
+
+    $app->group('/restaurant', function() use ($app) {
+        $app->post('/logo/:id', function ($id) use ($app) {
+            $rc = DataControllerFactory::getRestaurantController();
+
+            $upload_handler = new UploadHandler(["link_id" => $id]);
+            $files = $upload_handler->post(true);
+            if (count($files) != 0)
+                $rc->updateLogoPhoto($id, $files[0]->name);
+            else
+                throw new Exception("Error Uploading file");
+        });
     });
 });
 

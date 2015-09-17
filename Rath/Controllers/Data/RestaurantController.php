@@ -106,6 +106,33 @@ class RestaurantController extends ControllerBase
             ]);
         return $this->db->error();
     }
+
+    public function updateLogoPhoto($id, $photoUrl)
+    {
+        $prod = $this->db->get(Restaurant::TABLE_NAME,
+            [
+                Restaurant::ID_COL,
+                Restaurant::LOGO_PHOTO_COL
+            ],
+            [
+                Restaurant::ID_COL => $id
+            ]);
+
+        if($prod[Restaurant::LOGO_PHOTO_COL] <> ""){
+            $file = APP_PATH.@'\\files\\'.$prod[Restaurant::LOGO_PHOTO_COL];
+            if(file_exists($file))
+                unlink($file);
+        }
+
+        $this->db->update(Restaurant::TABLE_NAME,
+            [
+                Restaurant::LOGO_PHOTO_COL => $photoUrl
+            ],
+            [
+                Restaurant::ID_COL => $id
+            ]);
+        return $this->db->error();
+    }
     //endregion
 
     //region KitchenType
@@ -713,8 +740,10 @@ class RestaurantController extends ControllerBase
     public function getProducts($restoId, $skip, $top,$query)
     {
         $search = ControllerFactory::getSearchController();
-        $where = $search->getFilterFieldsToMedooWhereArray($query);
-        $where["AND"][Product::RESTAURANT_ID_COL] = $restoId;
+        if(!empty($query)){
+            $where = $search->getFilterFieldsToMedooWhereArray($query);
+            $where["AND"][Product::RESTAURANT_ID_COL] = $restoId;
+        }
         $where["LIMIT"] = [$skip,$top];
         //var_dump($where);
 
