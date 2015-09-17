@@ -86,9 +86,8 @@ class RestaurantController extends ControllerBase
             [
                 "AND" => [
                     Restaurant::ID_COL => $resto->id,
-                    Restaurant::USER_ID_COL =>  Authorization::$userId
+//                    Restaurant::USER_ID_COL =>  Authorization::$userId
                 ]
-
             ]);
         return $this->db->error();
     }
@@ -102,7 +101,7 @@ class RestaurantController extends ControllerBase
             [
                 "AND" => [
                     Restaurant::ID_COL => $id,
-                    Restaurant::USER_ID_COL =>  Authorization::$userId
+//                    Restaurant::USER_ID_COL =>  Authorization::$userId
                 ]
             ]);
         return $this->db->error();
@@ -721,6 +720,13 @@ class RestaurantController extends ControllerBase
                 Product::PHOTO_COL
             ],
             $where);
+
+        $pc = DataControllerFactory::getProductController();
+        for($i = 0; $i < count($result); $i++) {
+            $prod = $result[$i];
+            $result[$i] = $pc->getPhotoUrls($prod);
+        }
+
         return $result;
     }
 

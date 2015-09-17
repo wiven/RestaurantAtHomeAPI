@@ -27,6 +27,7 @@ use Rath\Controllers\ControllerFactory;
 use Rath\Controllers\Data\DataControllerFactory;
 use Rath\Entities\Order\OrderStatus;
 use Rath\Helpers\CrossDomainAjax;
+use Rath\Libraries\UploadHandler;
 
 //region Init
 \Slim\Slim::registerAutoloader();
@@ -1044,6 +1045,18 @@ $app->group('/dashboard', function() use ($app){
 //endregion
 
 
+$app->group('/photo', function() use ($app){
+    $app->post('/product/:id', function($id) use ($app){
+        $pc = DataControllerFactory::getProductController();
+
+        $upload_handler = new UploadHandler(["link_id" => $id]);
+        $files = $upload_handler->post(true);
+        if(count($files) != 0)
+            $pc->updateProductPhoto($id,$files[0]->name);
+        else
+            throw new Exception("Error Uploading file");
+    });
+});
 
 
 

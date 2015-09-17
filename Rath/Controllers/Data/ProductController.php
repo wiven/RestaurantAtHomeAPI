@@ -17,6 +17,7 @@ use Rath\Entities\Product\ProductStock;
 use Rath\Entities\Product\ProductType;
 use Rath\Entities\Product\RelatedProducts;
 use Rath\Entities\Product\Tag;
+use Rath\Libraries\UploadHandler;
 
 class ProductController extends ControllerBase
 {
@@ -27,13 +28,15 @@ class ProductController extends ControllerBase
      * @return array|bool
      */
     public function getProduct($id){
-        return $this->db->get(Product::TABLE_NAME,
+        $prod = $this->db->get(Product::TABLE_NAME,
                 "*"
             ,
             [
                 Product::ID_COL => $id
             ]
         );
+
+        return $this->getPhotoUrls($prod);
     }
 
     /**
@@ -241,6 +244,53 @@ class ProductController extends ControllerBase
                 ]
             ]);
         return $this->db->error();
+    }
+    //endregion
+
+    //region Photo
+    public function updateProductPhoto($id, $photoUrl)
+    {
+        $prod = $this->db->get(Product::TABLE_NAME,
+            [
+                Product::ID_COL,
+                Product::PHOTO_COL
+            ],
+            [
+                Product::ID_COL => $id
+            ]);
+
+        if($prod[Product::PHOTO_COL] <> ""){
+            $file = APP_PATH.@'\\files\\'.$prod[Product::PHOTO_COL];
+            if(file_exists($file))
+                unlink($file);
+        }
+
+        $this->db->update(Product::TABLE_NAME,
+            [
+                Product::PHOTO_COL => $photoUrl
+            ],
+            [
+                Product::ID_COL => $id
+            ]);
+        return $this->db->error();
+    }
+
+    /**
+     * @param $prod array
+     * @return array
+     */
+    public function getPhotoUrls($prod)
+    {
+        $photo =  $prod[Product::PHOTO_COL];
+        if(isset($photo))
+        {
+            $uploader = new UploadHandler();
+            $prod[Product::PHOTO_COL] = [
+                "url" => $uploader->get_download_url($photo),
+                "thumbnailUrl" => "To be found"
+            ];
+        }
+        return $prod;
     }
     //endregion
 
