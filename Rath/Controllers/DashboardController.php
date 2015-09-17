@@ -54,7 +54,7 @@ class DashboardController
         $address = $rc->getAddress($restaurant[Restaurant::ADDRESS_ID_COL]);
         $paymentMethods = $rc->getRestaurantPaymentMethods($restoId);
         $socialMedia = $rc->getAllSocialMedia($restoId);
-        $specialities = $rc->getRestaurantSpecialities($restoId);
+        $specialties = $rc->getRestaurantSpecialties($restoId);
 
         return[
             "restaurantInfo" => $restaurant,
@@ -62,7 +62,7 @@ class DashboardController
             "openingHours" => $openingHours,
             "paymentMethods" => $paymentMethods,
             "socialMedia" => $socialMedia,
-            "specialities" => $specialities,
+            "specialties" => $specialties,
             "photos" => $photos
         ];
     }

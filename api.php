@@ -208,6 +208,13 @@ $app->group('/manage', function() use ($app){
             );
         });
 
+        $app->get('/all/', function() use ($app,$resto){
+            CrossDomainAjax::PrintCrossDomainCall(
+                $app,
+                $resto->getPaymentMethods()
+            );
+        });
+
         $app->post('', function() use ($app,$resto){
             $pm = json_decode($app->request->getBody());
             CrossDomainAjax::PrintCrossDomainCall(
@@ -311,6 +318,13 @@ $app->group('/manage', function() use ($app){
             CrossDomainAjax::PrintCrossDomainCall(
                 $app,
                 $promo->getPromotionType($id)
+            );
+        });
+
+        $app->get('/all/', function() use ($app,$promo){
+            CrossDomainAjax::PrintCrossDomainCall(
+                $app,
+                $promo->getAllpromotionTypes()
             );
         });
 
@@ -562,7 +576,7 @@ $app->group('/restaurant', function() use ($app){
         $app->get('/:restoId', function($restoId) use ($app,$resto){
             CrossDomainAjax::PrintCrossDomainCall(
                 $app,
-                $resto->getRestaurantSpecialities($restoId)
+                $resto->getRestaurantSpecialties($restoId)
             );
         });
 

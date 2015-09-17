@@ -326,7 +326,7 @@ class RestaurantController extends ControllerBase
 
     //region Restaurant Speciality
 
-    public function getRestaurantSpecialities($restoId){
+    public function getRestaurantSpecialties($restoId){
         return $this->db->select(RestaurantHasSpeciality::TABLE_NAME,
             [
                 "[><]".Speciality::TABLE_NAME =>
@@ -588,6 +588,11 @@ class RestaurantController extends ControllerBase
             [
                 PaymentMethod::ID_COL => $id
             ]);
+    }
+
+    public function getPaymentMethods()
+    {
+        return $this->db->select(PaymentMethod::TABLE_NAME,"*");
     }
 
     /**

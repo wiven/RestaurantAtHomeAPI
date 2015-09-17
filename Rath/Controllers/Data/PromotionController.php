@@ -38,6 +38,7 @@ class PromotionController Extends ControllerBase
         return $promo;
     }
 
+
     /**
      * @param $promo Promotion
      * @return array|bool
@@ -170,6 +171,14 @@ class PromotionController Extends ControllerBase
             [
                 PromotionType::ID_COL => $id
             ]);
+    }
+
+    /**
+     * @return array|bool
+     */
+    public function getAllpromotionTypes()
+    {
+        return $this->db->select(PromotionType::TABLE_NAME,"*");
     }
 
     /**
