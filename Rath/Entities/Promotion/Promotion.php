@@ -31,6 +31,9 @@ class Promotion
     public $promotiontypeId;
     public $restaurantId;
 
+    //Used for updating linked products.
+    public $productId;
+
     public $name;
     public $fromDate;
     public $toDate;

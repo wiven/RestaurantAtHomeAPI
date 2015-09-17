@@ -97,13 +97,13 @@ class DashboardController
         $rc = DataControllerFactory::getRestaurantController();
 
         $active = $rc->getActivePromotions($restoId,$skip,$top);
-        $comming = $rc->getCommingPromotions($restoId,$skip,$top);
+        $coming = $rc->getComingPromotions($restoId,$skip,$top);
         $passed = $rc->getPassedPromotions($restoId,$skip,$top);
 
         return [
             "passed" => $passed,
             "active" => $active,
-            "comming" => $comming
+            "coming" => $coming
         ];
     }
 

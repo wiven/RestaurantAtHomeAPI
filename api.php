@@ -725,7 +725,7 @@ $app->group('/restaurant', function() use ($app){
         $app->get('/comming/:id/:skip/:top', function($id,$skip,$top) use ($app,$resto){
             CrossDomainAjax::PrintCrossDomainCall(
                 $app,
-                $resto->getCommingPromotions($id,$skip,$top)
+                $resto->getComingPromotions($id,$skip,$top)
             );
         });
     });

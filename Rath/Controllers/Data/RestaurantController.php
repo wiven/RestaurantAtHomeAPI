@@ -400,7 +400,7 @@ class RestaurantController extends ControllerBase
         return $this->db->query($query)->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function getCommingPromotions($restoId, $skip,$top){
+    public function getComingPromotions($restoId, $skip,$top){
         /** @noinspection SqlDialectInspection */
         $date = $this->db->quote(General::getCurrentDate());
         $query =

@@ -46,8 +46,11 @@ class PromotionController Extends ControllerBase
     {
         $lastId = $this->db->insert(Promotion::TABLE_NAME,
             Promotion::toDbArray($promo));
-        if($lastId != 0)
+        if($lastId != 0){
+            $promo->id = $lastId;
+            $this->updateLinkedProducts($promo);
             return $this->getPromotion($lastId);
+        }
         else
             return $this->db->error();
     }
@@ -63,7 +66,31 @@ class PromotionController Extends ControllerBase
             [
                 Promotion::ID_COL => $promo->id
             ]);
+
+        $this->updateLinkedProducts($promo);
         return $this->db->error();
+    }
+
+    /**
+     * @param $promo Promotion
+     */
+    public function updateLinkedProducts($promo)
+    {
+        $this->db->update(Product::TABLE_NAME,
+            [
+                Product::PROMOTION_ID_COL => null
+            ],
+            [
+                Product::PROMOTION_ID_COL => $promo->id
+            ]);
+
+        $this->db->update(Product::TABLE_NAME,
+            [
+                Product::PROMOTION_ID_COL => $promo->id
+            ],
+            [
+                Product::ID_COL => $promo->productId
+            ]);
     }
 
     public function deletePromotion($id)
@@ -74,6 +101,7 @@ class PromotionController Extends ControllerBase
             ]);
         return $this->db->error();
     }
+
     //endregion
 
     //region Promotion Usage History
