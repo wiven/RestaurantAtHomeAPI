@@ -52,6 +52,11 @@ class DataControllerFactory
     private static $filterFieldController;
 
     /**
+     * @var SlotController
+     */
+    private static $slotController;
+
+    /**
      * @return UserController
      */
     public static function getUserController()
@@ -126,6 +131,13 @@ class DataControllerFactory
         if(empty(self::$filterFieldController))
             self::$filterFieldController = new FilterFieldController();
         return self::$filterFieldController;
+    }
+
+    public static function getSlotController()
+    {
+        if(empty(self::$slotController))
+            self::$slotController = new SlotController();
+        return self::$slotController;
     }
 
 }

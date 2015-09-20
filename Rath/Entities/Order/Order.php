@@ -24,6 +24,7 @@ class Order
     const COUPON_ID = "couponId";
     const CREATION_DATE_TIME_COL = "creationDateTime";
     const SUBMITTED_COL = "submitted";
+    const SLOT_TEMPLATE_ID_COL = "slottemplateId";
 
     public $id;
     public $userId;
@@ -36,6 +37,7 @@ class Order
     public $couponId;
     public $creationDateTime;
     public $submitted;
+    public $slottemplateId;
 
     public $lines;
 
@@ -58,6 +60,9 @@ class Order
 
         if(!empty($order->couponId))
             $data[Order::COUPON_ID] = $order->couponId;
+
+        if(!empty($order->slottemplateId))
+            $data[self::SLOT_TEMPLATE_ID_COL] = $order->slottemplateId;
 
         //not allowed through api!
         //if(!empty($order->submitted))

@@ -19,6 +19,8 @@ use Rath\Entities\Restaurant\Holiday;
 use Rath\Entities\Restaurant\OpeningHours;
 use Rath\Entities\Restaurant\Restaurant;
 use Rath\Entities\Restaurant\RestaurantSocialMedia;
+use Rath\Entities\Slots\SlotTemplate;
+use Rath\Entities\Slots\SlotTemplateChange;
 use Rath\Entities\User\User;
 use Rath\Entities\User\UserPermission;
 use Rath\Controllers\UserPermissionController;
@@ -128,7 +130,11 @@ class MasterData
             "Socialmedia Object",
             MasterData::echoSocialMedia(),
             "Order + Detail Object",
-            MasterData::echoOrder()
+            MasterData::echoOrder(),
+            "Slot Template",
+            MasterData::echoSlotTemplate(),
+            "Slot Template Change",
+            MasterData::echoSlotTemplateChange()
         ];
     }
 
@@ -256,5 +262,25 @@ class MasterData
         ];
 
         return $order;
+    }
+
+    private static function echoSlotTemplate()
+    {
+        $slotTemplate = new SlotTemplate();
+        $slotTemplate->dayOfWeek = 0;
+        $slotTemplate->fromTime = "18:00";
+        $slotTemplate->toTime = "18:30";
+        $slotTemplate->restaurantId = 5;
+        $slotTemplate->quantity = 10;
+        return $slotTemplate;
+    }
+
+    private static function echoSlotTemplateChange()
+    {
+        $stc = new SlotTemplateChange();
+        $stc->slottemplateId = 1;
+        $stc->date = General::getCurrentDate();
+        $stc->quantity = 15;
+        return $stc;
     }
 }

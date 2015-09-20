@@ -35,6 +35,5 @@ class OpeningHours
             OpeningHours::TO_TIME_COL => $oH->toTime,
             OpeningHours::OPEN_COL => $oH->open
         ];
-
     }
 }

@@ -744,6 +744,22 @@ $app->group('/restaurant', function() use ($app){
         });
     });
 
+    $app->group('/slots', function() use ($app,$resto) {
+        $app->group('/template', function() use ($app,$resto) {
+            $app->get('/:id', function ($id) use ($app, $resto) {
+                CrossDomainAjax::PrintCrossDomainCall(
+                    $app,
+                    $resto->getSlotTemplates($id)
+                );
+            });
+            $app->get('/:id/:dayOfWeek', function ($id,$dayOfWeek) use ($app, $resto) {
+                CrossDomainAjax::PrintCrossDomainCall(
+                    $app,
+                    $resto->getSlotTemplates($id,$dayOfWeek)
+                );
+            });
+        });
+    });
 });
 //endregion
 
@@ -1066,6 +1082,7 @@ $app->group('/dashboard', function() use ($app){
 //endregion
 
 
+//region Photos
 $app->group('/photo', function() use ($app){
     $app->post('/product/:id', function($id) use ($app){
         $pc = DataControllerFactory::getProductController();
@@ -1076,6 +1093,96 @@ $app->group('/photo', function() use ($app){
             $pc->updateProductPhoto($id,$files[0]->name);
         else
             throw new Exception("Error Uploading file");
+    });
+
+    $app->group('/restaurant', function() use ($app) {
+        $app->post('/logo/:id', function ($id) use ($app) {
+            $rc = DataControllerFactory::getRestaurantController();
+
+            $upload_handler = new UploadHandler(["link_id" => $id]);
+            $files = $upload_handler->post(true);
+            if (count($files) != 0)
+                $rc->updateLogoPhoto($id, $files[0]->name);
+            else
+                throw new Exception("Error Uploading file");
+        });
+    });
+});
+//endregion
+
+
+$app->group('/slots', function() use ($app){
+    $sc = DataControllerFactory::getSlotController();
+
+    $app->group('/template', function() use ($app,$sc) {
+        $app->get('/:id',function($id) use ($app,$sc){
+            CrossDomainAjax::PrintCrossDomainCall(
+                $app,
+                $sc->getSlotTemplate($id)
+            );
+        });
+
+        $app->post('',function() use ($app,$sc){
+            $st = json_decode($app->request->getBody());
+            CrossDomainAjax::PrintCrossDomainCall(
+                $app,
+                $sc->addSlotTemplate($st)
+            );
+        });
+
+        $app->put('',function() use ($app,$sc){
+            $st = json_decode($app->request->getBody());
+            CrossDomainAjax::PrintCrossDomainCall(
+                $app,
+                $sc->updateSlotTemplate($st)
+            );
+        });
+
+        $app->get('/delete/:id',function($id) use ($app,$sc){
+            CrossDomainAjax::PrintCrossDomainCall(
+                $app,
+                $sc->deleteSlotTemplate($id)
+            );
+        });
+
+        $app->get('/generate/:id/:slotSize/:quantity',function($id,$slotSize,$quantity) use ($app,$sc){
+            CrossDomainAjax::PrintCrossDomainCall(
+                $app,
+                $sc->generateSlotsForRestaurantOpeningHours($id,$slotSize,$quantity)
+            );
+        });
+    });
+
+    $app->group('/change', function() use ($app,$sc) {
+        $app->get('/:id',function($id) use ($app,$sc){
+            CrossDomainAjax::PrintCrossDomainCall(
+                $app,
+                $sc->getSlotTemplateChange($id)
+            );
+        });
+
+        $app->post('',function() use ($app,$sc){
+            $st = json_decode($app->request->getBody());
+            CrossDomainAjax::PrintCrossDomainCall(
+                $app,
+                $sc->addSlotTemplateChange($st)
+            );
+        });
+
+        $app->put('',function() use ($app,$sc){
+            $st = json_decode($app->request->getBody());
+            CrossDomainAjax::PrintCrossDomainCall(
+                $app,
+                $sc->updateSlotTemplateChange($st)
+            );
+        });
+
+        $app->get('/delete/:id',function($id) use ($app,$sc){
+            CrossDomainAjax::PrintCrossDomainCall(
+                $app,
+                $sc->deleteSlotTemplateChange($id)
+            );
+        });
     });
 
     $app->group('/restaurant', function() use ($app) {

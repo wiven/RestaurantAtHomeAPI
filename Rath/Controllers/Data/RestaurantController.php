@@ -28,6 +28,7 @@ use Rath\Entities\Restaurant\RestaurantHasSpeciality;
 use Rath\Entities\Restaurant\RestaurantPhoto;
 use Rath\Entities\Restaurant\RestaurantSocialMedia;
 use Rath\Entities\Restaurant\Speciality;
+use Rath\Entities\Slots\SlotTemplate;
 use Rath\Entities\User\User;
 use Rath\Helpers\General;
 use Rath\Slim\Middleware\Authorization;
@@ -737,6 +738,7 @@ class RestaurantController extends ControllerBase
     }
     //endregion
 
+    //region Products
     public function getProducts($restoId, $skip, $top,$query)
     {
         $search = ControllerFactory::getSearchController();
@@ -777,4 +779,26 @@ class RestaurantController extends ControllerBase
 
         return $result;
     }
+    //endregion
+
+
+    //region Slots
+    public function getSlotTemplates($restoId, $dayOfWeek = -1)
+    {
+        $where = [
+            "AND" =>[
+                SlotTemplate::RESTAURANT_ID_COL => $restoId
+            ]
+        ];
+
+        if($dayOfWeek != -1)
+            $where["AND"][SlotTemplate::DAY_OF_WEEK_COL] = $dayOfWeek;
+
+        return $this->db->select(SlotTemplate::TABLE_NAME,
+            "*",
+            $where);
+    }
+
+    //endregion
+
 }
