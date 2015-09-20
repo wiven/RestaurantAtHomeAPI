@@ -14,6 +14,8 @@ if (!defined('APP_PATH'))
 if(!defined('APP_MODE')){
     if(strpos($_SERVER["HTTP_HOST"],"localhost") !== false)
         define('APP_MODE', 'LOCAL');
+    elseif(strpos($_SERVER["HTTP_HOST"],"test") !== false)
+        define('APP_MODE','TEST');
     else
         define('APP_MODE', 'APIDEV');
 }
@@ -172,6 +174,13 @@ $app->group('/manage', function() use ($app){
             CrossDomainAjax::PrintCrossDomainCall(
                 $app,
                 $resto->getKitchenType($id)
+            );
+        });
+
+        $app->get('/all/', function() use ($app,$resto){
+            CrossDomainAjax::PrintCrossDomainCall(
+                $app,
+                $resto->getKitchenTypes()
             );
         });
 

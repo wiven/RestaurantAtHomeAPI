@@ -154,6 +154,11 @@ class RestaurantController extends ControllerBase
         return $result;
     }
 
+    public function getKitchenTypes()
+    {
+        return $this->db->select(KitchenType::TABLE_NAME,"*");
+    }
+
     /**
      * @param $kitchenType KitchenType
      * @return array
