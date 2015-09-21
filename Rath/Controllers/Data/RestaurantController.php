@@ -31,6 +31,7 @@ use Rath\Entities\Restaurant\Speciality;
 use Rath\Entities\Slots\SlotTemplate;
 use Rath\Entities\User\User;
 use Rath\Helpers\General;
+use Rath\Helpers\PhotoManagement;
 use Rath\Slim\Middleware\Authorization;
 
 class RestaurantController extends ControllerBase
@@ -42,7 +43,7 @@ class RestaurantController extends ControllerBase
      * @return array|bool
      */
     public function getRestaurant($id){
-        return $this->db->get(Restaurant::TABLE_NAME,
+        $resto = $this->db->get(Restaurant::TABLE_NAME,
             [
                 Restaurant::ID_COL,
                 Restaurant::NAME_COL,
@@ -52,13 +53,14 @@ class RestaurantController extends ControllerBase
                 Restaurant::PHONE_COL,
                 Restaurant::EMAIL_COL,
                 Restaurant::URL_COL,
-                Restaurant::LOGO_PHOTO_COL,
                 Restaurant::DOMINATING_COLOR_COL,
                 Restaurant::COMMENT_COL
             ],
             [
                 Restaurant::ID_COL => $id
             ]);
+        $resto[Restaurant::LOGO_PHOTO_COL] = PhotoManagement::getPhotoUrls($resto[Restaurant::LOGO_PHOTO_COL]);
+        return $resto;
     }
 
     /**
@@ -119,11 +121,8 @@ class RestaurantController extends ControllerBase
                 Restaurant::ID_COL => $id
             ]);
 
-        if($prod[Restaurant::LOGO_PHOTO_COL] <> ""){
-            $file = APP_PATH.@'\\files\\'.$prod[Restaurant::LOGO_PHOTO_COL];
-            if(file_exists($file))
-                unlink($file);
-        }
+        if($prod[Restaurant::LOGO_PHOTO_COL] <> "")
+          PhotoManagement::deletePhoto($prod[Restaurant::LOGO_PHOTO_COL]);
 
         $this->db->update(Restaurant::TABLE_NAME,
             [
@@ -132,7 +131,7 @@ class RestaurantController extends ControllerBase
             [
                 Restaurant::ID_COL => $id
             ]);
-        return $this->db->error();
+        return $this->getRestaurant($id);
     }
     //endregion
 
@@ -532,16 +531,24 @@ class RestaurantController extends ControllerBase
     }
     //endregion
 
-    //region Photo TODO: add function to actual upload the photo
+    //region Photo
     /**
-     * @param $restoPhoto RestaurantPhoto
+     * @param $id
+     * @param $photos
      * @return array
+     * @internal param RestaurantPhoto $restoPhoto
      */
-    public function addPhoto($restoPhoto){
-        $this->db->insert(RestaurantPhoto::TABLE_NAME,
-            RestaurantPhoto::toDbArray($restoPhoto)
-        );
-        return $this->db->error();
+    public function addPhotos($id,$photos){
+        foreach ($photos as $photo) {
+            $restoPhoto = new RestaurantPhoto();
+            $restoPhoto->restaurantId = $id;
+            $restoPhoto->url = $photo->name;
+            $this->db->insert(RestaurantPhoto::TABLE_NAME,
+                RestaurantPhoto::toDbArray($restoPhoto)
+            );
+        }
+
+        return $this->getPhotos($id);
     }
 
     /**
@@ -549,7 +556,7 @@ class RestaurantController extends ControllerBase
      * @return array|bool
      */
     public function getPhoto($id){
-        return $this->db->select(RestaurantPhoto::TABLE_NAME,
+        return $this->db->get(RestaurantPhoto::TABLE_NAME,
             "*",
             [
                 RestaurantPhoto::ID_COL => $id
@@ -557,31 +564,25 @@ class RestaurantController extends ControllerBase
     }
 
     /**
-     * @param $restoId
+     * @param $Id
      * @return array
      */
-    public function getPhotos($restoId)
+    public function getPhotos($Id)
     {
-        return  $this->db->select(RestaurantPhoto::TABLE_NAME,
+        $photos =  $this->db->select(RestaurantPhoto::TABLE_NAME,
             "*",
             [
-                RestaurantPhoto::RESTAURANT_ID_COL => $restoId,
+                RestaurantPhoto::RESTAURANT_ID_COL => $Id,
                 "LIMIT" => [0,10]
             ]);
-    }
 
-    /**
-     * @param $restoPhoto RestaurantPhoto
-     * @return array
-     */
-    public function updatePhoto($restoPhoto){
-        $this->db->update(RestaurantPhoto::TABLE_NAME,
-            RestaurantPhoto::toDbArray($restoPhoto),
-            [
-                RestaurantPhoto::ID_COL => $restoPhoto->id
-            ]
-        );
-        return $this->db->error();
+        for($i = 0; $i < count($photos); $i++){
+            $photo = $photos[$i];
+            //var_dump($photo);
+            $photo[RestaurantPhoto::URL_COL] = PhotoManagement::getPhotoUrls($photo[RestaurantPhoto::URL_COL]);
+            $photos[$i] = $photo;
+        }
+        return $photos;
     }
 
     /**
@@ -589,6 +590,11 @@ class RestaurantController extends ControllerBase
      * @return array
      */
     public function deletePhoto($id){
+        $photo = $this->getPhoto($id);
+        //var_dump($photo);
+        if($photo[RestaurantPhoto::URL_COL] <> "")
+            PhotoManagement::deletePhoto($photo[RestaurantPhoto::URL_COL]);
+
         $this->db->delete(RestaurantPhoto::TABLE_NAME,
             [
                 RestaurantPhoto::ID_COL => $id

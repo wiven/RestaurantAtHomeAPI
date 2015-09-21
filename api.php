@@ -632,7 +632,7 @@ $app->group('/restaurant', function() use ($app){
             $ho = json_decode($app->request->getBody());
             CrossDomainAjax::PrintCrossDomainCall(
                 $app,
-                $resto->addPhoto($ho)
+                $resto->addPhotos($ho)
             );
         });
 
@@ -1099,22 +1099,62 @@ $app->group('/photo', function() use ($app){
         $upload_handler = new UploadHandler(["link_id" => $id]);
         $files = $upload_handler->post(true);
         if(count($files) != 0)
-            $pc->updateProductPhoto($id,$files[0]->name);
+            CrossDomainAjax::PrintCrossDomainCall(
+                $app,
+                $pc->updateProductPhoto($id,$files[0]->name)
+            );
         else
             throw new Exception("Error Uploading file");
     });
 
     $app->group('/restaurant', function() use ($app) {
-        $app->post('/logo/:id', function ($id) use ($app) {
-            $rc = DataControllerFactory::getRestaurantController();
+        $rc = DataControllerFactory::getRestaurantController();
+        $app->post('/logo/:id', function ($id) use ($app,$rc) {
 
             $upload_handler = new UploadHandler(["link_id" => $id]);
             $files = $upload_handler->post(true);
             if (count($files) != 0)
-                $rc->updateLogoPhoto($id, $files[0]->name);
+                CrossDomainAjax::PrintCrossDomainCall(
+                    $app,
+                    $rc->updateLogoPhoto($id, $files[0]->name)
+                );
             else
                 throw new Exception("Error Uploading file");
         });
+
+        $app->get('/:id', function($id) use ($app,$rc){
+            CrossDomainAjax::PrintCrossDomainCall(
+                $app,
+                $rc->getPhotos($id)
+            );
+        });
+
+        $app->post('/:id' ,function($id) use ($app,$rc){
+            $photoCount = count($rc->getPhotos($id));
+            if(count($_FILES) > (10-$photoCount))
+                throw new Exception("To many foto's uploaded for this restaurant!");
+
+            //upload Photos
+            $uploadHandler = new UploadHandler(["link_id" => $id]);
+            $files = $uploadHandler->post(true);
+            var_dump($files);
+            if (count($files) != 0)
+                CrossDomainAjax::PrintCrossDomainCall(
+                    $app,
+                    $rc->addPhotos($id,$files)
+                );
+            else
+                throw new Exception("Error Uploading file");
+        });
+
+        $app->get('/delete/:id', function($id) use ($app,$rc){
+            CrossDomainAjax::PrintCrossDomainCall(
+                $app,
+                $rc->deletePhoto($id)
+            );
+        });
+
+
     });
 });
 //endregion

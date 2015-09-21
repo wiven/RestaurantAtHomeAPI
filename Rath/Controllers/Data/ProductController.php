@@ -17,6 +17,7 @@ use Rath\Entities\Product\ProductStock;
 use Rath\Entities\Product\ProductType;
 use Rath\Entities\Product\RelatedProducts;
 use Rath\Entities\Product\Tag;
+use Rath\Helpers\PhotoManagement;
 use Rath\Libraries\UploadHandler;
 
 class ProductController extends ControllerBase
@@ -36,7 +37,8 @@ class ProductController extends ControllerBase
             ]
         );
 
-        return $this->getPhotoUrls($prod);
+        $prod[Product::PHOTO_COL] = PhotoManagement::getPhotoUrls($prod[Product::PHOTO_COL]);
+        return $prod;
     }
 
     /**
@@ -259,12 +261,10 @@ class ProductController extends ControllerBase
                 Product::ID_COL => $id
             ]);
 
-        if($prod[Product::PHOTO_COL] <> ""){
-            $file = APP_PATH.@'\\files\\'.$prod[Product::PHOTO_COL];
-            if(file_exists($file))
-                unlink($file);
-        }
+        if($prod[Product::PHOTO_COL] <> "")
+           PhotoManagement::deletePhoto($prod[Product::PHOTO_COL]);
 
+//        var_dump($photoUrl);
         $this->db->update(Product::TABLE_NAME,
             [
                 Product::PHOTO_COL => $photoUrl
@@ -272,25 +272,8 @@ class ProductController extends ControllerBase
             [
                 Product::ID_COL => $id
             ]);
-        return $this->db->error();
-    }
 
-    /**
-     * @param $prod array
-     * @return array
-     */
-    public function getPhotoUrls($prod)
-    {
-        $photo =  $prod[Product::PHOTO_COL];
-        if(isset($photo))
-        {
-            $uploader = new UploadHandler();
-            $prod[Product::PHOTO_COL] = [
-                "url" => $uploader->get_download_url($photo),
-                "thumbnailUrl" => "To be found"
-            ];
-        }
-        return $prod;
+        return $this->getProduct($id);
     }
     //endregion
 

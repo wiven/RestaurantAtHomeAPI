@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Multiple Upload</title>
+</head>
+<body>
+<p>Please upload some images.</p>
+<form action="http://localhost:8080/RestaurantAtHomeAPI/photo/product/7" enctype="multipart/form-data" method="post">
+    <h2>Product Photo Upload:</h2>
+    <input type="file" name="files[]" multiple="multiple"/><br/>
+    <input type="submit" value="Upload Now"/>
+</form>
+
+<form action="http://localhost:8080/RestaurantAtHomeAPI/photo/restaurant/logo/5" enctype="multipart/form-data" method="post">
+    <h2>Restaurant Logo Upload:</h2>
+    <input type="file" name="files[]" multiple="multiple"/><br/>
+    <input type="submit" value="Upload Now"/>
+</form>
+
+<form action="http://localhost:8080/RestaurantAtHomeAPI/photo/restaurant/5" enctype="multipart/form-data" method="post">
+    <h2>Restaurant Photo Upload:</h2>
+    <input type="file" name="files[]" multiple="multiple"/><br/>
+    <input type="submit" value="Upload Now"/>
+</form>
+</body>
+</html>

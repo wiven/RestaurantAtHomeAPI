@@ -29,7 +29,7 @@ class RestaurantPhoto
     {
         return[
             self::RESTAURANT_ID_COL => $restoPhoto->restaurantId,
-            self::URL_COL => $restoPhoto->restaurantId
+            self::URL_COL => $restoPhoto->url
         ];
     }
 }
