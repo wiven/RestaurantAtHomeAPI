@@ -771,7 +771,8 @@ class RestaurantController extends ControllerBase
         $pc = DataControllerFactory::getProductController();
         for($i = 0; $i < count($result); $i++) {
             $prod = $result[$i];
-            $result[$i] = $pc->getPhotoUrls($prod);
+            $prod[Product::PHOTO_COL] = PhotoManagement::getPhotoUrls($prod[Product::PHOTO_COL]);
+            $result[$i] = $prod;
         }
 
         return $result;
