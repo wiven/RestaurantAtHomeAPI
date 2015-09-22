@@ -115,6 +115,7 @@ class SlotController extends ControllerBase
      * @param $restoId
      * @param $slotSize
      * Size of a slot in min.
+     * @return array
      * @throws \Exception
      */
     public function generateSlotsForRestaurantOpeningHours($restoId, $slotSize,$slotQuantity)
@@ -173,6 +174,7 @@ class SlotController extends ControllerBase
             throw $e;
 //            var_dump($e);
         }
+        return ["Status" => "Success"];
         //var_dump($open);
     }
     //endregion

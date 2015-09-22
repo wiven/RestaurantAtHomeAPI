@@ -619,38 +619,6 @@ $app->group('/restaurant', function() use ($app){
         });
     });
 
-    //TODO: test photo upload
-    $app->group('/photo', function() use ($app,$resto){
-        $app->get('/:id', function($id) use ($app,$resto){
-            CrossDomainAjax::PrintCrossDomainCall(
-                $app,
-                $resto->getPhoto($id)
-            );
-        });
-
-        $app->post('' ,function() use ($app,$resto){
-            $ho = json_decode($app->request->getBody());
-            CrossDomainAjax::PrintCrossDomainCall(
-                $app,
-                $resto->addPhotos($ho)
-            );
-        });
-
-        $app->put('', function() use ($app,$resto){
-            $ho = json_decode($app->request->getBody());
-            CrossDomainAjax::PrintCrossDomainCall(
-                $app,
-                $resto->updatePhoto($ho)
-            );
-        });
-
-        $app->get('/delete/:id', function($id) use ($app,$resto){
-            CrossDomainAjax::PrintCrossDomainCall(
-                $app,
-                $resto->deletePhoto($id)
-            );
-        });
-    });
 
     $app->group('/socialmedia', function() use ($app,$resto){
         $app->get('/:id', function($id) use ($app,$resto){
@@ -765,6 +733,14 @@ $app->group('/restaurant', function() use ($app){
                 CrossDomainAjax::PrintCrossDomainCall(
                     $app,
                     $resto->getSlotTemplates($id,$dayOfWeek)
+                );
+            });
+        });
+        $app->group('/overview', function() use ($app,$resto) {
+            $app->get('/:id/:date', function ($id,$date) use ($app, $resto) {
+                CrossDomainAjax::PrintCrossDomainCall(
+                    $app,
+                    $resto->getSlotOverview($id,$date)
                 );
             });
         });
@@ -1073,6 +1049,13 @@ $app->group('/dashboard', function() use ($app){
         );
     });
 
+    $app->get('/slots/:restoId',function($restoId) use ($app,$dash){
+        CrossDomainAjax::PrintCrossDomainCall(
+            $app,
+            $dash->getSlotContent($restoId)
+        );
+    });
+
     $app->get('/promotions/:restoId/:skip/:top',function($restoId,$skip,$top) use ($app,$dash){
         CrossDomainAjax::PrintCrossDomainCall(
             $app,
@@ -1160,6 +1143,7 @@ $app->group('/photo', function() use ($app){
 //endregion
 
 
+//region Slots
 $app->group('/slots', function() use ($app){
     $sc = DataControllerFactory::getSlotController();
 
@@ -1247,6 +1231,7 @@ $app->group('/slots', function() use ($app){
         });
     });
 });
+//endregion
 
 
 

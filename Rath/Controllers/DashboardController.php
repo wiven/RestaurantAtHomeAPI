@@ -92,6 +92,14 @@ class DashboardController
         ];
     }
 
+    public  function getSlotContent($restoId)
+    {
+        $rc = DataControllerFactory::getRestaurantController();
+//        $slotTemplates = $rc->getSlotTemplates($restoId,General::getCurrentDayOfWeek());
+        return $rc->getSlotOverview($restoId);
+
+    }
+
     public function getPromotionContent($restoId, $skip,$top)
     {
         $rc = DataControllerFactory::getRestaurantController();

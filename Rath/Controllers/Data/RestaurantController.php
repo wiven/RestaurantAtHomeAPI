@@ -29,6 +29,7 @@ use Rath\Entities\Restaurant\RestaurantPhoto;
 use Rath\Entities\Restaurant\RestaurantSocialMedia;
 use Rath\Entities\Restaurant\Speciality;
 use Rath\Entities\Slots\SlotTemplate;
+use Rath\Entities\Slots\SlotTemplateChange;
 use Rath\Entities\User\User;
 use Rath\Helpers\General;
 use Rath\Helpers\PhotoManagement;
@@ -536,7 +537,6 @@ class RestaurantController extends ControllerBase
      * @param $id
      * @param $photos
      * @return array
-     * @internal param RestaurantPhoto $restoPhoto
      */
     public function addPhotos($id,$photos){
         foreach ($photos as $photo) {
@@ -809,6 +809,46 @@ class RestaurantController extends ControllerBase
         return $this->db->select(SlotTemplate::TABLE_NAME,
             "*",
             $where);
+    }
+
+    public function getSlotOverview($restoId, $date = null)
+    {
+        if($date == null){
+            $date = General::getCurrentDate();
+            $dayOfWeek = General::getCurrentDayOfWeek();
+        }
+        else
+            $dayOfWeek = date('w', strtotime($date));
+
+
+        $result = $this->db->select(SlotTemplate::TABLE_NAME,
+            [
+                "[>]".SlotTemplateChange::TABLE_NAME =>
+                    [
+                        SlotTemplate::TABLE_NAME.".".SlotTemplate::ID_COL => SlotTemplateChange::SLOT_TEMPLATE_ID_COL
+                    ]
+            ],
+            [
+                SlotTemplate::TABLE_NAME.".".SlotTemplate::ID_COL,
+                SlotTemplate::FROM_TIME_COL,
+                SlotTemplate::TO_TIME_COL,
+                SlotTemplate::TABLE_NAME.".".SlotTemplate::QUANTITY_COL,
+                SlotTemplateChange::TABLE_NAME.".".SlotTemplateChange::ID_COL."(changeId)",
+                SlotTemplateChange::TABLE_NAME.".".SlotTemplateChange::QUANTITY_COL."(changeQty)"
+            ],
+            [
+                "AND" => [
+                    SlotTemplate::RESTAURANT_ID_COL => $restoId,
+                    SlotTemplate::DAY_OF_WEEK_COL => $dayOfWeek,
+                    "OR" => [
+                        SlotTemplateChange::TABLE_NAME.".".SlotTemplateChange::DATE_COL => $date,
+                        SlotTemplateChange::TABLE_NAME.".".SlotTemplateChange::DATE_COL => null
+                    ]
+                ]
+            ]);
+//        var_dump($this->db->last_query());
+//        var_dump($this->db->error());
+        return $result;
     }
 
     //endregion

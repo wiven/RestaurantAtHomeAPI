@@ -35,6 +35,20 @@ class General
         return date(self::dateTimeFormat);
     }
 
+    /**
+     * @return bool|int|string
+     * DayOfWeek where 0 = Sunday.
+     */
+    public static function getCurrentDayOfWeek()
+    {
+        return date('w');
+//        $day = $day -1;
+//        if( $day == -1)
+//            $day = 6;
+//
+//        return $day;
+    }
+
     const booleanType = "boolean";
     const integerType = "integer";
     const doubleType = "double";
