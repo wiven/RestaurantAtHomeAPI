@@ -57,6 +57,11 @@ class DataControllerFactory
     private static $slotController;
 
     /**
+     * @var LoyaltyPointsController
+     */
+    private static $loyaltyPointsController;
+
+    /**
      * @return UserController
      */
     public static function getUserController()
@@ -138,6 +143,13 @@ class DataControllerFactory
         if(empty(self::$slotController))
             self::$slotController = new SlotController();
         return self::$slotController;
+    }
+
+    public static function getLoyaltyPointsController()
+    {
+        if(empty(self::$loyaltyPointsController))
+            self::$loyaltyPointsController = new LoyaltyPointsController();
+        return self::$loyaltyPointsController;
     }
 
 }

@@ -8,11 +8,14 @@
 
 namespace Rath\Controllers\Data;
 
+use Rath\Entities\Restaurant\Restaurant;
+use Rath\Entities\User\LoyaltyPoints;
 use Rath\helpers\MedooFactory;
 use Rath\Entities\User\User;
 use Rath\Entities\User\UserPermission;
 use Rath\Entities\ApiResponse;
 use Rath\Libraries\medoo;
+use Rath\Slim\Middleware\Authorization;
 
 
 class UserController extends ControllerBase
@@ -256,6 +259,35 @@ class UserController extends ControllerBase
             ]);
         return array_filter($user);
     }
+
+    //region LoyaltyPoints
+
+    /**
+     * @return array|bool
+     */
+    public function getLoyaltyPoints()
+    {
+        $result =  $this->db->select(LoyaltyPoints::TABLE_NAME,
+            [
+                "[><]".Restaurant::TABLE_NAME => [
+                    Restaurant::TABLE_NAME.".".Restaurant::ID_COL => LoyaltyPoints::TABLE_NAME.".".LoyaltyPoints::RESTAURANT_ID_COL
+                ]
+            ],
+            [
+                Restaurant::TABLE_NAME.".".Restaurant::ID_COL,
+                Restaurant::NAME_COL,
+                LoyaltyPoints::QUANTITY_COL
+            ],
+            [
+                LoyaltyPoints::USER_ID_COL => Authorization::$userId
+            ]);
+
+        var_dump($this->db->last_query());
+
+        return $result;
+    }
+
+    //endregion
 
 }
 
