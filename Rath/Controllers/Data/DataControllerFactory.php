@@ -9,6 +9,8 @@
 namespace Rath\Controllers\Data;
 
 
+use Rath\Entities\User\LoyaltyBonus;
+
 class DataControllerFactory
 {
     /**
@@ -60,6 +62,11 @@ class DataControllerFactory
      * @var LoyaltyPointsController
      */
     private static $loyaltyPointsController;
+
+    /**
+     * @var LoyaltyBonus
+     */
+    private static $loyaltyBonusController;
 
     /**
      * @return UserController
@@ -150,6 +157,13 @@ class DataControllerFactory
         if(empty(self::$loyaltyPointsController))
             self::$loyaltyPointsController = new LoyaltyPointsController();
         return self::$loyaltyPointsController;
+    }
+
+    public static function getLoyaltyBonusController()
+    {
+        if(empty(self::$loyaltyBonusController))
+            self::$loyaltyBonusController = new LoyaltyBonusController();
+        return self::$loyaltyBonusController;
     }
 
 }

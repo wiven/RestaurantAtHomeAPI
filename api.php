@@ -163,7 +163,7 @@ $app->group('/user', function() use ($app){
         $app->get('/', function() use ($app,$user){
             CrossDomainAjax::PrintCrossDomainCall(
                 $app,
-                $user->getLoyaltyPoints()
+                $user->getLoyaltyPoints() //bug
             );
         });
     });
@@ -1244,8 +1244,37 @@ $app->group('/slots', function() use ($app){
 
 
 //region LoyaltyPoints
-$app->group('loyaltypoints',function() use ($app){
+$app->group('/loyaltybonus',function() use ($app){
+    $lbc = DataControllerFactory::getLoyaltyBonusController();
+    $app->get('/:id',function($id) use ($app,$lbc){
+        CrossDomainAjax::PrintCrossDomainCall(
+            $app,
+            $lbc->getLoyaltyBonus($id)
+        );
+    });
 
+    $app->post('',function() use ($app,$lbc){
+        $st = json_decode($app->request->getBody());
+        CrossDomainAjax::PrintCrossDomainCall(
+            $app,
+            $lbc->addLoyaltyBonus($st)
+        );
+    });
+
+    $app->put('',function() use ($app,$lbc){
+        $st = json_decode($app->request->getBody());
+        CrossDomainAjax::PrintCrossDomainCall(
+            $app,
+            $lbc->updateLoyaltyBonus($st)
+        );
+    });
+
+    $app->get('/delete/:id',function($id) use ($app,$lbc){
+        CrossDomainAjax::PrintCrossDomainCall(
+            $app,
+            $lbc->deleteLoyaltyBonus($id)
+        );
+    });
 });
 //endregion
 

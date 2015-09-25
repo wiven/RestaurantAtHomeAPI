@@ -9,35 +9,35 @@
 namespace Rath\Entities\User;
 
 
-class LoyaltyPoints
+class LoyaltyBonus
 {
-    const TABLE_NAME = "loyaltypoints";
+    const TABLE_NAME = "loyaltybonus";
 
     const ID_COL = "id";
-    const USER_ID_COL ="userid";
+    const PRODUCT_ID_COL ="productid";
     const RESTAURANT_ID_COL = "restaurantid";
     const QUANTITY_COL = "quantity";
 
     public $id;
-    public $userid;
+    public $productid;
     public $restaurantid;
     public $quantity;
 
     /**
-     * @param $lp LoyaltyPoints
+     * @param $lp LoyaltyBonus
      * @return array
      */
     public static function toDbInsertArray($lp)
     {
         return [
-            self::USER_ID_COL => $lp->userid,
+            self::PRODUCT_ID_COL => $lp->productid,
             self::RESTAURANT_ID_COL => $lp->restaurantid,
             self::QUANTITY_COL => $lp->quantity
         ];
     }
 
     /**
-     * @param $lp LoyaltyPoints
+     * @param $lp LoyaltyBonus
      * @return array
      */
     public static function toDbUpdateArray($lp)
