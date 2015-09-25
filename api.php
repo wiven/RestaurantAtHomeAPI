@@ -163,7 +163,7 @@ $app->group('/user', function() use ($app){
         $app->get('/', function() use ($app,$user){
             CrossDomainAjax::PrintCrossDomainCall(
                 $app,
-                $user->getLoyaltyPoints()
+                $user->getLoyaltyPoints() //bug
             );
         });
     });
@@ -1065,6 +1065,13 @@ $app->group('/dashboard', function() use ($app){
         );
     });
 
+    $app->get('/loyalty/:restoId',function($restoId) use ($app,$dash){
+        CrossDomainAjax::PrintCrossDomainCall(
+            $app,
+            $dash->getLoyaltyContent($restoId)
+        );
+    });
+
     $app->get('/promotions/:restoId/:skip/:top',function($restoId,$skip,$top) use ($app,$dash){
         CrossDomainAjax::PrintCrossDomainCall(
             $app,
@@ -1243,13 +1250,48 @@ $app->group('/slots', function() use ($app){
 //endregion
 
 
-//region LoyaltyPoints
-$app->group('loyaltypoints',function() use ($app){
+//region Loyalty Bonus
+$app->group('/loyaltybonus',function() use ($app){
+    $lbc = DataControllerFactory::getLoyaltyBonusController();
+    $app->get('/:id',function($id) use ($app,$lbc){
+        CrossDomainAjax::PrintCrossDomainCall(
+            $app,
+            $lbc->getLoyaltyBonus($id)
+        );
+    });
 
+    $app->post('',function() use ($app,$lbc){
+        $st = json_decode($app->request->getBody());
+        CrossDomainAjax::PrintCrossDomainCall(
+            $app,
+            $lbc->createLoyaltyBonus($st)
+        );
+    });
+
+    $app->put('',function() use ($app,$lbc){
+        $st = json_decode($app->request->getBody());
+        CrossDomainAjax::PrintCrossDomainCall(
+            $app,
+            $lbc->updateLoyaltyBonus($st)
+        );
+    });
+
+    $app->get('/delete/:id',function($id) use ($app,$lbc){
+        CrossDomainAjax::PrintCrossDomainCall(
+            $app,
+            $lbc->deleteLoyaltyBonus($id)
+        );
+    });
 });
 //endregion
 
 
+$app->get('/test',function() use ($app){
+    CrossDomainAjax::PrintCrossDomainCall(
+        $app,
+        "test method"
+    );
+});
 //function exception_handler($exception) {
 //   if($exception);
 //}

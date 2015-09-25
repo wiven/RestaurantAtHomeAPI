@@ -11,7 +11,7 @@ namespace Rath\Entities\User;
 
 class LoyaltyPoints
 {
-    const TABLE_NAME = "user";
+    const TABLE_NAME = "loyaltypoints";
 
     const ID_COL = "id";
     const USER_ID_COL ="userid";
