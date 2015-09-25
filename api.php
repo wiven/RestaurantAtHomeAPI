@@ -158,6 +158,15 @@ $app->group('/user', function() use ($app){
             );
         });
     });
+
+    $app->group('/loyaltypoints',function() use ($app,$user){
+        $app->get('/', function() use ($app,$user){
+            CrossDomainAjax::PrintCrossDomainCall(
+                $app,
+                $user->getLoyaltyPoints()
+            );
+        });
+    });
 });
 //endregion
 
@@ -1234,7 +1243,11 @@ $app->group('/slots', function() use ($app){
 //endregion
 
 
+//region LoyaltyPoints
+$app->group('loyaltypoints',function() use ($app){
 
+});
+//endregion
 
 
 //function exception_handler($exception) {
