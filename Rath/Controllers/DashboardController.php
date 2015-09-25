@@ -13,6 +13,7 @@ use Rath\Controllers\Data\DataControllerFactory;
 use Rath\Entities\Order\Order;
 use Rath\Entities\Order\OrderStatus;
 use Rath\Entities\Promotion\Promotion;
+use Rath\Entities\Restaurant\LoyaltyBonus;
 use Rath\Entities\Restaurant\Restaurant;
 use Rath\Helpers\General;
 
@@ -98,6 +99,21 @@ class DashboardController
 //        $slotTemplates = $rc->getSlotTemplates($restoId,General::getCurrentDayOfWeek());
         return $rc->getSlotOverview($restoId);
 
+    }
+
+    public function getLoyaltyContent($restoId)
+    {
+        $rc = DataControllerFactory::getRestaurantController();
+        $lbc = DataControllerFactory::getLoyaltyBonusController();
+        $result = $rc->getLoyaltyBonus($restoId);
+
+        if(empty($result)){
+            $lb = new LoyaltyBonus();
+            $lb->restaurantid = $restoId;
+            $lb->quantity = 0;
+            $result = $lbc->createLoyaltyBonus($lb);
+        }
+        return $result;
     }
 
     public function getPromotionContent($restoId, $skip,$top)

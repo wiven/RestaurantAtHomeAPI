@@ -20,6 +20,7 @@ use Rath\Entities\Promotion\Promotion;
 use Rath\Entities\Promotion\PromotionType;
 use Rath\Entities\Restaurant\Holiday;
 use Rath\Entities\Restaurant\KitchenType;
+use Rath\Entities\Restaurant\LoyaltyBonus;
 use Rath\Entities\Restaurant\OpeningHours;
 use Rath\Entities\Restaurant\PaymentMethod;
 use Rath\Entities\Restaurant\Restaurant;
@@ -30,7 +31,6 @@ use Rath\Entities\Restaurant\RestaurantSocialMedia;
 use Rath\Entities\Restaurant\Speciality;
 use Rath\Entities\Slots\SlotTemplate;
 use Rath\Entities\Slots\SlotTemplateChange;
-use Rath\Entities\User\LoyaltyBonus;
 use Rath\Entities\User\User;
 use Rath\Helpers\General;
 use Rath\Helpers\PhotoManagement;
@@ -857,10 +857,10 @@ class RestaurantController extends ControllerBase
     //region LoyaltyBonus
     public function getLoyaltyBonus($restoId)
     {
-        return $this->db->select(LoyaltyBonus::TABLE_NAME,
+        $result = $this->db->select(LoyaltyBonus::TABLE_NAME,
             [
                 "[><]".Product::TABLE_NAME => [
-                    Product::TABLE_NAME.".".Product::ID_COL => LoyaltyBonus::PRODUCT_ID_COL
+                    LoyaltyBonus::PRODUCT_ID_COL => Product::ID_COL
                 ]
             ],
             [
@@ -872,6 +872,10 @@ class RestaurantController extends ControllerBase
             [
                 LoyaltyBonus::TABLE_NAME.".".LoyaltyBonus::RESTAURANT_ID_COL => $restoId
             ]);
+
+//        var_dump($this->db->error());
+
+        return $result;
 
     }
     //endregion

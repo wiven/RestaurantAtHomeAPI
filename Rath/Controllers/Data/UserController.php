@@ -270,19 +270,19 @@ class UserController extends ControllerBase
         $result =  $this->db->select(LoyaltyPoints::TABLE_NAME,
             [
                 "[><]".Restaurant::TABLE_NAME => [
-                    Restaurant::TABLE_NAME.".".Restaurant::ID_COL => LoyaltyPoints::TABLE_NAME.".".LoyaltyPoints::RESTAURANT_ID_COL
+                    LoyaltyPoints::RESTAURANT_ID_COL => Restaurant::ID_COL
                 ]
             ],
             [
-                Restaurant::TABLE_NAME.".".Restaurant::ID_COL,
+                Restaurant::TABLE_NAME.".".Restaurant::ID_COL."(restoId)",
                 Restaurant::NAME_COL,
                 LoyaltyPoints::QUANTITY_COL
             ],
             [
-                LoyaltyPoints::USER_ID_COL => Authorization::$userId
+                LoyaltyPoints::TABLE_NAME.".".LoyaltyPoints::USER_ID_COL => Authorization::$userId
             ]);
-
-        var_dump($this->db->last_query());
+//        var_dump($this->db->last_query());
+//        var_dump($this->db->error());
 
         return $result;
     }

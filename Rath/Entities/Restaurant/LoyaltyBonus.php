@@ -6,7 +6,7 @@
  * Time: 07:24 PM
  */
 
-namespace Rath\Entities\User;
+namespace Rath\Entities\Restaurant;
 
 
 class LoyaltyBonus

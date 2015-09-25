@@ -9,7 +9,7 @@
 namespace Rath\Controllers\Data;
 
 
-use Rath\Entities\User\LoyaltyBonus;
+use Rath\Entities\Restaurant\LoyaltyBonus;
 
 class LoyaltyBonusController extends ControllerBase
 {
@@ -18,7 +18,7 @@ class LoyaltyBonusController extends ControllerBase
      * @param $lb LoyaltyBonus
      * @return array|bool
      */
-    public function addLoyaltyBonus($lb)
+    public function createLoyaltyBonus($lb)
     {
         $lastId = $this->db->insert(LoyaltyBonus::TABLE_NAME,
             LoyaltyBonus::toDbInsertArray($lb));

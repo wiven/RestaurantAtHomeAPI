@@ -1065,6 +1065,13 @@ $app->group('/dashboard', function() use ($app){
         );
     });
 
+    $app->get('/loyalty/:restoId',function($restoId) use ($app,$dash){
+        CrossDomainAjax::PrintCrossDomainCall(
+            $app,
+            $dash->getLoyaltyContent($restoId)
+        );
+    });
+
     $app->get('/promotions/:restoId/:skip/:top',function($restoId,$skip,$top) use ($app,$dash){
         CrossDomainAjax::PrintCrossDomainCall(
             $app,
@@ -1243,7 +1250,7 @@ $app->group('/slots', function() use ($app){
 //endregion
 
 
-//region LoyaltyPoints
+//region Loyalty Bonus
 $app->group('/loyaltybonus',function() use ($app){
     $lbc = DataControllerFactory::getLoyaltyBonusController();
     $app->get('/:id',function($id) use ($app,$lbc){
@@ -1257,7 +1264,7 @@ $app->group('/loyaltybonus',function() use ($app){
         $st = json_decode($app->request->getBody());
         CrossDomainAjax::PrintCrossDomainCall(
             $app,
-            $lbc->addLoyaltyBonus($st)
+            $lbc->createLoyaltyBonus($st)
         );
     });
 
@@ -1279,6 +1286,12 @@ $app->group('/loyaltybonus',function() use ($app){
 //endregion
 
 
+$app->get('/test',function() use ($app){
+    CrossDomainAjax::PrintCrossDomainCall(
+        $app,
+        "test method"
+    );
+});
 //function exception_handler($exception) {
 //   if($exception);
 //}
