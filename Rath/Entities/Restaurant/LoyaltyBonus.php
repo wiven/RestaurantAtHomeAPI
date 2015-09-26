@@ -43,6 +43,7 @@ class LoyaltyBonus
     public static function toDbUpdateArray($lp)
     {
         return[
+            self::PRODUCT_ID_COL => $lp->productid,
             self::QUANTITY_COL => $lp->quantity
         ];
     }
