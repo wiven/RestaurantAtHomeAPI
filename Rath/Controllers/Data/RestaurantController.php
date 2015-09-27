@@ -779,12 +779,14 @@ class RestaurantController extends ControllerBase
         $result = $this->db->select(Product::TABLE_NAME,
             [
                 Product::ID_COL,
-                Product::NAME_COL
+                Product::NAME_COL,
+                Product::PHOTO_COL
             ],
             [
                 Product::RESTAURANT_ID_COL => $restoId
             ]);
 
+        $result = PhotoManagement::getPhotoUrlsForArray($result,Product::PHOTO_COL);
         return $result;
     }
     //endregion
