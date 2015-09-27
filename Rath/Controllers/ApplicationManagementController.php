@@ -19,6 +19,32 @@ class ApplicationManagementController Extends ControllerBase
         return ['ack'=> time()];
     }
 
+    //region City - Province
+    /**
+     * @param $codeOrName int|string
+     * @return array|bool
+     */
+    public function getCities($codeOrName)
+    {
+        if(strlen($codeOrName) < 2)
+            return [];
+
+        $where = [];
+        if(is_numeric($codeOrName))
+            $where[City::CODE_COL."[~]"] = $codeOrName."%";
+        else
+            $where[City::NAME_COL."[~]"] = $codeOrName."%";
+        $where["ORDER"] = City::ALPHA_COL;
+
+        return $this->db->select(City::TABLE_NAME,
+            [
+                City::ID_COL,
+                City::NAME_COL,
+                City::CODE_COL
+            ],
+            $where);
+    }
+
     public function calculateDistanceMatrix($provinceId)
     {
         ini_set('max_execution_time', 3000);
@@ -111,4 +137,5 @@ class ApplicationManagementController Extends ControllerBase
         }
 
     }
+    //endregion
 }

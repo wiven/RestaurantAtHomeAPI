@@ -1304,10 +1304,11 @@ $app->group('/loyaltybonus',function() use ($app){
 //endregion
 
 
-$app->get('/test',function() use ($app){
+$app->get('/cities/:codeOrName',function($codeOrName) use ($app){
+    $apmc = ControllerFactory::getAppManagementController();
     CrossDomainAjax::PrintCrossDomainCall(
         $app,
-        "test method"
+        $apmc->getCities($codeOrName)
     );
 });
 //function exception_handler($exception) {

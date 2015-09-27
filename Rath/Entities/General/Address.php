@@ -22,6 +22,7 @@ class Address
     const USER_ID_COL = "userId";
     const LATITUDE_COL = "latitude";
     const LONGITUDE_COL = "longitude";
+    const CITY_ID_COL = "cityid";
 
     public $id;
     public $street;
@@ -31,6 +32,7 @@ class Address
     public $city;
     public $latitude;
     public $longitude;
+    public $cityid;
 
     /**
      * @var int
@@ -49,7 +51,8 @@ class Address
             Address::POSTCODE_COL => $address->postcode,
             Address::CITY_COL => $address->city,
             Address::LATITUDE_COL => $address->latitude,
-            Address::LONGITUDE_COL => $address->longitude
+            Address::LONGITUDE_COL => $address->longitude,
+            self::CITY_ID_COL => $address->cityid
         ];
         if(!empty($address->userId))
             $array[Address::USER_ID_COL] = $address->userId;
