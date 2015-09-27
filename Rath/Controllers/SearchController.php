@@ -13,13 +13,98 @@ use Rath\Controllers\Data\ControllerBase;
 use Rath\Controllers\Data\DataControllerFactory;
 use Rath\Entities\AppMgt\FilterField;
 use Rath\Entities\DynamicClass;
+use Rath\Entities\General\Address;
+use Rath\Entities\Product\Product;
+use Rath\Entities\Promotion\Promotion;
+use Rath\Entities\Promotion\PromotionType;
+use Rath\Entities\Restaurant\KitchenType;
+use Rath\Entities\Restaurant\OpeningHours;
+use Rath\Entities\Restaurant\Restaurant;
+use Rath\Helpers\General;
 use Rath\helpers\MedooFactory;
+use Rath\Helpers\PhotoManagement;
 
 class SearchController extends ControllerBase
 {
+    /**
+     * @param $skip
+     * @param $top
+     * @param $query
+     * @return array|bool
+     * @throws \Exception
+     * <p>
+     * Options: Open = true of false
+     * </p>
+     */
     public function searchProducts($skip, $top, $query)
     {
+        $where = [];
+        if(!empty($query)){
+            $where = $this->getFilterFieldsToMedooWhereArray($query);
+        }
 
+        //Allow custom options to be passed
+        $options = $this->getMedooWhereArrayOptions($where);
+
+
+        if(isset($options["open"]))
+            if($options["open"])
+            {
+                $where["AND"][OpeningHours::TABLE_NAME.".".OpeningHours::DAY_OF_WEEK_COL] = General::getCurrentDayOfWeek();
+                $where["AND"][OpeningHours::TABLE_NAME.".".OpeningHours::FROM_TIME_COL."[<]"] = General::getCurrentTime();
+                $where["AND"][OpeningHours::TABLE_NAME.".".OpeningHours::TO_TIME_COL."[>]"] = General::getCurrentTime();
+            }
+
+        $result =  $this->db->distinct()->select(Product::TABLE_NAME,
+            [
+                "[><]".Restaurant::TABLE_NAME =>[
+                    Product::TABLE_NAME.".".Product::RESTAURANT_ID_COL => Restaurant::ID_COL
+                ],
+                "[><]".Address::TABLE_NAME => [
+                    Restaurant::TABLE_NAME.".".Restaurant::ADDRESS_ID_COL => Address::ID_COL
+                ],
+                "[><]".KitchenType::TABLE_NAME => [
+                    Restaurant::TABLE_NAME.".".Restaurant::KITCHEN_TYPE_ID_COL => KitchenType::ID_COL
+                ],
+                "[><]".OpeningHours::TABLE_NAME => [
+                    Restaurant::TABLE_NAME.".".Restaurant::ID_COL => OpeningHours::RESTAURANT_ID_COL
+                ],
+                "[>]".Promotion::TABLE_NAME => [
+                    Product::TABLE_NAME.".".Product::PROMOTION_ID_COL => Promotion::PROMOTION_TYPE_ID_COL
+                ],
+                "[>]".PromotionType::TABLE_NAME =>[
+                    Promotion::TABLE_NAME.".".Promotion::PROMOTION_TYPE_ID_COL => PromotionType::ID_COL
+                ]
+                //TODO: Link with Address->city->matrix
+            ],
+            [
+                Product::TABLE_NAME.".".Product::ID_COL,
+                Product::TABLE_NAME.".".Product::NAME_COL,
+                Product::TABLE_NAME.".".Product::PRICE_COL,
+                Product::TABLE_NAME.".".Product::DESCRIPTION_COL,
+                Product::TABLE_NAME.".".Product::PHOTO_COL,
+                PromotionType::TABLE_NAME.".".PromotionType::NAME_COL."(promotionTypeName)",
+
+                Restaurant::TABLE_NAME.".".Restaurant::NAME_COL."(restaurantName)",
+                KitchenType::TABLE_NAME.".".KitchenType::NAME_COL."(kitchenTypeName)",
+                Address::TABLE_NAME.".".Address::STREET_COL,
+                Address::TABLE_NAME.".".Address::NUMBER_COL,
+                Address::TABLE_NAME.".".Address::ADDITION_COL,
+                Address::TABLE_NAME.".".Address::CITY_COL,
+                Address::TABLE_NAME.".".Address::LATITUDE_COL,
+                Address::TABLE_NAME.".".Address::LONGITUDE_COL,
+
+                OpeningHours::TABLE_NAME.".".OpeningHours::FROM_TIME_COL,
+                OpeningHours::TABLE_NAME.".".OpeningHours::TO_TIME_COL
+            ],
+            $where);
+
+        if(!empty($result))
+            $result = PhotoManagement::getPhotoUrlsForArray($result,Product::PHOTO_COL);
+
+        var_dump($this->db->last_query());
+
+        return $result;
     }
 
     /**
@@ -35,32 +120,35 @@ class SearchController extends ControllerBase
         $parameters = explode("&",$query);
         foreach ($parameters as $para)
         {
+            echo "<br> ".$para;
+
             $keyValuePair = explode("=",$para);
             $field = $fc->get($keyValuePair[0]);
             //var_dump($field);
             $value = $keyValuePair[1];
 
-            if(strpos($value,",") !== false)
-            {
-                $result[$field->databaseFieldname] = explode(",",$value);
+            //Allow custom options to be passed
+            if(gettype($field) != General::objectType){
+                $result["options"][$field] = $value;
             }
-            elseif(strpos($value,"-") !== false)
-            {
-                $range = explode("-",$value);
-                if(count($range) != 2)
-                    throw new \Exception("Invalid Filter range submitted");
+            else {
+                if (strpos($value, ",") !== false) {
+                    $result[$field->databaseFieldname] = explode(",", $value);
+                } elseif (strpos($value, "-") !== false) {
+                    $range = explode("-", $value);
+                    if (count($range) != 2)
+                        throw new \Exception("Invalid Filter range submitted");
 
-                $result[$field->databaseFieldname."[<>]"] = $range;
-            }
-            else
-            {
-                //var_dump($value);
-                if($field->like)
-                    $key = $field->databaseFieldname."[~]";
-                else
-                    $key = $field->databaseFieldname;
+                    $result[$field->databaseFieldname . "[<>]"] = $range;
+                } else {
+                    //var_dump($value);
+                    if ($field->like)
+                        $key = $field->databaseFieldname . "[~]";
+                    else
+                        $key = $field->databaseFieldname;
 
-                $result[$key] = $value;
+                    $result[$key] = $value;
+                }
             }
         }
 
@@ -71,34 +159,10 @@ class SearchController extends ControllerBase
             ];
     }
 
-    /*
-    *
-    * Geeft de afstand van A tot B adhv breedte- & lengtegraad
-    *
-    * @param	float		$lat1		Breedtegraad van A
-    * @param	float		$lat2		Breedtegraad van B
-    * @param	float		$lon1		Lengtegraad van A
-    * @param	float		$lon2		Lengtegraad van B
-    * @param	string	$unit		Afstand in kilometer (K) of mijlen (M)
-    *
-    */
-    function distance($lat1, $lon1, $lat2, $lon2, $unit)
+    public function getMedooWhereArrayOptions(&$array)
     {
-        $theta = $lon1 - $lon2;
-        $dist = sin(deg2rad($lat1)) * sin(deg2rad($lat2)) +  cos(deg2rad($lat1)) * cos(deg2rad($lat2)) * cos(deg2rad($theta));
-        $dist = acos($dist);
-        $dist = rad2deg($dist);
-        $miles = $dist * 60 * 1.1515;
-        $unit = strtoupper($unit);
-
-        if ($unit == "K")
-        {
-            return ($miles * 1.609344);
-        }
-        else
-        {
-            return $miles;
-        }
-
+        $options = $array["AND"]["options"];
+        unset($array["AND"]["options"]);
+        return $options;
     }
 }

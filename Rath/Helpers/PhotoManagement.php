@@ -45,4 +45,15 @@ class PhotoManagement
             ];
         }
     }
+
+    public static function getPhotoUrlsForArray($array, $column)
+    {
+        for($i = 0; $i < count($array); $i++){
+            $photo = $array[$i];
+            //var_dump($photo);
+            $photo[$column] = PhotoManagement::getPhotoUrls($photo[$column]);
+            $array[$i] = $photo;
+        }
+        return $array;
+    }
 }

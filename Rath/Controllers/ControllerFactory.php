@@ -41,4 +41,16 @@ class ControllerFactory
         return self::$searchController;
     }
 
+    /**
+     * @var ApplicationManagementController
+     */
+    private static $appManagementController;
+
+    public static function getAppManagementController()
+    {
+        if(empty(self::$appManagementController))
+            self::$appManagementController = new ApplicationManagementController();
+        return self::$appManagementController;
+    }
+
 }

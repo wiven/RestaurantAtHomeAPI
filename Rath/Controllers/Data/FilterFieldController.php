@@ -10,12 +10,13 @@ namespace Rath\Controllers\Data;
 
 
 use Rath\Entities\AppMgt\FilterField;
+use Rath\Helpers\General;
 
 class FilterFieldController Extends ControllerBase
 {
     /**
      * @param $id
-     * @return FilterField
+     * @return FilterField | String
      */
     public function get($id)
     {
@@ -26,6 +27,8 @@ class FilterFieldController Extends ControllerBase
             ]
         );
 
+        if(gettype($result) != General::arrayType or empty($result))
+            return $id;
         return FilterField::toFilterField($result);
     }
 }

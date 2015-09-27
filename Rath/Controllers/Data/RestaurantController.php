@@ -577,12 +577,7 @@ class RestaurantController extends ControllerBase
                 "LIMIT" => [0,10]
             ]);
 
-        for($i = 0; $i < count($photos); $i++){
-            $photo = $photos[$i];
-            //var_dump($photo);
-            $photo[RestaurantPhoto::URL_COL] = PhotoManagement::getPhotoUrls($photo[RestaurantPhoto::URL_COL]);
-            $photos[$i] = $photo;
-        }
+        $photos = PhotoManagement::getPhotoUrlsForArray($photos,RestaurantPhoto::URL_COL);
         return $photos;
     }
 

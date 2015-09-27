@@ -177,6 +177,7 @@ $app->group('/manage', function() use ($app){
     $promo = DataControllerFactory::getPromotionController();
     $gen = DataControllerFactory::getGeneralController();
     $default = DataControllerFactory::getDefaultDataController();
+    $mgt = ControllerFactory::getAppManagementController();
 
     $app->group('/kitchentype' , function() use ($app,$resto){
         $app->get('/:id', function($id) use ($app,$resto){
@@ -465,6 +466,13 @@ $app->group('/manage', function() use ($app){
                 $default->insertSocialMediaTypes()
             );
         });
+    });
+
+    $app->post('/distancematrix/:provinceId', function ($provinceId) use ($app, $mgt) {
+        CrossDomainAjax::PrintCrossDomainCall(
+            $app,
+            $mgt->calculateDistanceMatrix($provinceId)
+        );
     });
 });
 //endregion
@@ -1087,6 +1095,16 @@ $app->group('/dashboard', function() use ($app){
     });
 });
 //endregion
+
+$app->group('/search', function() use ($app){
+    $sc = ControllerFactory::getSearchController();
+    $app->get('/:skip/:top/:query', function($skip,$top,$query) use ($app,$sc){
+       CrossDomainAjax::PrintCrossDomainCall(
+           $app,
+           $sc->searchProducts($skip,$top,$query)
+       );
+    });
+});
 //endregion
 
 

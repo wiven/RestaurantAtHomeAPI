@@ -34,6 +34,7 @@ class medoo
 	// Variable
 	protected $logs = array();
 	protected $debug_mode = false;
+	protected $distinct_mode = false;
 	public function __construct($options = null)
 	{
 		try {
@@ -441,6 +442,13 @@ class medoo
 	}
 	protected function select_context($table, $join, &$columns = null, $where = null, $column_fn = null)
 	{
+		if($this->distinct_mode)
+		{
+			$distinct = 'DISTINCT ';
+		} else {
+			$distinct = '';
+		}
+
 		$table = '"' . $table . '"';
 		$join_key = is_array($join) ? array_keys($join) : null;
 		if (
@@ -550,7 +558,7 @@ class medoo
 		{
 			$column = $this->column_push($columns);
 		}
-		return 'SELECT ' . $column . ' FROM ' . $table . $this->where_clause($where);
+		return 'SELECT ' . $distinct . $column . ' FROM ' . $table . $this->where_clause($where);
 	}
 	public function select($table, $join, $columns = null, $where = null)
 	{
@@ -753,6 +761,11 @@ class medoo
 	public function debug()
 	{
 		$this->debug_mode = true;
+		return $this;
+	}
+	public function distinct()
+	{
+		$this->distinct_mode = true;
 		return $this;
 	}
 	public function error()
