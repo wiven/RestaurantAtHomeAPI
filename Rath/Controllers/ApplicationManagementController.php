@@ -35,6 +35,7 @@ class ApplicationManagementController Extends ControllerBase
         else
             $where[City::NAME_COL."[~]"] = $codeOrName."%";
         $where["ORDER"] = City::ALPHA_COL;
+        $where["LIMIT"] = [0,10];
 
         return $this->db->select(City::TABLE_NAME,
             [

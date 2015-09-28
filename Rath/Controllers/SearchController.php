@@ -74,8 +74,7 @@ class SearchController extends ControllerBase
                 ],
                 "[>]".PromotionType::TABLE_NAME =>[
                     Promotion::TABLE_NAME.".".Promotion::PROMOTION_TYPE_ID_COL => PromotionType::ID_COL
-                ],
-
+                ]
                 //TODO: Link with Address->city->matrix
             ],
             [
