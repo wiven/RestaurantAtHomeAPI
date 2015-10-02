@@ -10,6 +10,7 @@ namespace Rath\helpers;
 
 use Rath\Entities\General\Address;
 use Rath\Entities\General\Partner;
+use Rath\Entities\Order\Coupon;
 use Rath\Entities\Order\Order;
 use Rath\Entities\Order\OrderDetail;
 use Rath\Entities\Product\Product;
@@ -134,7 +135,9 @@ class MasterData
             "Slot Template",
             MasterData::echoSlotTemplate(),
             "Slot Template Change",
-            MasterData::echoSlotTemplateChange()
+            MasterData::echoSlotTemplateChange(),
+            "Coupon",
+            MasterData::echoCoupon()
         ];
     }
 
@@ -282,5 +285,18 @@ class MasterData
         $stc->date = General::getCurrentDate();
         $stc->quantity = 15;
         return $stc;
+    }
+
+    private static function echoCoupon()
+    {
+        $cp = new Coupon();
+        $cp->id = 1;
+        $cp->code = "ioqsjdofijf";
+        $cp->discountType = Coupon::DISCOUNT_TYPE_VAL_AMOUNT;
+        $cp->discountAmount = 10;
+        $cp->startDate = General::getCurrentDate();
+        $cp->endDate = General::getCurrentDate();
+        $cp->quantity = 10;
+        return $cp;
     }
 }

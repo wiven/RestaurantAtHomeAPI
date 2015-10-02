@@ -12,6 +12,7 @@ use PDO;
 use Rath\Controllers\ControllerFactory;
 use Rath\Controllers\Data\ControllerBase;
 use Rath\Entities\General\Address;
+use Rath\Entities\Order\Coupon;
 use Rath\Entities\Order\Order;
 use Rath\Entities\Order\OrderDetail;
 use Rath\Entities\Order\OrderStatus;
@@ -874,6 +875,21 @@ class RestaurantController extends ControllerBase
 
         return $result;
 
+    }
+    //endregion
+
+    //region Coupons
+    /**
+     * @param $restoId
+     * @return array|bool
+     */
+    public function getCoupons($restoId)
+    {
+        return $this->db->select(Coupon::TABLE_NAME,
+            "*",
+            [
+                Coupon::RESTAURANT_ID_COL => $restoId
+            ]);
     }
     //endregion
 

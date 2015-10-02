@@ -21,8 +21,12 @@ class Coupon
         const DISCOUNT_TYPE_VAL_AMOUNT = "Amount";
     const DISCOUNT_AMOUT_COL = "discountAmount";
     const QUANTITY_COL = "quantity";
+    const CODE_COL = "code";
+    const RESTAURANT_ID_COL = "restaurantid";
 
     public $id;
+    public $restaurantid;
+    public $code;
     public $startDate;
     public $endDate;
     public $discountType;
@@ -33,9 +37,9 @@ class Coupon
      * @param $coupon Coupon
      * @return array
      */
-    public function toDbArray($coupon)
+    public static function toDbArray($coupon)
     {
-        return [
+        $data = [
             Coupon::START_DATE_COL => $coupon->startDate,
             Coupon::END_DATE_COL => $coupon->endDate,
             Coupon::DISCOUNT_TYPE_COL => $coupon->discountType,
@@ -43,5 +47,13 @@ class Coupon
             Coupon::DISCOUNT_AMOUT_COL => $coupon->discountAmount,
             Coupon::QUANTITY_COL => $coupon->quantity
         ];
+
+        if(isset($coupon->restaurantid))
+            $data[self::RESTAURANT_ID_COL] = $coupon->restaurantid;
+
+        if(isset($coupon->code))
+            $data[self::CODE_COL] = $coupon->code;
+
+        return $data;
     }
 }

@@ -819,6 +819,15 @@ $app->group('/restaurant', function() use ($app){
             });
         });
     });
+
+    $app->group('/coupons',function() use ($app,$resto){
+        $app->get('/:id', function ($id) use ($app, $resto) {
+            CrossDomainAjax::PrintCrossDomainCall(
+                $app,
+                $resto->getCoupons($id)
+            );
+        });
+    });
 });
 //endregion
 
@@ -1360,6 +1369,47 @@ $app->group('/loyaltybonus',function() use ($app){
 });
 //endregion
 
+//region Coupons
+$app->group('/coupon',function() use ($app){
+    $cc = DataControllerFactory::getCouponController();
+    $app->get('/:id',function($id) use ($app,$cc){
+        CrossDomainAjax::PrintCrossDomainCall(
+            $app,
+            $cc->getCoupon($id)
+        );
+    });
+
+    $app->post('',function() use ($app,$cc){
+        $st = json_decode($app->request->getBody());
+        CrossDomainAjax::PrintCrossDomainCall(
+            $app,
+            $cc->createCoupon($st)
+        );
+    });
+
+    $app->put('',function() use ($app,$cc){
+        $st = json_decode($app->request->getBody());
+        CrossDomainAjax::PrintCrossDomainCall(
+            $app,
+            $cc->updateCoupon($st)
+        );
+    });
+
+    $app->get('/delete/:id',function($id) use ($app,$cc){
+        CrossDomainAjax::PrintCrossDomainCall(
+            $app,
+            $cc->deleteCoupon($id)
+        );
+    });
+
+    $app->get('/generatecode/',function() use ($app,$cc){
+        CrossDomainAjax::PrintCrossDomainCall(
+            $app,
+            $cc->generateCode()
+        );
+    });
+});
+//endregion
 
 $app->get('/cities/:codeOrName',function($codeOrName) use ($app){
     $apmc = ControllerFactory::getAppManagementController();

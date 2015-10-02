@@ -12,6 +12,7 @@ namespace Rath\Helpers;
 class General
 {
     const dateFormat = "Y-m-d";
+    const yearFormat = "Y";
     const timeFormat = "H:i:s";
     const dateTimeFormat = "Y-m-d H:i:s";
 
@@ -21,6 +22,11 @@ class General
     public static function getCurrentDate()
     {
         return date(self::dateFormat);
+    }
+
+    public static function getCurrentYear()
+    {
+        return date(self::yearFormat);
     }
 
     /**

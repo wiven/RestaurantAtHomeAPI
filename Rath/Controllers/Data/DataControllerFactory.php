@@ -9,7 +9,7 @@
 namespace Rath\Controllers\Data;
 
 
-use Rath\Entities\User\LoyaltyBonus;
+use Rath\Entities\Restaurant\LoyaltyBonus;
 
 class DataControllerFactory
 {
@@ -67,6 +67,12 @@ class DataControllerFactory
      * @var LoyaltyBonus
      */
     private static $loyaltyBonusController;
+
+    /**
+     * @var CouponController
+     */
+    private static $couponController;
+
 
     /**
      * @return UserController
@@ -164,6 +170,13 @@ class DataControllerFactory
         if(empty(self::$loyaltyBonusController))
             self::$loyaltyBonusController = new LoyaltyBonusController();
         return self::$loyaltyBonusController;
+    }
+
+    public static function getCouponController()
+    {
+        if(empty(self::$couponController))
+            self::$couponController = new CouponController();
+        return self::$couponController;
     }
 
 }
