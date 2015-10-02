@@ -15,9 +15,11 @@ class PaymentMethod
 
     const ID_COL = "id";
     const NAME_COL = "name";
+    const MOLLIE_ID_COL = "mollieId";
 
     public $id;
     public $name;
+    public $mollieId;
 
     /**
      * @param $payment PaymentMethod
@@ -26,7 +28,8 @@ class PaymentMethod
     public static function toDbArray($payment){
         return [
             PaymentMethod::ID_COL => $payment->id,
-            PaymentMethod::NAME_COL => $payment->name
+            PaymentMethod::NAME_COL => $payment->name,
+            PaymentMethod::MOLLIE_ID_COL => $payment->mollieId
         ];
     }
 }

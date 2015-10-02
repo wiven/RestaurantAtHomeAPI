@@ -53,4 +53,16 @@ class ControllerFactory
         return self::$appManagementController;
     }
 
+    /**
+     * @var PaymentController
+     */
+    private static $paymentController;
+
+    public static function getPaymentController()
+    {
+        if(empty(self::$paymentController))
+            self::$paymentController = new PaymentController();
+        return self::$paymentController;
+    }
+
 }

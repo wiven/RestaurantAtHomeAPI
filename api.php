@@ -219,6 +219,7 @@ $app->group('/manage', function() use ($app){
     $gen = DataControllerFactory::getGeneralController();
     $default = DataControllerFactory::getDefaultDataController();
     $mgt = ControllerFactory::getAppManagementController();
+    $pay = ControllerFactory::getPaymentController();
 
     $app->group('/kitchentype' , function() use ($app,$resto){
         $app->get('/:id', function($id) use ($app,$resto){
@@ -513,6 +514,21 @@ $app->group('/manage', function() use ($app){
         CrossDomainAjax::PrintCrossDomainCall(
             $app,
             $mgt->calculateDistanceMatrix($provinceId)
+        );
+    });
+
+    $app->get('/payments/mollie/paymentmethods', function () use ($app, $pay) {
+        CrossDomainAjax::PrintCrossDomainCall(
+            $app,
+            $pay->logMolliePaymentMethods()
+        );
+    });
+
+    $app->post('/payments/mollie/dummy', function () use ($app, $pay) {
+        $pr = json_decode($app->request->getBody());
+        CrossDomainAjax::PrintCrossDomainCall(
+            $app,
+            $pay->CreateMollieTransaction($pr)
         );
     });
 });

@@ -9,6 +9,9 @@
 namespace Rath\Entities\Order;
 
 
+use Rath\Controllers\Data\DataControllerFactory;
+use Rath\Entities\Restaurant\Restaurant;
+
 class Order
 {
     const TABLE_NAME = "order";
@@ -25,6 +28,7 @@ class Order
     const CREATION_DATE_TIME_COL = "creationDateTime";
     const SUBMITTED_COL = "submitted";
     const SLOT_TEMPLATE_ID_COL = "slottemplateId";
+    const MOLLIE_ID_COL = "mollieId";
 
     public $id;
     public $userId;
@@ -38,8 +42,20 @@ class Order
     public $creationDateTime;
     public $submitted;
     public $slottemplateId;
+    public $mollieId;
 
     public $lines;
+
+    /**
+     * @param $order Order
+     * @return string
+     */
+    public static function getOrderDescription($order)
+    {
+        $rc = DataControllerFactory::getRestaurantController();
+        $resto = $rc->getRestaurant($order->restaurantId);
+        return "Order ".$order->id." - ".$resto[Restaurant::NAME_COL]." - ".$order->amount." EURO";
+    }
 
     /**
      * @param $order Order
@@ -63,6 +79,9 @@ class Order
 
         if(!empty($order->slottemplateId))
             $data[self::SLOT_TEMPLATE_ID_COL] = $order->slottemplateId;
+
+        if(!empty($order->mollieId))
+            $data[self::MOLLIE_ID_COL] = $order->mollieId;
 
         //not allowed through api!
         //if(!empty($order->submitted))
