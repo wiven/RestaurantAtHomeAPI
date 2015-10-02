@@ -132,11 +132,11 @@ class SearchController extends ControllerBase
         $parameters = explode("&",$query);
         foreach ($parameters as $para)
         {
-            Debug::writeEcho("<br> ".$para);
+            $this->log->debug("<br> ".$para);
 
             $keyValuePair = explode("=",$para);
             $field = $fc->get($keyValuePair[0]);
-            //var_dump($field);
+            $this->log->debug($field);
             $value = $keyValuePair[1];
 
             //Allow custom options to be passed
@@ -153,7 +153,7 @@ class SearchController extends ControllerBase
 
                     $result[$field->databaseFieldname . "[<>]"] = $range;
                 } else {
-                    //var_dump($value);
+                    $this->log->debug($value);
                     if ($field->like)
                         $key = $field->databaseFieldname . "[~]";
                     else

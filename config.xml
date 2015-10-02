@@ -6,7 +6,7 @@
         <param name="file" value="myLog.log" />
     </appender>
     <root>
-        <level value="Debug" />
+        <level value="FATAL" />
         <appender_ref ref="myAppender" />
     </root>
 </configuration>

@@ -44,7 +44,40 @@ $app->add(new \Rath\Slim\Middleware\Authorization()); //TODO; Authentication che
 
 Logger::configure('config.xml');
 
+//$configurator = new LoggerConfiguratorDefault();
+//$config = $configurator->parse('config.xml');
+//var_dump($config);
+//
+//$codeConfig = \Rath\Helpers\Log4PhpConfig::getConfig();
+//var_dump($codeConfig);
+//
+//Logger::configure($codeConfig);
+//Logger::configure([
+//    'appenders' => [
+//        'default' => [
+//            'class' => 'LoggerAppenderFile',
+//            'layout' => [
+//                'class' => 'LoggerLayoutPattern',
+//                'params' => [
+//                    'conversionPattern' => '%date{Y-m-d H:i:s,u} %-5level [%logger] %message%newline%ex'
+//                ]
+//            ],
+//            'params' => [
+//                'file' => 'mylog.log',
+//                'append' => true
+//            ]
+//        ]
+//    ],
+//    'rootlogger' => [
+//        'level' => 'DEBUG',
+//        'appenders' => [
+//            "default"
+//        ]
+//    ]
+//]);
+
 $log = Logger::getLogger("api");
+
 
 bcscale(2); //Calculation decimals
 //endregion
