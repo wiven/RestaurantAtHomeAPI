@@ -9,6 +9,7 @@
 namespace Rath\Controllers\Data;
 
 
+use Logger;
 use Rath\Helpers\MedooFactory;
 use Rath\Libraries\medoo;
 
@@ -19,7 +20,13 @@ abstract class ControllerBase
      */
     protected $db;
 
+    /**
+     * @var Logger
+     */
+    protected $log;
+
     public function __construct(){
         $this->db = MedooFactory::getMedooInstance();
+        $this->log = Logger::getLogger(get_called_class());
     }
 }

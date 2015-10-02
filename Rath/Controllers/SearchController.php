@@ -111,7 +111,9 @@ class SearchController extends ControllerBase
         if(!empty($result))
             $result = PhotoManagement::getPhotoUrlsForArray($result,Product::PHOTO_COL);
 
-        Debug::varDump($this->db->last_query());
+        $this->log->debug($this->db->last_query());
+
+        //Todo: skip + top
 
         return $result;
     }
