@@ -58,6 +58,9 @@ class SearchController extends ControllerBase
                 $where["AND"][OpeningHours::TABLE_NAME.".".OpeningHours::TO_TIME_COL."[>]"] = General::getCurrentTime();
             }
 
+        // skip / top filters
+        $where["LIMIT"] = [$skip,$top];
+
         $result =  $this->db->distinct()->select(Product::TABLE_NAME,
             [
                 "[><]".Restaurant::TABLE_NAME =>[
@@ -112,8 +115,6 @@ class SearchController extends ControllerBase
             $result = PhotoManagement::getPhotoUrlsForArray($result,Product::PHOTO_COL);
 
         $this->log->debug($this->db->last_query());
-
-        //Todo: skip + top
 
         return $result;
     }
