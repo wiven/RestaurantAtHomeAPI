@@ -16,6 +16,7 @@ use Rath\Entities\User\UserPermission;
 use Rath\Entities\ApiResponse;
 use Rath\Libraries\medoo;
 use Rath\Slim\Middleware\Authorization;
+use Slim\Route;
 
 
 class UserController extends ControllerBase
@@ -216,9 +217,13 @@ class UserController extends ControllerBase
         return $lastId+1;
     }
 
+    /**
+     * @param $hash string
+     * @param $route Route
+     * @return bool
+     */
     public function checkUserPermissions($hash,$route){
         $result = UserController::getUserByHash($hash);
-        $result = array_filter($result);
 //        var_dump($result);
 
         if(!empty($result)>0)
@@ -233,6 +238,7 @@ class UserController extends ControllerBase
             return false; //TODO: implement possibility to add user specific permissions
 
 
+
         $result = $this->db->select(UserPermission::TABLE_NAME,
             [
                 UserPermission::DISABLED_COL
@@ -240,7 +246,7 @@ class UserController extends ControllerBase
             [
                 "AND" => [
                     UserPermission::USER_TYPE_COL => $user[User::TYPE_COL],
-                    UserPermission::ROUTE_COL => $route
+                    UserPermission::ROUTE_COL => $route->getName()
                 ]
             ]);
 //        var_dump($result);
@@ -250,14 +256,32 @@ class UserController extends ControllerBase
     }
 
     public function getUserIdByHash($hash){
-        $user = $this->db->select(User::TABLE_NAME,
+        $user = $this->db->get(User::TABLE_NAME,
             [
                 User::ID_COL
             ],
             [
                 User::HASH_COL => $hash
             ]);
-        return array_filter($user);
+        $this->log->debug($user);
+        return $user;
+    }
+
+    public function checkUserHasRestaurant($userId, $restoId)
+    {
+        $result = $this->db->get(Restaurant::TABLE_NAME,
+            [
+                Restaurant::ID_COL,
+                Restaurant::USER_ID_COL
+            ],
+            [
+                "AND" => [
+                    Restaurant::USER_ID_COL => $userId,
+                    Restaurant::ID_COL => $restoId
+                ]
+            ]);
+
+        return isset($result[Restaurant::ID_COL]);
     }
 
     //region LoyaltyPoints
@@ -286,6 +310,8 @@ class UserController extends ControllerBase
 
         return $result;
     }
+
+
 
     //endregion
 

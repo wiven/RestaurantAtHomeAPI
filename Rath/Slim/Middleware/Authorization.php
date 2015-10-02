@@ -11,19 +11,35 @@
 
 namespace Rath\Slim\Middleware;
 
+use Logger;
 use Rath\Controllers\Data\DataControllerFactory;
 use Rath\Controllers\Data\UserController;
 use Rath\Controllers\UserPermissionController;
 use Rath\Entities\User\User;
+use Slim\Route;
 
 
 class Authorization extends \Slim\Middleware
 {
     /**
+     * RestaurantId Variable that will be checked for authenticity.
+     */
+    const restoId = "aRestoId";
+
+    /**
      * @var int
      */
     public static $userId = 0;
+
+    /**
+     * @var string
+     */
     private $hash = "";
+
+    /**
+     * @var Logger
+     */
+    private $log;
     /**
      * @var UserController
      */
@@ -31,6 +47,7 @@ class Authorization extends \Slim\Middleware
 
     public function __construct(){
         $this->userController = DataControllerFactory::getUserController();
+        $this->log = Logger::getLogger(__CLASS__);
     }
 
     public function call(){
@@ -47,9 +64,11 @@ class Authorization extends \Slim\Middleware
         $this->loadUserIdFromHash();
 
         $route = $this->app->router()->getCurrentRoute();
-        $routeName = $route->getName();
-        if(empty($routeName))
+        //$this->checkParameters($route);
+
+        if(empty( $route->getName()))
             return; //Skip all unamed routes. //TODO: build in Role model
+
         $publicRoutes = [
             API_LOGIN_ROUTE,
             API_UNAUTHORISED_ROUTE,
@@ -59,9 +78,9 @@ class Authorization extends \Slim\Middleware
         ];
 
         //die(var_dump($routeName));
-        if(!in_array($routeName,$publicRoutes)){
-            if(!$this->userController->checkUserPermissions($this->hash,$route->getName())){
-                $response = UserPermissionController::GetPermissionErrorMessage($routeName);
+        if(!in_array($route->getName(),$publicRoutes)){
+            if(!$this->userController->checkUserPermissions($this->hash,$route)){
+                $response = UserPermissionController::GetPermissionErrorMessage($route->getName());
                 $this->app->halt(401,json_encode($response));
 //                $res = $this->app->response();
 //                $res->status(401);
@@ -75,15 +94,38 @@ class Authorization extends \Slim\Middleware
         }
     }
 
+
     private function loadUserIdFromHash(){
         $headers = $this->app->request->headers;
         $this->hash = $headers["hash"];
         if(!empty($this->hash)){
             $result = $this->userController->getUserIdByHash($this->hash);
             if(!empty($result))
-                Authorization::$userId = intval($result[0][User::ID_COL]);
+                Authorization::$userId = intval($result[User::ID_COL]);
         }
         else
             Authorization::$userId = -1;
+    }
+
+    /**
+     * @param $route Route
+     */
+    private function checkParameters($route)
+    {
+        $parameters = $route->getParams();
+        $this->log->debug($parameters);
+        if(isset($parameters[self::restoId])){
+            if(!$this->userController->checkUserHasRestaurant(self::$userId,$parameters[self::restoId]))
+                $this->SendSecurityMessage($route);
+        }
+    }
+
+    /**
+     * @param $route Route
+     */
+    private function SendSecurityMessage($route)
+    {
+        $response = UserPermissionController::GetPermissionErrorMessage($route->getName());
+        $this->app->halt(401,json_encode($response));
     }
 }

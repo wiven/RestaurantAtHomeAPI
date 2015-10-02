@@ -34,6 +34,7 @@ use Rath\Controllers\Data\DataControllerFactory;
 use Rath\Entities\Order\OrderStatus;
 use Rath\Helpers\CrossDomainAjax;
 use Rath\Libraries\UploadHandler;
+use Rath\Slim\Middleware\Authorization;
 
 //region Init
 \Slim\Slim::registerAutoloader();
@@ -743,28 +744,28 @@ $app->group('/restaurant', function() use ($app){
     });
 
     $app->group('/order', function() use ($app,$resto){
-        $app->get('/new/:id/:skip/:top', function($id,$skip,$top) use ($app,$resto){
+        $app->get('/new/:'.Authorization::restoId.'/:skip/:top', function($id,$skip,$top) use ($app,$resto){
             CrossDomainAjax::PrintCrossDomainCall(
                 $app,
                 $resto->getOrders($id,OrderStatus::val_New,OrderStatus::val_New,$skip,$top,false)
             );
         });
 
-        $app->get('/inprogress/:id/:skip/:top', function($id,$skip,$top) use ($app,$resto){
+        $app->get('/inprogress/:'.Authorization::restoId.'/:skip/:top', function($id,$skip,$top) use ($app,$resto){
             CrossDomainAjax::PrintCrossDomainCall(
                 $app,
                 $resto->getOrders($id,OrderStatus::val_Accepted,OrderStatus::val_InProgress,$skip,$top,false)
             );
         });
 
-        $app->get('/ready/:id/:skip/:top', function($id,$skip,$top) use ($app,$resto){
+        $app->get('/ready/:'.Authorization::restoId.'/:skip/:top', function($id,$skip,$top) use ($app,$resto){
             CrossDomainAjax::PrintCrossDomainCall(
                 $app,
                 $resto->getOrders($id,OrderStatus::val_Ready,OrderStatus::val_OnRoute,$skip,$top,false)
             );
         });
 
-        $app->get('/finished/:id/:skip/:top', function($id,$skip,$top) use ($app,$resto){
+        $app->get('/finished/:'.Authorization::restoId.'/:skip/:top', function($id,$skip,$top) use ($app,$resto){
             CrossDomainAjax::PrintCrossDomainCall(
                 $app,
                 $resto->getOrders($id,OrderStatus::val_Finished,OrderStatus::val_Finished,$skip,$top,false)
@@ -787,7 +788,7 @@ $app->group('/restaurant', function() use ($app){
             );
         });
 
-        $app->get('/comming/:id/:skip/:top', function($id,$skip,$top) use ($app,$resto){
+        $app->get('/comming/:'.Authorization::restoId.'/:skip/:top', function($id,$skip,$top) use ($app,$resto){
             CrossDomainAjax::PrintCrossDomainCall(
                 $app,
                 $resto->getComingPromotions($id,$skip,$top)
@@ -797,13 +798,13 @@ $app->group('/restaurant', function() use ($app){
 
     $app->group('/slots', function() use ($app,$resto) {
         $app->group('/template', function() use ($app,$resto) {
-            $app->get('/:id', function ($id) use ($app, $resto) {
+            $app->get('/:'.Authorization::restoId, function ($id) use ($app, $resto) {
                 CrossDomainAjax::PrintCrossDomainCall(
                     $app,
                     $resto->getSlotTemplates($id)
                 );
             });
-            $app->get('/:id/:dayOfWeek', function ($id,$dayOfWeek) use ($app, $resto) {
+            $app->get('/:'.Authorization::restoId.'/:dayOfWeek', function ($id,$dayOfWeek) use ($app, $resto) {
                 CrossDomainAjax::PrintCrossDomainCall(
                     $app,
                     $resto->getSlotTemplates($id,$dayOfWeek)
@@ -811,7 +812,7 @@ $app->group('/restaurant', function() use ($app){
             });
         });
         $app->group('/overview', function() use ($app,$resto) {
-            $app->get('/:id/:date', function ($id,$date) use ($app, $resto) {
+            $app->get('/:'.Authorization::restoId.'/:date', function ($id,$date) use ($app, $resto) {
                 CrossDomainAjax::PrintCrossDomainCall(
                     $app,
                     $resto->getSlotOverview($id,$date)
@@ -821,7 +822,7 @@ $app->group('/restaurant', function() use ($app){
     });
 
     $app->group('/coupons',function() use ($app,$resto){
-        $app->get('/:id', function ($id) use ($app, $resto) {
+        $app->get('/:'.Authorization::restoId, function ($id) use ($app, $resto) {
             CrossDomainAjax::PrintCrossDomainCall(
                 $app,
                 $resto->getCoupons($id)
