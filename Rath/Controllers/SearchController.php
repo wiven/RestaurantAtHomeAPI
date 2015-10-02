@@ -11,6 +11,8 @@ namespace Rath\Controllers;
 
 use Rath\Controllers\Data\ControllerBase;
 use Rath\Controllers\Data\DataControllerFactory;
+use Rath\Entities\AppMgt\City;
+use Rath\Entities\AppMgt\DistanceMatrix;
 use Rath\Entities\AppMgt\FilterField;
 use Rath\Entities\DynamicClass;
 use Rath\Entities\General\Address;
@@ -20,6 +22,7 @@ use Rath\Entities\Promotion\PromotionType;
 use Rath\Entities\Restaurant\KitchenType;
 use Rath\Entities\Restaurant\OpeningHours;
 use Rath\Entities\Restaurant\Restaurant;
+use Rath\Helpers\Debug;
 use Rath\Helpers\General;
 use Rath\helpers\MedooFactory;
 use Rath\Helpers\PhotoManagement;
@@ -74,8 +77,13 @@ class SearchController extends ControllerBase
                 ],
                 "[>]".PromotionType::TABLE_NAME =>[
                     Promotion::TABLE_NAME.".".Promotion::PROMOTION_TYPE_ID_COL => PromotionType::ID_COL
+                ],
+                "[><]".City::TABLE_NAME => [
+                    Address::TABLE_NAME.".".Address::CITY_ID_COL => City::ID_COL
+                ],
+                "[><]".DistanceMatrix::TABLE_NAME => [
+                    City::TABLE_NAME.".".City::ID_COL => DistanceMatrix::TO_CITY_ID_COL
                 ]
-                //TODO: Link with Address->city->matrix
             ],
             [
                 Product::TABLE_NAME.".".Product::ID_COL,
@@ -93,6 +101,7 @@ class SearchController extends ControllerBase
                 Address::TABLE_NAME.".".Address::CITY_COL,
                 Address::TABLE_NAME.".".Address::LATITUDE_COL,
                 Address::TABLE_NAME.".".Address::LONGITUDE_COL,
+                DistanceMatrix::TABLE_NAME.".".DistanceMatrix::DISTANCE_COL,
 
                 OpeningHours::TABLE_NAME.".".OpeningHours::FROM_TIME_COL,
                 OpeningHours::TABLE_NAME.".".OpeningHours::TO_TIME_COL
@@ -102,7 +111,7 @@ class SearchController extends ControllerBase
         if(!empty($result))
             $result = PhotoManagement::getPhotoUrlsForArray($result,Product::PHOTO_COL);
 
-        var_dump($this->db->last_query());
+        Debug::varDump($this->db->last_query());
 
         return $result;
     }
@@ -120,7 +129,7 @@ class SearchController extends ControllerBase
         $parameters = explode("&",$query);
         foreach ($parameters as $para)
         {
-            echo "<br> ".$para;
+            Debug::writeEcho("<br> ".$para);
 
             $keyValuePair = explode("=",$para);
             $field = $fc->get($keyValuePair[0]);
@@ -161,8 +170,11 @@ class SearchController extends ControllerBase
 
     public function getMedooWhereArrayOptions(&$array)
     {
-        $options = $array["AND"]["options"];
-        unset($array["AND"]["options"]);
+        $options = [];
+        if(isset($array["AND"]["options"])){
+            $options = $array["AND"]["options"];
+            unset($array["AND"]["options"]);
+        }
         return $options;
     }
 }

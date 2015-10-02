@@ -7,9 +7,13 @@
 if (!defined('APP_PATH'))
     define('APP_PATH', realpath(__DIR__ ));
 
+if(!defined("DEBUG"))
+    define("DEBUG",true);
+
 // available mode:
 // LOCAL
 // APIDEV
+// TEST
 
 if(!defined('APP_MODE')){
     if(strpos($_SERVER["HTTP_HOST"],"localhost") !== false)
@@ -38,13 +42,17 @@ $app = new \Slim\Slim();
 $app->setName("RestaurantAtHomeApi");
 $app->add(new \Rath\Slim\Middleware\Authorization()); //TODO; Authentication check
 
+Logger::configure('config.xml');
+
+$log = Logger::getLogger("api");
+
 bcscale(2); //Calculation decimals
 //endregion
 
 // Inject as Slim application middleware
 //$app->add(new \Slagger\Slagger('/v1/docs', 'Rath'));
 
-
+$log->debug("Api initialisation finished");
 
 //region App Mgt (old)
 const API_PING_ROUTE = "ping";
