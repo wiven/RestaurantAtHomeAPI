@@ -1409,6 +1409,13 @@ $app->group('/coupon',function() use ($app){
             $cc->generateCode()
         );
     });
+
+    $app->get('/validate/:code',function($code) use ($app,$cc){
+        CrossDomainAjax::PrintCrossDomainCall(
+            $app,
+            $cc->validateCode($code)
+        );
+    });
 });
 //endregion
 
