@@ -11,6 +11,7 @@ namespace Rath\Entities\Order;
 
 use Rath\Controllers\Data\DataControllerFactory;
 use Rath\Entities\Restaurant\Restaurant;
+use Rath\Slim\Middleware\Authorization;
 
 class Order
 {
@@ -64,7 +65,7 @@ class Order
     public static function toDbArray($order)
     {
         $data =[
-            Order::USER_ID_COL => $order->userId,
+            Order::USER_ID_COL => Authorization::$userId,
             Order::RESTAURANT_ID_COL => $order->restaurantId,
             Order::ORDER_STATUS_ID_COL => $order->orderStatusId,
             Order::AMOUNT_COL => $order->amount,
@@ -86,6 +87,41 @@ class Order
         //not allowed through api!
         //if(!empty($order->submitted))
             //$data[Order::SUBMITTED_COL] = $order->submitted;
+
+        return $data;
+    }
+
+    /**
+     * @param $order Order
+     * @return array
+     */
+    public static function toDbUpdateArray($order)
+    {
+        $data = [];
+
+        if(!empty($order->addressId))
+            $data[Order::ADDRESS_ID_COL] = $order->addressId;
+
+        if(!empty($order->comment))
+            $data[Order::COMMENT_COL] = $order->comment;
+
+        if(!empty($order->orderDateTime))
+            $data[Order::ORDER_DATETIME_COL] = $order->orderDateTime;
+
+        if(!empty($order->amount))
+            $data[Order::AMOUNT_COL] = $order->amount;
+
+        if(!empty($order->orderStatusId))
+            $data[Order::ORDER_STATUS_ID_COL] = $order->orderStatusId;
+
+        if(!empty($order->couponId))
+            $data[Order::COUPON_ID] = $order->couponId;
+
+        if(!empty($order->slottemplateId))
+            $data[self::SLOT_TEMPLATE_ID_COL] = $order->slottemplateId;
+
+        if(!empty($order->mollieId))
+            $data[self::MOLLIE_ID_COL] = $order->mollieId;
 
         return $data;
     }

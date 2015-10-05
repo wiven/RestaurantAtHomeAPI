@@ -64,7 +64,7 @@ class OrderController extends ControllerBase
     public function updateOrder($order)
     {
         $this->db->update(Order::TABLE_NAME,
-            Order::toDbArray($order),
+            Order::toDbUpdateArray($order),
             [
                 Order::ID_COL => $order->id
             ]);
