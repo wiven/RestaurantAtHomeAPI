@@ -1413,7 +1413,7 @@ $app->group('/coupon',function() use ($app){
     $app->get('/validate/:code',function($code) use ($app,$cc){
         CrossDomainAjax::PrintCrossDomainCall(
             $app,
-            $cc->validateCode($code)
+            $cc->validateCode($code,false)
         );
     });
 });

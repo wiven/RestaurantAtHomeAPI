@@ -81,9 +81,10 @@ class CouponController extends ControllerBase
     /**
      * - Check that a code isn't already used.
      * @param $code
+     * @param bool $boolResponse
      * @return bool
      */
-    public function validateCode($code)
+    public function validateCode($code,$boolResponse = true)
     {
         $result = $this->db->get(Coupon::TABLE_NAME,
             [
@@ -93,6 +94,12 @@ class CouponController extends ControllerBase
                 Coupon::CODE_COL => $code
             ]);
 
-        return !isset($result[Coupon::ID_COL]);
+        if($boolResponse)
+            return !isset($result[Coupon::ID_COL]);
+        else
+            return[
+                "available" => !isset($result[Coupon::ID_COL])
+            ];
+
     }
 }
