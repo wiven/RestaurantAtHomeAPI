@@ -127,7 +127,20 @@ class OrderController extends ControllerBase
     public function getOrderLines($orderId)
     {
         return $this->db->select(OrderDetail::TABLE_NAME,
-            "*",
+            [
+                "[><]".Product::TABLE_NAME =>[
+                    OrderDetail::PRODUCT_ID_COL => Product::ID_COL
+                ]
+            ],
+            [
+                OrderDetail::ORDER_ID_COL,
+                OrderDetail::TABLE_NAME.".".OrderDetail::ID_COL,
+                OrderDetail::PRODUCT_ID_COL,
+                Product::NAME_COL,
+                OrderDetail::QUANTITY_COL,
+                OrderDetail::UNIT_PRICE_COL,
+                OrderDetail::LINE_TOTAL_COL
+            ],
             [
                 OrderDetail::ORDER_ID_COL => $orderId
             ]);
