@@ -46,6 +46,16 @@ class ApplicationManagementController Extends ControllerBase
             $where);
     }
 
+    public function getAllCities()
+    {
+        return $this->db->select(City::TABLE_NAME,
+            [
+                City::ID_COL,
+                City::NAME_COL,
+                City::CODE_COL
+            ]);
+    }
+
     public function calculateDistanceMatrix($provinceId)
     {
         ini_set('max_execution_time', 3000);

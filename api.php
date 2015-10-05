@@ -1412,12 +1412,23 @@ $app->group('/coupon',function() use ($app){
 });
 //endregion
 
-$app->get('/cities/:codeOrName',function($codeOrName) use ($app){
+$app->group('/cities',function() use ($app){
     $apmc = ControllerFactory::getAppManagementController();
-    CrossDomainAjax::PrintCrossDomainCall(
-        $app,
-        $apmc->getCities($codeOrName)
-    );
+
+    $app->get('/:codeOrName',function($codeOrName) use ($app,$apmc){
+        CrossDomainAjax::PrintCrossDomainCall(
+            $app,
+            $apmc->getCities($codeOrName)
+        );
+    });
+
+    $app->get('/all/',function() use ($app,$apmc){
+        CrossDomainAjax::PrintCrossDomainCall(
+            $app,
+            $apmc->getAllCities()
+        );
+    });
+
 });
 //function exception_handler($exception) {
 //   if($exception);
