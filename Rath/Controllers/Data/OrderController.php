@@ -100,19 +100,28 @@ class OrderController extends ControllerBase
         $cc = DataControllerFactory::getCouponController();
 
         $order = $this->getOrderPublic($id,true);
+
+        if(!isset($order[Order::ID_COL]))
+            return [];
+
         $order["lines"] = $this->getOrderLines($id);
-        if($order[Order::MOLLIE_ID_COL] != null)
-            $order["paymentInfo"] = $mc->getMollieInfoPublic($order[Order::MOLLIE_ID_COL]);
-        else
-            $order["paymentInfo"] = "Cash";
 
-        if($order[Order::COUPON_ID] != null)
-            $order["couponDetail"] = $cc->getCoupon(Order::COUPON_ID);
-        else
-            $order["couponDetail"] = null;
+        if(isset($order[Order::MOLLIE_ID_COL]))
+            if($order[Order::MOLLIE_ID_COL] != null)
+                $order["paymentInfo"] = $mc->getMollieInfoPublic($order[Order::MOLLIE_ID_COL]);
+            else
+                $order["paymentInfo"] = "Cash";
 
-        $order["userDetails"] = $uc->getUserDetails($order[Order::USER_ID_COL]);
-        $order["addressDetails"] = $gc->getAddress($order[Order::ADDRESS_ID_COL]);
+        if(isset($order[Order::COUPON_ID]))
+            if($order[Order::COUPON_ID] != null)
+                $order["couponDetail"] = $cc->getCoupon(Order::COUPON_ID);
+            else
+                $order["couponDetail"] = null;
+
+        if(isset($order[Order::USER_ID_COL]))
+            $order["userDetails"] = $uc->getUserDetails($order[Order::USER_ID_COL]);
+        if(isset($order[Order::ADDRESS_ID_COL]))
+            $order["addressDetails"] = $gc->getAddress($order[Order::ADDRESS_ID_COL]);
 
         unset($order[Order::ADDRESS_ID_COL]);
         unset($order[Order::USER_ID_COL]);
