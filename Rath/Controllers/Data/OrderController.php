@@ -9,9 +9,11 @@
 namespace Rath\Controllers\Data;
 
 
+use Rath\Entities\Order\Coupon;
 use Rath\Entities\Order\Order;
 use Rath\Entities\Order\OrderDetail;
 use Rath\Entities\Product\Product;
+use Rath\Entities\Slots\SlotTemplate;
 use Rath\Exceptions\OrderDetailException;
 use Rath\Helpers\General;
 use Rath\Entities\DynamicClass;
@@ -50,10 +52,71 @@ class OrderController extends ControllerBase
             ]);
     }
 
-    public function getOrderWithLines($id)
+    /**
+     * @param $id
+     * @return bool | array
+     */
+    public function getOrderPublic($id,$includeIds = false)
     {
-        $order = $this->getOrder($id);
+        $fields = [
+            Order::TABLE_NAME.".".Order::ID_COL,
+            Order::TABLE_NAME.".".Order::ORDER_STATUS_ID_COL,
+            Order::TABLE_NAME.".".Order::AMOUNT_COL,
+            Order::TABLE_NAME.".".Order::ORDER_DATETIME_COL,
+            Order::TABLE_NAME.".".Order::COMMENT_COL,
+            Order::TABLE_NAME.".".Order::COUPON_ID,
+            Order::TABLE_NAME.".".Order::SUBMITTED_COL,
+            Order::TABLE_NAME.".".Order::CREATION_DATE_TIME_COL,
+            Order::TABLE_NAME.".".Order::SLOT_TEMPLATE_ID_COL,
+            SlotTemplate::FROM_TIME_COL."(slotFromTime)",
+            SlotTemplate::TO_TIME_COL."(slotToTime)"
+        ];
+
+        if($includeIds){
+            array_push($fields,Order::ADDRESS_ID_COL);
+            array_push($fields,Order::USER_ID_COL);
+            array_push($fields,Order::MOLLIE_ID_COL);
+        }
+
+        $order = $this->db->get(Order::TABLE_NAME,
+            [
+                "[>]".SlotTemplate::TABLE_NAME =>[
+                    Order::TABLE_NAME.".".Order::SLOT_TEMPLATE_ID_COL => SlotTemplate::ID_COL
+                ]
+            ],
+            $fields,
+            [
+                Order::TABLE_NAME.".".Order::ID_COL => $id
+            ]);
+        //$this->log->debug($this->db->last_query());
+        return $order;
+    }
+
+    public function getOrderDetail($id)
+    {
+        $mc = DataControllerFactory::getMollieInfoController();
+        $uc = DataControllerFactory::getUserController();
+        $gc = DataControllerFactory::getGeneralController();
+        $cc = DataControllerFactory::getCouponController();
+
+        $order = $this->getOrderPublic($id,true);
         $order["lines"] = $this->getOrderLines($id);
+        if($order[Order::MOLLIE_ID_COL] != null)
+            $order["paymentInfo"] = $mc->getMollieInfoPublic($order[Order::MOLLIE_ID_COL]);
+        else
+            $order["paymentInfo"] = "Cash";
+
+        if($order[Order::COUPON_ID] != null)
+            $order["couponDetail"] = $cc->getCoupon(Order::COUPON_ID);
+        else
+            $order["couponDetail"] = null;
+
+        $order["userDetails"] = $uc->getUserDetails($order[Order::USER_ID_COL]);
+        $order["addressDetails"] = $gc->getAddress($order[Order::ADDRESS_ID_COL]);
+
+        unset($order[Order::ADDRESS_ID_COL]);
+        unset($order[Order::USER_ID_COL]);
+        unset($order[Order::MOLLIE_ID_COL]);
         return $order;
     }
 

@@ -1024,7 +1024,7 @@ $app->group('/order', function() use ($app){
     $app->get('/:id', function($id) use ($app,$oc){
         CrossDomainAjax::PrintCrossDomainCall(
             $app,
-            $oc->getOrderWithLines($id)
+            $oc->getOrderDetail($id)
         );
     });
 

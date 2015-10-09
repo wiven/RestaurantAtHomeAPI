@@ -73,6 +73,10 @@ class DataControllerFactory
      */
     private static $couponController;
 
+    /**
+     * @var MollieInfoController
+     */
+    private static $mollieInfoController;
 
     /**
      * @return UserController
@@ -177,6 +181,13 @@ class DataControllerFactory
         if(empty(self::$couponController))
             self::$couponController = new CouponController();
         return self::$couponController;
+    }
+
+    public static function getMollieInfoController()
+    {
+        if(empty(self::$mollieInfoController))
+            self::$mollieInfoController = new MollieInfoController();
+        return self::$mollieInfoController;
     }
 
 }

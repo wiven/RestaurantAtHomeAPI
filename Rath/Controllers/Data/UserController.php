@@ -8,6 +8,7 @@
 
 namespace Rath\Controllers\Data;
 
+use Rath\Entities\General\Address;
 use Rath\Entities\Restaurant\Restaurant;
 use Rath\Entities\User\LoyaltyPoints;
 use Rath\helpers\MedooFactory;
@@ -255,6 +256,25 @@ class UserController extends ControllerBase
         return ($result[0][UserPermission::DISABLED_COL] == 0);
     }
 
+    public function getUserDetails($id,$includeAddress = false)
+    {
+        $user = $this->db->select(User::TABLE_NAME,
+            [
+                User::EMAIL_COL,
+                User::NAME_COL,
+                User::SURNAME_COL,
+                User::PHONE_NO_COL
+            ],[
+                User::ID_COL => $id
+            ]
+        );
+
+        if($includeAddress)
+            $user["addresses"] = $this->getUserAddresses($id);
+
+        return $user;
+    }
+
     public function getUserIdByHash($hash){
         $user = $this->db->get(User::TABLE_NAME,
             [
@@ -313,6 +333,30 @@ class UserController extends ControllerBase
 
 
 
+    //endregion
+
+    //region Address
+    /**
+     * @param $userId
+     * @return array|bool
+     */
+    public function getUserAddresses($userId)
+    {
+        return $this->db->select(Address::TABLE_NAME,
+            [
+                Address::ID_COL,
+                Address::STREET_COL,
+                Address::NUMBER_COL,
+                Address::ADDITION_COL,
+                Address::POSTCODE_COL,
+                Address::CITY_COL,
+                Address::LATITUDE_COL,
+                Address::LONGITUDE_COL
+            ],
+            [
+                Address::USER_ID_COL => $userId
+            ]);
+    }
     //endregion
 
 }

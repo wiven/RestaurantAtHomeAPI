@@ -15,7 +15,7 @@ use Rath\Slim\Middleware\Authorization;
 
 class Order
 {
-    const TABLE_NAME = "order";
+    const TABLE_NAME = "orders"; //change for syntax problems in sql
 
     const ID_COL = "id";
     const USER_ID_COL = "userId";
@@ -29,7 +29,7 @@ class Order
     const CREATION_DATE_TIME_COL = "creationDateTime";
     const SUBMITTED_COL = "submitted";
     const SLOT_TEMPLATE_ID_COL = "slottemplateId";
-    const MOLLIE_ID_COL = "mollieId";
+    const MOLLIE_ID_COL = "mollieinfoid";
 
     public $id;
     public $userId;
@@ -43,7 +43,7 @@ class Order
     public $creationDateTime;
     public $submitted;
     public $slottemplateId;
-    public $mollieId;
+    public $mollieinfoid;
 
     public $lines;
 
@@ -81,8 +81,8 @@ class Order
         if(!empty($order->slottemplateId))
             $data[self::SLOT_TEMPLATE_ID_COL] = $order->slottemplateId;
 
-        if(!empty($order->mollieId))
-            $data[self::MOLLIE_ID_COL] = $order->mollieId;
+        if(!empty($order->mollieinfoid))
+            $data[self::MOLLIE_ID_COL] = $order->mollieinfoid;
 
         //not allowed through api!
         //if(!empty($order->submitted))
@@ -120,8 +120,8 @@ class Order
         if(!empty($order->slottemplateId))
             $data[self::SLOT_TEMPLATE_ID_COL] = $order->slottemplateId;
 
-        if(!empty($order->mollieId))
-            $data[self::MOLLIE_ID_COL] = $order->mollieId;
+        if(!empty($order->mollieinfoid))
+            $data[self::MOLLIE_ID_COL] = $order->mollieinfoid;
 
         return $data;
     }

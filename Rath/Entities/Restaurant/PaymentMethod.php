@@ -15,7 +15,7 @@ class PaymentMethod
 
     const ID_COL = "id";
     const NAME_COL = "name";
-    const MOLLIE_ID_COL = "mollieId";
+    const MOLLIE_ID_COL = "mollieinfoid";
 
     public $id;
     public $name;
