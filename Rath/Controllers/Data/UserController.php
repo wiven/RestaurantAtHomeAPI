@@ -11,6 +11,7 @@ namespace Rath\Controllers\Data;
 use Rath\Entities\General\Address;
 use Rath\Entities\Restaurant\Restaurant;
 use Rath\Entities\User\LoyaltyPoints;
+use Rath\Helpers\General;
 use Rath\helpers\MedooFactory;
 use Rath\Entities\User\User;
 use Rath\Entities\User\UserPermission;
@@ -86,7 +87,7 @@ class UserController extends ControllerBase
     }
 
     /**
-     * @param $user
+     * @param $user User
      * @return string
      */
     public function createUser($user){
@@ -190,7 +191,7 @@ class UserController extends ControllerBase
     }
 
     public function getUserByHash($hash){
-        $user = $this->db->select(User::TABLE_NAME,
+        $user = $this->db->get(User::TABLE_NAME,
             [
                 User::HASH_COL,
                 User::EMAIL_COL,
@@ -227,9 +228,7 @@ class UserController extends ControllerBase
         $result = UserController::getUserByHash($hash);
 //        var_dump($result);
 
-        if(!empty($result)>0)
-            $user = $result[0];
-        else
+        if(!isset($user[User::EMAIL_COL]))
             return false;
 
         if($user[User::ADMIN_COL]) //allow full access
@@ -303,6 +302,126 @@ class UserController extends ControllerBase
 
         return isset($result[Restaurant::ID_COL]);
     }
+
+    //region Password Recovery
+
+    /**
+     * @param $email
+     * @return ApiResponse
+     */
+    public function sendUserPasswordRecoveryMail($email)
+    {
+        $response = new ApiResponse();
+
+        $user = $this->getUserByEmail($email);
+        if(!isset($user[User::EMAIL_COL]))
+        {
+            $response->code = 404;
+            $response->message = "The entered email address isn't registered";
+            return $response;
+        }
+        $user = json_decode(json_encode($user),false);
+        $url = "http://restaurantAthome.be/recovery?email=".$this->createRecoveryHash($user);
+
+        try{
+            $this->sendRecoveryEmail($user,$url);
+        }
+        catch(\Exception $e){
+            $this->log->error("Error sending recovery mail!".$user,$e);
+            $response->code = 500;
+            $response->message = "Something went wrong sending the recovery email";
+            return $response;
+        }
+
+        $response->code = 200;
+        $response->message = "Email send";
+        return $response;
+    }
+
+    public function handleUserPasswordRecoveryChange($recoveryHash, $userInfo)
+    {
+        $response = new ApiResponse();
+        $user = $this->db->get(User::TABLE_NAME,
+            [
+                User::ID_COL,
+                User::RECOVERY_HASH_COL,
+                User::RECOVERY_REQUEST_DT_COL
+            ],
+            [
+                User::RECOVERY_HASH_COL => $recoveryHash
+            ]);
+
+        if(isset($user[User::ID_COL]))
+            $user = json_decode(json_encode($user),false);
+        else{
+            $response->code = 404;
+            $response->message = "Unknow recovery link";
+            return $response;
+        }
+
+        $this->db->update(User::TABLE_NAME,
+            [
+                User::RECOVERY_REQUEST_DT_COL => null,
+                User::RECOVERY_HASH_COL => null,
+                User::PASSWORD_COL => $userInfo->password //TODO:: Password encryption
+            ],
+            [
+                User::ID_COL => $user->id
+            ]);
+
+        $response->code = 200;
+        $response->message = "Password change success";
+        return $response;
+    }
+
+    /**
+     * @param $user User
+     * @return string
+     */
+    private function createRecoveryHash($user)
+    {
+        $recoveryHash = substr(md5(uniqid(rand(), true)), 0, 20);
+        $this->db->update(User::TABLE_NAME,
+            [
+                User::RECOVERY_HASH_COL => $recoveryHash,
+                User::RECOVERY_REQUEST_DT_COL => General::getCurrentDateTime()
+            ],
+            [
+                User::ID_COL => $user->id
+            ]);
+        return $recoveryHash;
+    }
+
+    /**
+     * @param $user User
+     * @param $recoveryUrl
+     */
+    private function sendRecoveryEmail($user,$recoveryUrl)
+    {
+        //TODo: read template html
+
+        $subject = 'Restaurant At Home - Password Recovery';
+        $from = "info@restaurantathome.be";
+
+        $headers = "From: " . strip_tags($from) . "\r\n";
+        $headers .= "Reply-To: ". strip_tags($from) . "\r\n";
+        //$headers .= "CC: susan@example.com\r\n";
+        $headers .= "MIME-Version: 1.0\r\n";
+        $headers .= "Content-Type: text/html; charset=ISO-8859-1\r\n";
+
+        $message = "<html>
+                        <body>
+                            <h1>Password Recovery for: $user->email</h1>
+                            <p>Go to the following <a href='$recoveryUrl'>url</a></p>
+                        </body>
+                    </html>";
+
+
+        mail($user->email,$from,$message);
+    }
+    //endregion
+
+
 
     //region LoyaltyPoints
 

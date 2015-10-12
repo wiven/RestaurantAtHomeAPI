@@ -26,6 +26,8 @@ class User extends DynamicClass
     const SOCIAL_LOGIN_COL = 'socialLogin';
     const HASH_COL = "hash";
     const EXCLUSIVE_PERMISSION_COL = "exclusivePermissions";
+    const RECOVERY_HASH_COL = "recoveryHash";
+    const RECOVERY_REQUEST_DT_COL = "recoveryRequestDT";
 
     public $id;
     public $name;
@@ -38,7 +40,7 @@ class User extends DynamicClass
     public $socialLogin;
     public $hash;
     public $exclusivePermissions;
-
-
+    public $recoveryHash;
+    public $recoveryRequestDT;
 
 }

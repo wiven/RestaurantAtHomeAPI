@@ -168,6 +168,19 @@ $app->group('/user', function() use ($app){
             $user->deleteUser($hash));
     })->name(API_USER_DELETE_ROUTE);
 
+    $app->get('/reset/:email', function($email) use ($app,$user){
+        CrossDomainAjax::PrintCrossDomainCall(
+            $app,
+            $user->sendUserPasswordRecoveryMail($email));
+    })->name(API_USER_DELETE_ROUTE);
+
+    $app->get('/recover/:recoveryHash', function($recoveryHash) use ($app,$user){
+        $userInfo = json_decode($app->request->getBody());
+        CrossDomainAjax::PrintCrossDomainCall(
+            $app,
+            $user->handleUserPasswordRecoveryChange($recoveryHash,$userInfo));
+    })->name(API_USER_DELETE_ROUTE);
+
     $app->group('/address', function() use ($app){
         $gen = new \Rath\Controllers\Data\GeneralController();
         $app->get('/:id', function($id) use ($app,$gen){
