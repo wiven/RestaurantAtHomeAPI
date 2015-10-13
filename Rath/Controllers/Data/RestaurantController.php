@@ -840,8 +840,12 @@ class RestaurantController extends ControllerBase
                     SlotTemplate::RESTAURANT_ID_COL => $restoId,
                     SlotTemplate::DAY_OF_WEEK_COL => $dayOfWeek,
                     "OR" => [
-                        SlotTemplateChange::TABLE_NAME.".".SlotTemplateChange::DATE_COL => $date,
-                        SlotTemplateChange::TABLE_NAME.".".SlotTemplateChange::DATE_COL => null
+                        "OR #datesIsDate" => [
+                            SlotTemplateChange::TABLE_NAME.".".SlotTemplateChange::DATE_COL => $date
+                        ],
+                        "OR #datesIsNull" => [
+                            SlotTemplateChange::TABLE_NAME.".".SlotTemplateChange::DATE_COL => null
+                        ]
                     ]
                 ]
             ]);
