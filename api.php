@@ -23,6 +23,13 @@ if(!defined('APP_MODE')){
     else
         define('APP_MODE', 'APIDEV');
 }
+
+if(!defined('EMAIL_TEMPLATE'))
+    define('EMAIL_TEMPLATE',APP_PATH."/Resources/emailTemplate.html");
+
+if(!defined('HASH_ALGO'))
+    define('HASH_ALGO',"sha256");
+
 //var_dump(APP_MODE);
 //var_dump($_SERVER["HTTP_HOST"]);
 //endregion
@@ -168,18 +175,25 @@ $app->group('/user', function() use ($app){
             $user->deleteUser($hash));
     })->name(API_USER_DELETE_ROUTE);
 
+    //region Password recovery
+
     $app->get('/reset/:email', function($email) use ($app,$user){
         CrossDomainAjax::PrintCrossDomainCall(
             $app,
             $user->sendUserPasswordRecoveryMail($email));
-    })->name(API_USER_DELETE_ROUTE);
+    });
 
-    $app->get('/recover/:recoveryHash', function($recoveryHash) use ($app,$user){
+
+    $app->post('/recovery/:recoveryHash', function ($recoveryHash) use ($app, $user) {
         $userInfo = json_decode($app->request->getBody());
         CrossDomainAjax::PrintCrossDomainCall(
             $app,
-            $user->handleUserPasswordRecoveryChange($recoveryHash,$userInfo));
-    })->name(API_USER_DELETE_ROUTE);
+            $user->handleUserPasswordRecoveryChange($recoveryHash, $userInfo));
+    });
+    //endregion
+
+
+
 
     $app->group('/address', function() use ($app){
         $gen = new \Rath\Controllers\Data\GeneralController();

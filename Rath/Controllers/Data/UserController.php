@@ -117,7 +117,7 @@ class UserController extends ControllerBase
 
 //        echo "Insert user";
         $userId = $this->getNextUserId();
-        $hashString = sha1($userId.$user->email.time());
+        $hashString = hash(HASH_ALGO,$userId.$user->email.time());
 //        var_dump($hashString);
         $data = [
             User::ID_COL => $userId,
@@ -168,22 +168,29 @@ class UserController extends ControllerBase
             [
                 User::HASH_COL => $hash,
             ]);
-        $response->code = 1;
+        $response->code = 200;
         $response->message = "User successfully removed.";
         return $response;
     }
 
-    public function getUserByEmail($email){
-        $user = $this->db->select(User::TABLE_NAME,
+    public function getUserByEmail($email,$internal = false){
+        $param = [
+            User::HASH_COL,
+            User::EMAIL_COL,
+            User::NAME_COL,
+            User::SURNAME_COL,
+            User::PHONE_NO_COL,
+            User::TYPE_COL,
+            User::SOCIAL_LOGIN_COL
+        ];
+
+        if($internal){
+            array_push($param, User::ID_COL);
+        }
+
+        $user = $this->db->get(User::TABLE_NAME,
+            $param,
             [
-                User::HASH_COL,
-                User::EMAIL_COL,
-                User::NAME_COL,
-                User::SURNAME_COL,
-                User::PHONE_NO_COL,
-                User::TYPE_COL,
-                User::SOCIAL_LOGIN_COL
-            ],[
                 User::EMAIL_COL => $email
             ]
         );
@@ -313,7 +320,8 @@ class UserController extends ControllerBase
     {
         $response = new ApiResponse();
 
-        $user = $this->getUserByEmail($email);
+        $user = $this->getUserByEmail($email,true);
+
         if(!isset($user[User::EMAIL_COL]))
         {
             $response->code = 404;
@@ -321,13 +329,20 @@ class UserController extends ControllerBase
             return $response;
         }
         $user = json_decode(json_encode($user),false);
-        $url = "http://restaurantAthome.be/recovery?email=".$this->createRecoveryHash($user);
+
+        if($user->socialLogin){
+            $response->code = 417;
+            $response->message = "This is social login and cannot ask for a password reset.";
+            return $response;
+        }
+
+        $url = "http://restaurantathome.be/user/passwordrecovery?key=".$this->createRecoveryHash($user); //TODO: Param - Url to recovery
 
         try{
             $this->sendRecoveryEmail($user,$url);
         }
         catch(\Exception $e){
-            $this->log->error("Error sending recovery mail!".$user,$e);
+            $this->log->error("Error sending recovery mail!".json_encode($user),$e);
             $response->code = 500;
             $response->message = "Something went wrong sending the recovery email";
             return $response;
@@ -355,7 +370,14 @@ class UserController extends ControllerBase
             $user = json_decode(json_encode($user),false);
         else{
             $response->code = 404;
-            $response->message = "Unknow recovery link";
+            $response->message = "Unknow recovery key";
+            return $response;
+        }
+
+        if(!$this->checkRecoveryStillValid($user))
+        {
+            $response->code = 408;
+            $response->message = "The reset link has expired";
             return $response;
         }
 
@@ -376,11 +398,26 @@ class UserController extends ControllerBase
 
     /**
      * @param $user User
+     * @return bool
+     */
+    private function checkRecoveryStillValid($user)
+    {
+        $creation = new \DateTime($user->recoveryRequestDT);
+        $now = new \DateTime();
+        $diff = $now->diff($creation);
+
+        if($diff->h > 24)
+            return false;
+        return true;
+    }
+
+    /**
+     * @param $user User
      * @return string
      */
     private function createRecoveryHash($user)
     {
-        $recoveryHash = substr(md5(uniqid(rand(), true)), 0, 20);
+        $recoveryHash = hash(HASH_ALGO,uniqid(rand(), true));
         $this->db->update(User::TABLE_NAME,
             [
                 User::RECOVERY_HASH_COL => $recoveryHash,
@@ -395,29 +432,29 @@ class UserController extends ControllerBase
     /**
      * @param $user User
      * @param $recoveryUrl
+     * @throws \Exception
      */
     private function sendRecoveryEmail($user,$recoveryUrl)
     {
         //TODo: read template html
 
         $subject = 'Restaurant At Home - Password Recovery';
-        $from = "info@restaurantathome.be";
+        $from = "info@restaurantathome.be"; //Todo: Param - from email
 
-        $headers = "From: " . strip_tags($from) . "\r\n";
+        $headers = "MIME-Version: 1.0"."\r\n";
+        $headers .= "Content-Type: text/html; charset=UTF-8"."\r\n";
+        $headers .= "From: " . strip_tags($from) . "\r\n";
         $headers .= "Reply-To: ". strip_tags($from) . "\r\n";
         //$headers .= "CC: susan@example.com\r\n";
-        $headers .= "MIME-Version: 1.0\r\n";
-        $headers .= "Content-Type: text/html; charset=ISO-8859-1\r\n";
 
-        $message = "<html>
-                        <body>
-                            <h1>Password Recovery for: $user->email</h1>
-                            <p>Go to the following <a href='$recoveryUrl'>url</a></p>
-                        </body>
-                    </html>";
+        $message = file_get_contents(EMAIL_TEMPLATE);
+        $message = str_replace("%%EMAIL%%",$user->email,$message);
+        $message = str_replace("%%URL%%",$recoveryUrl,$message);
 
+        if($message === false)
+            throw new \Exception("Failed to read email template");
 
-        mail($user->email,$from,$message);
+        mail($user->email,$subject,$message,$headers);
     }
     //endregion
 
