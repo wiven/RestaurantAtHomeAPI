@@ -192,7 +192,11 @@ $app->group('/user', function() use ($app){
     });
     //endregion
 
-
+    $app->get('/resto/', function() use ($app,$user){
+        CrossDomainAjax::PrintCrossDomainCall(
+            $app,
+            $user->getUserRestaurants());
+    });
 
 
     $app->group('/address', function() use ($app){

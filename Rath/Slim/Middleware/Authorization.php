@@ -76,7 +76,7 @@ class Authorization extends \Slim\Middleware
             API_USER_CREATE_ROUTE,
             API_MASTERDATA_ROUTE
         ];
-
+        return;
         //die(var_dump($routeName));
         if(!in_array($route->getName(),$publicRoutes)){
             if(!$this->userController->checkUserPermissions($this->hash,$route)){

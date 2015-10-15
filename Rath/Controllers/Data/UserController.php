@@ -310,6 +310,26 @@ class UserController extends ControllerBase
         return isset($result[Restaurant::ID_COL]);
     }
 
+    public function getUserRestaurants()
+    {
+        return $this->db->select(Restaurant::TABLE_NAME,
+            [
+                Restaurant::ID_COL,
+                Restaurant::NAME_COL,
+                Restaurant::KITCHEN_TYPE_ID_COL,
+                Restaurant::ADDRESS_ID_COL,
+                Restaurant::LOGO_PHOTO_COL,
+                Restaurant::PHONE_COL,
+                Restaurant::EMAIL_COL,
+                Restaurant::URL_COL,
+                Restaurant::DOMINATING_COLOR_COL,
+                Restaurant::COMMENT_COL
+            ],
+            [
+                Restaurant::USER_ID_COL => Authorization::$userId
+            ]);
+    }
+
     //region Password Recovery
 
     /**
