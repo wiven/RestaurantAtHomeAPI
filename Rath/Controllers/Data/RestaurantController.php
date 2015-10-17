@@ -869,7 +869,7 @@ class RestaurantController extends ControllerBase
                 LoyaltyBonus::TABLE_NAME.".".LoyaltyBonus::ID_COL,
                 LoyaltyBonus::PRODUCT_ID_COL,
                 Product::TABLE_NAME.".".Product::NAME_COL,
-                LoyaltyBonus::QUANTITY_COL
+                LoyaltyBonus::POINTS_COL
             ],
             [
                 LoyaltyBonus::TABLE_NAME.".".LoyaltyBonus::RESTAURANT_ID_COL => $restoId

@@ -9,7 +9,10 @@
 namespace Rath\Controllers\Data;
 
 
+use Rath\Entities\ApiResponse;
+use Rath\Entities\Product\Product;
 use Rath\Entities\Restaurant\LoyaltyBonus;
+use Swagger\Annotations\Response;
 
 class LoyaltyBonusController extends ControllerBase
 {
@@ -20,6 +23,10 @@ class LoyaltyBonusController extends ControllerBase
      */
     public function createLoyaltyBonus($lb)
     {
+        $valid = $lb->validate();
+        if($valid->code != 200)
+            return $valid;
+
         $lastId = $this->db->insert(LoyaltyBonus::TABLE_NAME,
             LoyaltyBonus::toDbInsertArray($lb));
 
@@ -48,6 +55,10 @@ class LoyaltyBonusController extends ControllerBase
      */
     public function updateLoyaltyBonus($lb)
     {
+        $valid = $lb->validate();
+        if($valid->code != 200)
+            return $valid;
+
         $change = $this->db->update(LoyaltyBonus::TABLE_NAME,
             LoyaltyBonus::toDbUpdateArray($lb));
 
@@ -65,4 +76,6 @@ class LoyaltyBonusController extends ControllerBase
             ]);
     }
     //endregion
+
+
 }

@@ -9,31 +9,118 @@
 namespace Rath\Entities\Restaurant;
 
 
-class LoyaltyBonus
+use Rath\Controllers\Data\DataControllerFactory;
+use Rath\Entities\ApiResponse;
+use Rath\Entities\EntityBase;
+use Rath\Entities\Product\Product;
+
+class LoyaltyBonus extends EntityBase
 {
     const TABLE_NAME = "loyaltybonus";
 
     const ID_COL = "id";
     const PRODUCT_ID_COL ="productid";
     const RESTAURANT_ID_COL = "restaurantid";
-    const QUANTITY_COL = "quantity";
+    const TYPE_COL = "type";
+        const TYPE_VALUE_PERC = 'Percentage';
+        const TYPE_VALUE_AMOUNT = 'Amount';
+        const TYPE_VALUE_PRODUCT = 'Product';
+    const AMOUNT_COL ="amount";
+    const POINTS_COL = "points";
 
+    /**
+     * @var int
+     */
     public $id;
-    public $productid;
+    /**
+     * @var int
+     */
     public $restaurantid;
-    public $quantity;
+    /**
+     * @var float
+     */
+    public $points;
+    /**
+     * @var string
+     */
+    public $type;
+    /**
+     * @var float
+     */
+    public $amount;
+    /**
+     * @var int|null
+     */
+    public $productid;
 
+    //region Validation
+    /**
+     * @return bool
+     */
+    public function validatePoints()
+    {
+        return ($this->points >= 0 && $this->points != null);
+    }
+
+    /**
+     * @return bool
+     */
+    public function validateAmount()
+    {
+        return ($this->amount >= 0 && $this->amount != null);
+    }
+
+    /**
+     * @return ApiResponse
+     */
+    public function validate()
+    {
+        $pc = DataControllerFactory::getProductController();
+
+        $response = new ApiResponse();
+        $response->code = 200;
+
+        switch($this->type) {
+            case LoyaltyBonus::TYPE_VALUE_PRODUCT:
+                if (!isset($this->productid)) {
+                    $response->code = 406;
+                    $response->message = "Product Id must be set";
+                    return $response;
+                }
+                $prod = $pc->getProduct($this->productid);
+                if (!isset($prod[Product::ID_COL])) {
+                    $response->code = 406;
+                    $response->message = "Product doesn't exist";
+                }
+                break;
+        }
+
+        if(!$this->validatePoints() or !$this->validateAmount())
+        {
+            $response->code = 406;
+            $response->message = "amount & points must be set";
+            return $response;
+        }
+        return $response;
+    }
+    //endregion
+
+    //region Database
     /**
      * @param $lp LoyaltyBonus
      * @return array
      */
     public static function toDbInsertArray($lp)
     {
-        return [
-            self::PRODUCT_ID_COL => $lp->productid,
+        $data =  [
             self::RESTAURANT_ID_COL => $lp->restaurantid,
-            self::QUANTITY_COL => $lp->quantity
+            self::POINTS_COL => $lp->points,
+            self::TYPE_COL => $lp->type,
+            self::AMOUNT_COL => $lp->amount,
+            self::PRODUCT_ID_COL => $lp->productid
         ];
+
+        return $data;
     }
 
     /**
@@ -42,10 +129,15 @@ class LoyaltyBonus
      */
     public static function toDbUpdateArray($lp)
     {
-        return[
-            self::PRODUCT_ID_COL => $lp->productid,
-            self::QUANTITY_COL => $lp->quantity
+        $data = [
+            self::TYPE_COL => $lp->type,
+            self::AMOUNT_COL => $lp->amount,
+            self::POINTS_COL => $lp->points,
+            self::PRODUCT_ID_COL => $lp->productid
         ];
+
+        return $data;
     }
+    //endregion
 
 }

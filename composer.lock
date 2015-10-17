@@ -4,8 +4,8 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "e4e6a91886617d0400e7e5df30e83d6f",
-    "content-hash": "bb76ece1a5f75789675aaa8a4171cfc3",
+    "hash": "b04745ada212fdffa7d8ca2b36e9c118",
+    "content-hash": "e8062ed9acd1290a322c9df42e78a0f1",
     "packages": [
         {
             "name": "apache/log4php",
@@ -217,6 +217,45 @@
                 "sofortbanking"
             ],
             "time": "2015-06-30 11:35:46"
+        },
+        {
+            "name": "netresearch/jsonmapper",
+            "version": "v0.10.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/netresearch/jsonmapper.git",
+                "reference": "a58388bdda93424363de20bc20fe0e349ec735ee"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/netresearch/jsonmapper/zipball/a58388bdda93424363de20bc20fe0e349ec735ee",
+                "reference": "a58388bdda93424363de20bc20fe0e349ec735ee",
+                "shasum": ""
+            },
+            "require-dev": {
+                "phpunit/phpunit": "4.2.*",
+                "squizlabs/php_codesniffer": "~1.5"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-0": {
+                    "": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "OSL-3.0"
+            ],
+            "authors": [
+                {
+                    "name": "Christian Weiske",
+                    "email": "christian.weiske@netresearch.de",
+                    "homepage": "http://www.netresearch.de/",
+                    "role": "Developer"
+                }
+            ],
+            "description": "Map nested JSON structures onto PHP classes",
+            "time": "2015-09-24 12:43:26"
         },
         {
             "name": "symfony/finder",

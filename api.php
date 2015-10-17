@@ -39,6 +39,7 @@ require_once __DIR__.'/vendor/autoload.php';
 use Rath\Controllers\ControllerFactory;
 use Rath\Controllers\Data\DataControllerFactory;
 use Rath\Entities\Order\OrderStatus;
+use Rath\Entities\Restaurant\LoyaltyBonus;
 use Rath\Helpers\CrossDomainAjax;
 use Rath\Libraries\UploadHandler;
 use Rath\Slim\Middleware\Authorization;
@@ -1377,7 +1378,7 @@ $app->group('/loyaltybonus',function() use ($app){
     });
 
     $app->post('',function() use ($app,$lbc){
-        $st = json_decode($app->request->getBody());
+        $st = LoyaltyBonus::fromJson($app->request->getBody());
         CrossDomainAjax::PrintCrossDomainCall(
             $app,
             $lbc->createLoyaltyBonus($st)
@@ -1385,7 +1386,7 @@ $app->group('/loyaltybonus',function() use ($app){
     });
 
     $app->put('',function() use ($app,$lbc){
-        $st = json_decode($app->request->getBody());
+        $st = LoyaltyBonus::fromJson($app->request->getBody());
         CrossDomainAjax::PrintCrossDomainCall(
             $app,
             $lbc->updateLoyaltyBonus($st)
