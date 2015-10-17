@@ -37,7 +37,7 @@ class LoyaltyBonus extends EntityBase
      */
     public $restaurantid;
     /**
-     * @var float
+     * @var int
      */
     public $points;
     /**
@@ -59,7 +59,7 @@ class LoyaltyBonus extends EntityBase
      */
     public function validatePoints()
     {
-        return ($this->points >= 0 && $this->points != null);
+        return ($this->points >= 0);
     }
 
     /**
@@ -67,7 +67,7 @@ class LoyaltyBonus extends EntityBase
      */
     public function validateAmount()
     {
-        return ($this->amount >= 0 && $this->amount != null);
+        return ($this->amount >= 0.0);
     }
 
     /**
@@ -94,6 +94,10 @@ class LoyaltyBonus extends EntityBase
                 }
                 break;
         }
+
+        //$this->log->debug($this);
+        $this->log->debug("validatePoint: ".json_encode($this->validatePoints()));
+        $this->log->debug("validateAmount: ".json_encode($this->validateAmount()));
 
         if(!$this->validatePoints() or !$this->validateAmount())
         {

@@ -29,4 +29,9 @@ abstract class ControllerBase
         $this->db = MedooFactory::getMedooInstance();
         $this->log = Logger::getLogger(get_called_class());
     }
+
+    public function logLastQuery()
+    {
+        $this->log->debug($this->db->last_query());
+    }
 }

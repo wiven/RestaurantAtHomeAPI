@@ -42,11 +42,26 @@ class LoyaltyBonusController extends ControllerBase
      */
     public function getLoyaltyBonus($id)
     {
-        return $this->db->get(LoyaltyBonus::TABLE_NAME,
-            "*",
+        $result = $this->db->get(LoyaltyBonus::TABLE_NAME,
             [
-                LoyaltyBonus::ID_COL => $id
+                "[>]".Product::TABLE_NAME => [
+                    LoyaltyBonus::PRODUCT_ID_COL => Product::ID_COL
+                ]
+            ],
+            [
+                LoyaltyBonus::TABLE_NAME.".".LoyaltyBonus::ID_COL,
+                LoyaltyBonus::TABLE_NAME.".".LoyaltyBonus::RESTAURANT_ID_COL,
+                LoyaltyBonus::POINTS_COL,
+                LoyaltyBonus::TYPE_COL,
+                LoyaltyBonus::AMOUNT_COL,
+                LoyaltyBonus::PRODUCT_ID_COL,
+                Product::TABLE_NAME.".".Product::NAME_COL."(productName)"
+            ],
+            [
+                LoyaltyBonus::TABLE_NAME.".".LoyaltyBonus::ID_COL => $id
             ]);
+        $this->logLastQuery();
+        return $result;
     }
 
     /**

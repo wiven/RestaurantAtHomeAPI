@@ -10,6 +10,7 @@ namespace Rath\Entities;
 
 
 use JsonMapper;
+use Logger;
 use Rath\Helpers\General;
 
 abstract class EntityBase
@@ -18,6 +19,16 @@ abstract class EntityBase
      * @var JsonMapper
      */
     private static $jsonMapper;
+
+    /**
+     * @var Logger
+     */
+    protected $log;
+
+    public function __construct()
+    {
+        $this->log = Logger::getLogger(get_called_class());
+    }
 
     /**
      * @param $jsonString

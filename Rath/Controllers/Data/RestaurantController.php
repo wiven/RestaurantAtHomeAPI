@@ -861,22 +861,24 @@ class RestaurantController extends ControllerBase
     {
         $result = $this->db->select(LoyaltyBonus::TABLE_NAME,
             [
-                "[><]".Product::TABLE_NAME => [
+                "[>]".Product::TABLE_NAME => [
                     LoyaltyBonus::PRODUCT_ID_COL => Product::ID_COL
                 ]
             ],
             [
                 LoyaltyBonus::TABLE_NAME.".".LoyaltyBonus::ID_COL,
+                LoyaltyBonus::POINTS_COL,
+                LoyaltyBonus::TYPE_COL,
+                LoyaltyBonus::AMOUNT_COL,
                 LoyaltyBonus::PRODUCT_ID_COL,
-                Product::TABLE_NAME.".".Product::NAME_COL,
-                LoyaltyBonus::POINTS_COL
+                Product::TABLE_NAME.".".Product::NAME_COL."(productName)"
             ],
             [
-                LoyaltyBonus::TABLE_NAME.".".LoyaltyBonus::RESTAURANT_ID_COL => $restoId
+                LoyaltyBonus::TABLE_NAME.".".LoyaltyBonus::RESTAURANT_ID_COL => $restoId,
+                "LIMIT" => [0,1]
             ]);
 
-//        var_dump($this->db->error());
-
+        $this->log->debug($this->db->last_query());
         return $result;
 
     }

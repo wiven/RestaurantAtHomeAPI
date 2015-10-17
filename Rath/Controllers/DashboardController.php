@@ -110,7 +110,9 @@ class DashboardController
         if(empty($result)){
             $lb = new LoyaltyBonus();
             $lb->restaurantid = $restoId;
-            $lb->quantity = 0;
+            $lb->type = LoyaltyBonus::TYPE_VALUE_AMOUNT;
+            $lb->points = 0;
+            $lb->amount = 0;
             $result = $lbc->createLoyaltyBonus($lb);
         }
         return $result;
