@@ -939,6 +939,9 @@ class RestaurantController extends ControllerBase
      */
     public function getUsedTags($restoId, $tagQuery = null)
     {
+        if(count($restoId) == 0)
+            return null;
+
         $where = [];
         if($tagQuery == null)
             $where[Restaurant::TABLE_NAME.".".Restaurant::ID_COL] = $restoId;
@@ -953,8 +956,8 @@ class RestaurantController extends ControllerBase
                 $where["AND"][$key] = $value;
         }
 
-//        $this->log->debug("After where merge");
-//        $this->log->debug($where);
+        $this->log->debug("After where merge");
+        $this->log->debug($where);
 
         $result = $this->db->select(Tag::TABLE_NAME,
             [

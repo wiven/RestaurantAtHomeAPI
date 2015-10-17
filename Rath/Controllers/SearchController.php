@@ -43,9 +43,12 @@ class SearchController extends ControllerBase
         if(!empty($query))
             $where = $this->getFilterFieldsToMedooWhereArray($query,$fields);
 
+//        var_dump($fields);
         $tagField = from($fields)
             ->singleOrDefault(null,function($field){
-                return $field->id == FilterField::TAG_ID_FIELD;
+                if(isset($field->id))
+                    return $field->id == FilterField::TAG_ID_FIELD;
+                return null;
             });
 
         $tagQuery = null;
@@ -62,12 +65,17 @@ class SearchController extends ControllerBase
         $searchResult = $this->searchRestaurants($skip,$top,$where);
 
         $this->log->debug($fields);
-
+        $this->log->debug("search result:");
         $this->log->debug($searchResult);
 
-        $restos = Restaurant::fromJsonArray($searchResult);
-        $tagUse = $this->getUsedTags($restos,$tagQuery);
-        $allTags = $this->mapTagUsage($tagUse);
+        if(count($searchResult) == 0){
+            $restos = Restaurant::fromJsonArray($searchResult);
+            $tagUse = $this->getUsedTags($restos,$tagQuery);
+            $allTags = $this->mapTagUsage($tagUse);
+        }
+        else
+            $allTags = $this->mapTagUsage([]);
+
 
         if(!empty($searchResult)) //do after array conversions
             $searchResult = PhotoManagement::getPhotoUrlsForArray($searchResult,Restaurant::LOGO_PHOTO_COL);
@@ -251,7 +259,9 @@ class SearchController extends ControllerBase
             ],
             $where);
 
-        $this->log->debug($this->db->last_query());
+        $this->log->debug("Search restaurant restult info");
+        $this->logLastQuery();
+        $this->logMedooError();
 
         return $result;
     }
@@ -265,6 +275,7 @@ class SearchController extends ControllerBase
     public function getUsedTags($restaurants,$tagQuery)
     {
         /* @var $usage Tag[] */
+        $usage = [];
         $rc = DataControllerFactory::getRestaurantController();
 
         $restoIdArray = [];
@@ -272,25 +283,29 @@ class SearchController extends ControllerBase
             /* @var $resto Restaurant */
             array_push($restoIdArray,$resto->id);
         }
-        $tags = Tag::fromJsonArray($rc->getUsedTags($restoIdArray,$tagQuery));
+
+        $usedTags = $rc->getUsedTags($restoIdArray,$tagQuery);
+        if($usedTags != null){
+            $tags = Tag::fromJsonArray($usedTags);
 
 //        $this->log->debug(count($tags));
 
-        $usage = array_unique($tags); //get only unique values
-        $usage = array_values($usage); //reset the index of the array (1,2,3,...)
+            $usage = array_unique($tags); //get only unique values
+            $usage = array_values($usage); //reset the index of the array (1,2,3,...)
 //        $this->log->debug(count($usage));
 
-        for($i = 0; $i < count($usage); $i++)
-        {
-            $tagUse = $usage[$i];
-            $count = from($tags)
-                ->where(function ($tag) use ($tagUse){
+            for($i = 0; $i < count($usage); $i++)
+            {
+                $tagUse = $usage[$i];
+                $count = from($tags)
+                    ->where(function ($tag) use ($tagUse){
 //                    $this->log->debug((string)($tag->id." = ".$tagUse->id));
-                    return $tag->id == $tagUse->id;
-                })
-                ->count();
+                        return $tag->id == $tagUse->id;
+                    })
+                    ->count();
 
-            $usage[$i]->usage = $count;
+                $usage[$i]->usage = $count;
+            }
         }
 
 //        $this->log->debug($restos);
@@ -353,34 +368,37 @@ class SearchController extends ControllerBase
             $this->log->debug("<br> ".$para);
 
             $keyValuePair = explode("=",$para);
-            $field = $fc->get($keyValuePair[0]);
-            $this->log->debug($field);
-            $value = $keyValuePair[1];
+            if(isset($keyValuePair[0]) && isset($keyValuePair[1])) //ensure a value pair exists
+            {
+                $field = $fc->get($keyValuePair[0]);
+                $this->log->debug($field);
+                $value = $keyValuePair[1];
 
-            //Store fields
-            array_push($fields,$field);
+                //Store fields
+                array_push($fields,$field);
 
-            //Allow custom options to be passed
-            if(gettype($field) != General::objectType){
-                $result["options"][$field] = $value;
-            }
-            else {
-                if (strpos($value, ",") !== false) {
-                    $result[$field->databaseFieldname] = explode(",", $value);
-                } elseif (strpos($value, "-") !== false) {
-                    $range = explode("-", $value);
-                    if (count($range) != 2)
-                        throw new \Exception("Invalid Filter range submitted");
+                //Allow custom options to be passed
+                if(gettype($field) != General::objectType){
+                    $result["options"][$field] = $value;
+                }
+                else {
+                    if (strpos($value, ",") !== false) {
+                        $result[$field->databaseFieldname] = explode(",", $value);
+                    } elseif (strpos($value, "-") !== false) {
+                        $range = explode("-", $value);
+                        if (count($range) != 2)
+                            throw new \Exception("Invalid Filter range submitted");
 
-                    $result[$field->databaseFieldname . "[<>]"] = $range;
-                } else {
-                    $this->log->debug($value);
-                    if ($field->like)
-                        $key = $field->databaseFieldname . "[~]";
-                    else
-                        $key = $field->databaseFieldname;
+                        $result[$field->databaseFieldname . "[<>]"] = $range;
+                    } else {
+                        $this->log->debug($value);
+                        if ($field->like)
+                            $key = $field->databaseFieldname . "[~]";
+                        else
+                            $key = $field->databaseFieldname;
 
-                    $result[$key] = $value;
+                        $result[$key] = $value;
+                    }
                 }
             }
         }

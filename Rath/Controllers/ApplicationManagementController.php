@@ -81,7 +81,8 @@ class ApplicationManagementController Extends ControllerBase
         {
             foreach($cities as $toCity)
             {
-                if($fromCity[City::ID_COL] != $toCity[City::ID_COL]) {
+//                if($fromCity[City::ID_COL] != $toCity[City::ID_COL])
+                {
 
 
 //                    echo "<br> from: " . $fromCity[City::ID_COL] . " to " . $toCity[City::ID_COL] . " Distance: " . $this->distance(
