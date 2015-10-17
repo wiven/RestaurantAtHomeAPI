@@ -97,7 +97,7 @@ class UploadHandler
             'accept_file_types' => '/.+$/i',
             // The php.ini settings upload_max_filesize and post_max_size
             // take precedence over the following max_file_size setting:
-            'max_file_size' => null,
+            'max_file_size' =>  5 * 1024 * 1024,
             'min_file_size' => 1,
             // The maximum number of files for the upload directory:
             'max_number_of_files' => null,
@@ -158,8 +158,8 @@ class UploadHandler
                     // Uncomment the following to force the max
                     // dimensions and e.g. create square thumbnails:
                     //'crop' => true,
-                    'max_width' => 640,
-                    'max_height' => 640
+                    'max_width' => 700,
+                    'max_height' => 700
                 )
             ),
             'print_response' => true //TODO: change to false
