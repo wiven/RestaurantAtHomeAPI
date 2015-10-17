@@ -29,6 +29,6 @@ class FilterFieldController Extends ControllerBase
 
         if(gettype($result) != General::arrayType or empty($result))
             return $id;
-        return FilterField::toFilterField($result);
+        return FilterField::fromJson($result);
     }
 }

@@ -7,4 +7,5 @@ $baseDir = dirname($vendorDir);
 
 return array(
     $vendorDir . '/zircote/swagger-php/src/functions.php',
+    $vendorDir . '/athari/yalinqo/YaLinqo/Linq.php',
 );

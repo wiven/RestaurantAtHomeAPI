@@ -4,8 +4,8 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "b04745ada212fdffa7d8ca2b36e9c118",
-    "content-hash": "e8062ed9acd1290a322c9df42e78a0f1",
+    "hash": "192a15fc01ed2bdd030ebd60cec7d128",
+    "content-hash": "26546f50107128fdeecb22bbde7ccda6",
     "packages": [
         {
             "name": "apache/log4php",
@@ -36,6 +36,59 @@
                 "php"
             ],
             "time": "2012-10-26 09:13:25"
+        },
+        {
+            "name": "athari/yalinqo",
+            "version": "v2.3.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/Athari/YaLinqo.git",
+                "reference": "0e07d8119c233b3ac3f624cef6e0b3207baef3e0"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/Athari/YaLinqo/zipball/0e07d8119c233b3ac3f624cef6e0b3207baef3e0",
+                "reference": "0e07d8119c233b3ac3f624cef6e0b3207baef3e0",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.5"
+            },
+            "require-dev": {
+                "phpdocumentor/phpdocumentor": "~2.8",
+                "phpunit/phpunit": "<4.6",
+                "satooshi/php-coveralls": "dev-master",
+                "symfony/validator": "<2.5"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "2.x-dev"
+                }
+            },
+            "autoload": {
+                "files": [
+                    "YaLinqo/Linq.php"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "Simplified BSD"
+            ],
+            "authors": [
+                {
+                    "name": "Alexander Prokhorov"
+                }
+            ],
+            "description": "YaLinqo, a LINQ-to-objects library for PHP",
+            "homepage": "https://github.com/Athari/YaLinqo",
+            "keywords": [
+                "linq",
+                "linqo",
+                "query",
+                "statistic"
+            ],
+            "time": "2015-06-07 01:42:33"
         },
         {
             "name": "doctrine/annotations",

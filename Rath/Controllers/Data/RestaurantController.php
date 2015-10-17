@@ -17,6 +17,8 @@ use Rath\Entities\Order\Order;
 use Rath\Entities\Order\OrderDetail;
 use Rath\Entities\Order\OrderStatus;
 use Rath\Entities\Product\Product;
+use Rath\Entities\Product\ProductHasTags;
+use Rath\Entities\Product\Tag;
 use Rath\Entities\Promotion\Promotion;
 use Rath\Entities\Promotion\PromotionType;
 use Rath\Entities\Restaurant\Holiday;
@@ -379,7 +381,9 @@ class RestaurantController extends ControllerBase
     }
 
     public function getAllSpecialities(){
-        return $this->db->select(Speciality::TABLE_NAME,"*");
+        $result = $this->db->select(Speciality::TABLE_NAME,"*");
+        $this->logLastQuery();
+        return $result;
     }
 
     public function addRestaurantSpeciality($restoId,$specId){
@@ -747,6 +751,14 @@ class RestaurantController extends ControllerBase
     //endregion
 
     //region Products
+    /**
+     * @param $restoId
+     * @param $skip
+     * @param $top
+     * @param $query
+     * @return array|bool
+     * @throws \Exception
+     */
     public function getProducts($restoId, $skip, $top,$query)
     {
         $search = ControllerFactory::getSearchController();
@@ -916,6 +928,53 @@ class RestaurantController extends ControllerBase
             [
                 Coupon::RESTAURANT_ID_COL => $restoId
             ]);
+    }
+    //endregion
+
+    //region Tags (search)
+    /**
+     * @param $restoId int[]
+     * @param null $tagQuery
+     * @return array|bool
+     */
+    public function getUsedTags($restoId, $tagQuery = null)
+    {
+        $where = [];
+        if($tagQuery == null)
+            $where[Restaurant::TABLE_NAME.".".Restaurant::ID_COL] = $restoId;
+        else
+        {
+            $where = [
+                "AND" =>[
+                    Restaurant::TABLE_NAME.".".Restaurant::ID_COL => $restoId,
+                ]
+            ];
+            foreach($tagQuery as $key=>$value)
+                $where["AND"][$key] = $value;
+        }
+
+//        $this->log->debug("After where merge");
+//        $this->log->debug($where);
+
+        $result = $this->db->select(Tag::TABLE_NAME,
+            [
+                "[><]".ProductHasTags::TABLE_NAME => [
+                    Tag::TABLE_NAME.".".Tag::ID_COL => ProductHasTags::TAG_ID_COL
+                ],
+                "[><]".Product::TABLE_NAME => [
+                    ProductHasTags::TABLE_NAME.".".ProductHasTags::PRODUCT_ID_COL => Product::ID_COL
+                ],
+                "[><]".Restaurant::TABLE_NAME => [
+                    Product::TABLE_NAME.".".Product::RESTAURANT_ID_COL => Restaurant::ID_COL
+                ]
+            ],
+            [
+                Tag::TABLE_NAME.".".Tag::ID_COL,
+                Tag::TABLE_NAME.".".Tag::NAME_COL
+            ],
+            $where);
+
+        return $result;
     }
     //endregion
 

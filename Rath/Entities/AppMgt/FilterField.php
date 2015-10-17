@@ -10,8 +10,9 @@ namespace Rath\Entities\AppMgt;
 
 
 use Rath\Entities\DynamicClass;
+use Rath\Entities\EntityBase;
 
-class FilterField
+class FilterField extends EntityBase
 {
     const TABLE_NAME = "filterfield";
 
@@ -19,8 +20,19 @@ class FilterField
     const DATABASE_FIELDNAME_COL = "databaseFieldname";
     const LIKE_COL = "like";
 
+    const TAG_ID_FIELD = 1020;
+
+    /**
+     * @var int
+     */
     public $id;
+    /**
+     * @var string
+     */
     public $databaseFieldname;
+    /**
+     * @var bool
+     */
     public $like;
 
     /**

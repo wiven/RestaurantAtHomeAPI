@@ -9,7 +9,9 @@
 namespace Rath\Entities\Restaurant;
 
 
-class Restaurant
+use Rath\Entities\EntityBase;
+
+class Restaurant extends EntityBase
 {
     const TABLE_NAME = "restaurant";
 
@@ -26,16 +28,49 @@ class Restaurant
     const DOMINATING_COLOR_COL ="dominatingColor";
     const COMMENT_COL = "comment";
 
+    /**
+     * @var int
+     */
     public $id;
+    /**
+     * @var string
+     */
     public $name;
+    /**
+     * @var int
+     */
     public $userId;
+    /**
+     * @var int
+     */
     public $kitchentypeId;
+    /**
+     * @var int
+     */
     public $addressId;
+    /**
+     * @var string
+     */
     public $phone;
+    /**
+     * @var string
+     */
     public $email;
+    /**
+     * @var string
+     */
     public $url;
+    /**
+     * @var string
+     */
     public $logoPhoto;
+    /**
+     * @var string
+     */
     public $dominatingColor;
+    /**
+     * @var string
+     */
     public $comment;
 
 

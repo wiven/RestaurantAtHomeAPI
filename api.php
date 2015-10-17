@@ -1201,7 +1201,7 @@ $app->group('/search', function() use ($app){
     $app->get('/:skip/:top/:query', function($skip,$top,$query) use ($app,$sc){
        CrossDomainAjax::PrintCrossDomainCall(
            $app,
-           $sc->searchProducts($skip,$top,$query)
+           $sc->getSearchContent($skip,$top,$query)
        );
     });
 });

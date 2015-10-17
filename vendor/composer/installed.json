@@ -371,5 +371,60 @@
             }
         ],
         "description": "Map nested JSON structures onto PHP classes"
+    },
+    {
+        "name": "athari/yalinqo",
+        "version": "v2.3.0.0",
+        "version_normalized": "2.3.0.0",
+        "source": {
+            "type": "git",
+            "url": "https://github.com/Athari/YaLinqo.git",
+            "reference": "0e07d8119c233b3ac3f624cef6e0b3207baef3e0"
+        },
+        "dist": {
+            "type": "zip",
+            "url": "https://api.github.com/repos/Athari/YaLinqo/zipball/0e07d8119c233b3ac3f624cef6e0b3207baef3e0",
+            "reference": "0e07d8119c233b3ac3f624cef6e0b3207baef3e0",
+            "shasum": ""
+        },
+        "require": {
+            "php": ">=5.5"
+        },
+        "require-dev": {
+            "phpdocumentor/phpdocumentor": "~2.8",
+            "phpunit/phpunit": "<4.6",
+            "satooshi/php-coveralls": "dev-master",
+            "symfony/validator": "<2.5"
+        },
+        "time": "2015-06-07 01:42:33",
+        "type": "library",
+        "extra": {
+            "branch-alias": {
+                "dev-master": "2.x-dev"
+            }
+        },
+        "installation-source": "dist",
+        "autoload": {
+            "files": [
+                "YaLinqo/Linq.php"
+            ]
+        },
+        "notification-url": "https://packagist.org/downloads/",
+        "license": [
+            "Simplified BSD"
+        ],
+        "authors": [
+            {
+                "name": "Alexander Prokhorov"
+            }
+        ],
+        "description": "YaLinqo, a LINQ-to-objects library for PHP",
+        "homepage": "https://github.com/Athari/YaLinqo",
+        "keywords": [
+            "linq",
+            "linqo",
+            "query",
+            "statistic"
+        ]
     }
 ]
