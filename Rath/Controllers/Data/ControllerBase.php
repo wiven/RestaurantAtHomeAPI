@@ -34,4 +34,9 @@ abstract class ControllerBase
     {
         $this->log->debug($this->db->last_query());
     }
+
+    public function logMedooError()
+    {
+        $this->log->debug($this->db->error());
+    }
 }
