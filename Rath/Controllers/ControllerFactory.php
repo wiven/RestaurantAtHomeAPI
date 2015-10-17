@@ -65,4 +65,13 @@ class ControllerFactory
         return self::$paymentController;
     }
 
+    private static $RestaurantDetailController;
+
+    public static function getRestaurantDetailController()
+    {
+        if(empty(self::$RestaurantDetailController))
+            self::$RestaurantDetailController = new RestaurantDetailController();
+        return self::$RestaurantDetailController;
+    }
+
 }

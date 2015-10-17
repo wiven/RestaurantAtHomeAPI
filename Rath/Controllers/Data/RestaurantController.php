@@ -790,6 +790,26 @@ class RestaurantController extends ControllerBase
         $result = PhotoManagement::getPhotoUrlsForArray($result,Product::PHOTO_COL);
         return $result;
     }
+
+    public function getProductsAllByProductType($restoId,$productTypeId)
+    {
+        $result = $this->db->select(Product::TABLE_NAME,
+            [
+                Product::ID_COL,
+                Product::NAME_COL,
+                Product::PHOTO_COL
+            ],
+            [
+                "AND" =>
+                    [
+                        Product::RESTAURANT_ID_COL => $restoId,
+                        Product::PRODUCT_TYPE_ID => $productTypeId
+                    ]
+            ]);
+
+        $result = PhotoManagement::getPhotoUrlsForArray($result,Product::PHOTO_COL);
+        return $result;
+    }
     //endregion
 
 

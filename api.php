@@ -1195,6 +1195,7 @@ $app->group('/dashboard', function() use ($app){
 });
 //endregion
 
+//region Search
 $app->group('/search', function() use ($app){
     $sc = ControllerFactory::getSearchController();
     $app->get('/:skip/:top/:query', function($skip,$top,$query) use ($app,$sc){
@@ -1204,6 +1205,19 @@ $app->group('/search', function() use ($app){
        );
     });
 });
+//endregion
+
+//region Restaurant Detail
+$app->group('/restaurantdetail', function() use ($app) {
+    $rdc = ControllerFactory::getRestaurantDetailController();
+    $app->get('/:restoId', function($restoId) use ($app,$rdc){
+        CrossDomainAjax::PrintCrossDomainCall(
+            $app,
+            $rdc->getRestaurantDetailView($restoId)
+        );
+    });
+});
+//endregion
 //endregion
 
 
