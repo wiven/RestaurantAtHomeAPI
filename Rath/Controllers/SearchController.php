@@ -90,7 +90,8 @@ class SearchController extends ControllerBase
         return[
             "tagUse" => $tagUse,
             "promotionUse" => $promoTypeUse,
-            "results" => $searchResult
+            "results" => $searchResult,
+            "totalResults" => count($restoIdsResult)
         ];
 
     }
