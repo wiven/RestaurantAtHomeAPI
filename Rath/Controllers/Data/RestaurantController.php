@@ -10,15 +10,12 @@ namespace Rath\Controllers\Data;
 
 use PDO;
 use Rath\Controllers\ControllerFactory;
-use Rath\Controllers\Data\ControllerBase;
 use Rath\Entities\General\Address;
 use Rath\Entities\Order\Coupon;
 use Rath\Entities\Order\Order;
 use Rath\Entities\Order\OrderDetail;
 use Rath\Entities\Order\OrderStatus;
 use Rath\Entities\Product\Product;
-use Rath\Entities\Product\ProductHasTags;
-use Rath\Entities\Product\Tag;
 use Rath\Entities\Promotion\Promotion;
 use Rath\Entities\Promotion\PromotionType;
 use Rath\Entities\Restaurant\Holiday;
@@ -34,7 +31,6 @@ use Rath\Entities\Restaurant\RestaurantSocialMedia;
 use Rath\Entities\Restaurant\Speciality;
 use Rath\Entities\Slots\SlotTemplate;
 use Rath\Entities\Slots\SlotTemplateChange;
-use Rath\Entities\User\User;
 use Rath\Helpers\General;
 use Rath\Helpers\PhotoManagement;
 use Rath\Slim\Middleware\Authorization;
@@ -931,54 +927,5 @@ class RestaurantController extends ControllerBase
     }
     //endregion
 
-    //region Tags (search)
-    /**
-     * @param $restoId int[]
-     * @param null $tagQuery
-     * @return array|bool
-     */
-    public function getUsedTags($restoId, $tagQuery = null)
-    {
-        if(count($restoId) == 0)
-            return null;
-
-        $where = [];
-        if($tagQuery == null)
-            $where[Restaurant::TABLE_NAME.".".Restaurant::ID_COL] = $restoId;
-        else
-        {
-            $where = [
-                "AND" =>[
-                    Restaurant::TABLE_NAME.".".Restaurant::ID_COL => $restoId,
-                ]
-            ];
-            foreach($tagQuery as $key=>$value)
-                $where["AND"][$key] = $value;
-        }
-
-        $this->log->debug("After where merge");
-        $this->log->debug($where);
-
-        $result = $this->db->select(Tag::TABLE_NAME,
-            [
-                "[><]".ProductHasTags::TABLE_NAME => [
-                    Tag::TABLE_NAME.".".Tag::ID_COL => ProductHasTags::TAG_ID_COL
-                ],
-                "[><]".Product::TABLE_NAME => [
-                    ProductHasTags::TABLE_NAME.".".ProductHasTags::PRODUCT_ID_COL => Product::ID_COL
-                ],
-                "[><]".Restaurant::TABLE_NAME => [
-                    Product::TABLE_NAME.".".Product::RESTAURANT_ID_COL => Restaurant::ID_COL
-                ]
-            ],
-            [
-                Tag::TABLE_NAME.".".Tag::ID_COL,
-                Tag::TABLE_NAME.".".Tag::NAME_COL
-            ],
-            $where);
-
-        return $result;
-    }
-    //endregion
 
 }

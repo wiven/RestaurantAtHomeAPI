@@ -9,14 +9,22 @@
 namespace Rath\Entities\Promotion;
 
 
-class PromotionType
+use Rath\Entities\EntityBase;
+
+class PromotionType extends EntityBase
 {
     const TABLE_NAME = "promotiontype";
 
     const ID_COL = "id";
     const NAME_COL = "name";
 
+    /**
+     * @var int
+     */
     public $id;
+    /**
+     * @var string
+     */
     public $name;
 
     /**
@@ -28,5 +36,10 @@ class PromotionType
         return [
             PromotionType::NAME_COL => $promoType->name
         ];
+    }
+
+    public function __toString()
+    {
+        return (string)$this->id;
     }
 }

@@ -21,6 +21,8 @@ class FilterField extends EntityBase
     const LIKE_COL = "like";
 
     const TAG_ID_FIELD = 1020;
+    const DISTANT_MTX_FROM_CITY_FIELD = 900;
+    const PROMOTIONTYPE_ID_FIELD = 1050;
 
     /**
      * @var int
