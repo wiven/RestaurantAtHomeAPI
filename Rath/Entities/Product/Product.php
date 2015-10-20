@@ -9,7 +9,9 @@
 namespace Rath\Entities\Product;
 
 
-class Product
+use Rath\Entities\EntityBase;
+
+class Product extends EntityBase
 {
     const TABLE_NAME = "product";
 

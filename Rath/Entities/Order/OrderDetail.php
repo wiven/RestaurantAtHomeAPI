@@ -9,7 +9,9 @@
 namespace Rath\Entities\Order;
 
 
-class OrderDetail
+use Rath\Entities\EntityBase;
+
+class OrderDetail extends EntityBase
 {
     const TABLE_NAME = "orderdetail";
 
@@ -17,14 +19,36 @@ class OrderDetail
     const ORDER_ID_COL = "orderId";
     const PRODUCT_ID_COL = "productId";
     const QUANTITY_COL = "quantity";
-    const UNIT_PRICE_COL = "unitPrice";
-    const LINE_TOTAL_COL = "lineTotal";
+//    const UNIT_PRICE_COL = "unitPrice";
+//    const LINE_TOTAL_COL = "lineTotal";
 
+    /**
+     * @var int
+     */
     public $id;
+    /**
+     * @var int
+     */
     public $orderId;
+    /**
+     * @var int
+     */
     public $productId;
+    /**
+     * @var string
+     */
+    public $name;
+    /**
+     * @var int
+     */
     public $quantity;
-    public $unitPrice;
+    /**
+     * @var float
+     */
+    public $price;
+    /**
+     * @var float
+     */
     public $lineTotal;
 
     /**
@@ -33,12 +57,14 @@ class OrderDetail
      */
     public static function toDbArray($od)
     {
-        return [
+        $data = [
             OrderDetail::ORDER_ID_COL => $od->orderId,
-            OrderDetail::PRODUCT_ID_COL => $od->productId,
-            OrderDetail::QUANTITY_COL => $od->quantity,
-            OrderDetail::UNIT_PRICE_COL => $od->unitPrice,
-            OrderDetail::LINE_TOTAL_COL => $od->lineTotal
+            OrderDetail::QUANTITY_COL => $od->quantity
         ];
+
+        if(isset($data[OrderDetail::PRODUCT_ID_COL]))
+            $data[OrderDetail::PRODUCT_ID_COL] = $od->productId;
+
+        return $data;
     }
 }

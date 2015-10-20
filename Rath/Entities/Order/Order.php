@@ -9,11 +9,13 @@
 namespace Rath\Entities\Order;
 
 
+use DateTime;
 use Rath\Controllers\Data\DataControllerFactory;
+use Rath\Entities\EntityBase;
 use Rath\Entities\Restaurant\Restaurant;
 use Rath\Slim\Middleware\Authorization;
 
-class Order
+class Order extends EntityBase
 {
     const TABLE_NAME = "orders"; //change for syntax problems in sql
 
@@ -30,20 +32,64 @@ class Order
     const SUBMITTED_COL = "submitted";
     const SLOT_TEMPLATE_ID_COL = "slottemplateId";
     const MOLLIE_ID_COL = "mollieinfoid";
+    const PAYMENT_METHOD_ID = "paymentmethodid";
 
+    /**
+     * @var int
+     */
     public $id;
+    /**
+     * @var int
+     */
     public $userId;
+    /**
+     * @var int
+     */
     public $restaurantId;
+    /**
+     * @var int
+     */
     public $orderStatusId;
+    /**
+     * @var float
+     */
     public $amount;
+//    /**
+//     * @var DateTime | null
+//     */
     public $orderDateTime;
+    /**
+     * @var string
+     */
     public $comment;
+    /**
+     * @var int
+     */
     public $addressId;
+    /**
+     * @var int | null
+     */
     public $couponId;
+//    /**
+//     * @var DateTime | null
+//     */
     public $creationDateTime;
+    /**
+     * @var bool
+     */
     public $submitted;
+    /**
+     * @var int
+     */
     public $slottemplateId;
+    /**
+     * @var int
+     */
     public $mollieinfoid;
+    /**
+     * @var int
+     */
+    public $paymentmethodid;
 
     public $lines;
 
@@ -68,10 +114,10 @@ class Order
             Order::USER_ID_COL => Authorization::$userId,
             Order::RESTAURANT_ID_COL => $order->restaurantId,
             Order::ORDER_STATUS_ID_COL => $order->orderStatusId,
-            Order::AMOUNT_COL => $order->amount,
-            Order::ORDER_DATETIME_COL => $order->orderDateTime,
-            Order::COMMENT_COL => $order->comment,
-            Order::ADDRESS_ID_COL => $order->addressId,
+//            Order::AMOUNT_COL => $order->amount,
+//            Order::ORDER_DATETIME_COL => $order->orderDateTime,
+//            Order::COMMENT_COL => $order->comment,
+//            Order::ADDRESS_ID_COL => $order->addressId,
             Order::CREATION_DATE_TIME_COL => date("Y-m-d H:i:s")
         ];
 
@@ -83,6 +129,9 @@ class Order
 
         if(!empty($order->mollieinfoid))
             $data[self::MOLLIE_ID_COL] = $order->mollieinfoid;
+
+        if(!empty($order->paymentmethodid))
+            $data[self::PAYMENT_METHOD_ID] = $order->paymentmethodid;
 
         //not allowed through api!
         //if(!empty($order->submitted))
@@ -122,6 +171,9 @@ class Order
 
         if(!empty($order->mollieinfoid))
             $data[self::MOLLIE_ID_COL] = $order->mollieinfoid;
+
+        if(!empty($order->paymentmethodid))
+            $data[self::PAYMENT_METHOD_ID] = $order->paymentmethodid;
 
         return $data;
     }

@@ -9,9 +9,12 @@
 namespace Rath\Controllers\Data;
 
 
+use Rath\Controllers\PaymentController;
+use Rath\Entities\ApiResponse;
 use Rath\Entities\Order\Coupon;
 use Rath\Entities\Order\Order;
 use Rath\Entities\Order\OrderDetail;
+use Rath\Entities\Order\OrderStatus;
 use Rath\Entities\Product\Product;
 use Rath\Entities\Slots\SlotTemplate;
 use Rath\Exceptions\OrderDetailException;
@@ -20,6 +23,22 @@ use Rath\Entities\DynamicClass;
 
 class OrderController extends ControllerBase
 {
+    /**
+     * @var ProductController
+     */
+    private $pc;
+
+    /**
+     * OrderController constructor.
+     */
+    public function __construct()
+    {
+        parent::__construct();
+        $this->pc = DataControllerFactory::getProductController();
+    }
+
+
+
     //Todo: Order manipulation should return the order?
     //TODO: change the field subset to better suite UI.
 
@@ -30,11 +49,13 @@ class OrderController extends ControllerBase
      */
     public function createOrder($order)
     {
-        unset($order->submitted); //ensure no unpaid orders get through
+        $order->submitted = false;
+        $order->orderStatusId = OrderStatus::val_New;
+
         $lastId = $this->db->insert(Order::TABLE_NAME,
             Order::toDbArray($order));
         if($lastId != 0)
-            return $this->getOrder($lastId);
+            return $this->getOrderDetail($lastId);
         else
             return $this->db->error();
     }
@@ -60,6 +81,7 @@ class OrderController extends ControllerBase
     {
         $fields = [
             Order::TABLE_NAME.".".Order::ID_COL,
+            Order::TABLE_NAME.".".Order::RESTAURANT_ID_COL,
             Order::TABLE_NAME.".".Order::ORDER_STATUS_ID_COL,
             Order::TABLE_NAME.".".Order::AMOUNT_COL,
             Order::TABLE_NAME.".".Order::ORDER_DATETIME_COL,
@@ -67,6 +89,7 @@ class OrderController extends ControllerBase
             Order::TABLE_NAME.".".Order::COUPON_ID,
             Order::TABLE_NAME.".".Order::SUBMITTED_COL,
             Order::TABLE_NAME.".".Order::CREATION_DATE_TIME_COL,
+            Order::TABLE_NAME.".".Order::PAYMENT_METHOD_ID,
             Order::TABLE_NAME.".".Order::SLOT_TEMPLATE_ID_COL,
             SlotTemplate::FROM_TIME_COL."(slotFromTime)",
             SlotTemplate::TO_TIME_COL."(slotToTime)"
@@ -92,40 +115,63 @@ class OrderController extends ControllerBase
         return $order;
     }
 
-    public function getOrderDetail($id)
+    public function getOrderDetail($id, $full = false)
     {
-        $mc = DataControllerFactory::getMollieInfoController();
-        $uc = DataControllerFactory::getUserController();
-        $gc = DataControllerFactory::getGeneralController();
-        $cc = DataControllerFactory::getCouponController();
-
+        $apiResponse = new ApiResponse();
         $order = $this->getOrderPublic($id,true);
 
-        if(!isset($order[Order::ID_COL]))
-            return [];
+        if(!isset($order[Order::ID_COL])){
+            $apiResponse->code = 404;
+            $apiResponse->message = "order could not be found with id: ".(string)$id;
+            return $apiResponse;
+        }
+        /** @var Order $order */
+        $order = Order::fromJson($order);
 
-        $order["lines"] = $this->getOrderLines($id);
+        /** @var OrderDetail[] $lines */
+        $lines = $this->getOrderLines($id);
+        $orderTotal = from($lines)
+            ->sum(function($line){
+                /* @var OrderDetail $line */
+                return $line->lineTotal;
+            });
 
-        if(isset($order[Order::MOLLIE_ID_COL]))
-            if($order[Order::MOLLIE_ID_COL] != null)
-                $order["paymentInfo"] = $mc->getMollieInfoPublic($order[Order::MOLLIE_ID_COL]);
+        if($order->amount != $orderTotal){
+            $order->amount = $orderTotal;
+            $this->updateOrder($order);
+        }
+
+        $order->lines = $lines;
+
+        if($full)
+        {
+            $mc = DataControllerFactory::getMollieInfoController();
+            $uc = DataControllerFactory::getUserController();
+            $gc = DataControllerFactory::getGeneralController();
+            $cc = DataControllerFactory::getCouponController();
+
+            if($order->mollieinfoid != 0)
+                $order->paymentInfo = $mc->getMollieInfoPublic($order->mollieinfoid);
             else
-                $order["paymentInfo"] = "Cash";
+                $order->paymentInfo = "Cash";
 
-        if(isset($order[Order::COUPON_ID]))
-            if($order[Order::COUPON_ID] != null)
-                $order["couponDetail"] = $cc->getCoupon(Order::COUPON_ID);
+
+            if($order->couponId != 0)
+                $order->couponDetail = $cc->getCoupon($order->couponId);
             else
-                $order["couponDetail"] = null;
+                $order->couponDetail = null;
 
-        if(isset($order[Order::USER_ID_COL]))
-            $order["userDetails"] = $uc->getUserDetails($order[Order::USER_ID_COL]);
-        if(isset($order[Order::ADDRESS_ID_COL]))
-            $order["addressDetails"] = $gc->getAddress($order[Order::ADDRESS_ID_COL]);
 
-        unset($order[Order::ADDRESS_ID_COL]);
-        unset($order[Order::USER_ID_COL]);
-        unset($order[Order::MOLLIE_ID_COL]);
+            $order->userDetails = $uc->getUserDetails($order->userId);
+
+            if($order->addressId != 0)
+                $order->addressDetail = $gc->getAddress($order->addressId);
+
+            unset($order->addressId);
+            unset($order->userId);
+            unset($order->mollieinfoid);
+        }
+
         return $order;
     }
 
@@ -168,6 +214,28 @@ class OrderController extends ControllerBase
             ]);
         return $this->db->error();
     }
+
+    public function submitOrder($id)
+    {
+        $response = new ApiResponse();
+
+        /** @var Order $order */
+        $order = $this->getOrder($id);
+        $order = Order::fromJson($order);
+        if($order->submitted)
+        {
+            $response->code = 400;
+            $response->message = "Order already submitted";
+            return $response;
+        }
+
+        $pc = new PaymentController();
+        $pc->CreateMollieTransaction($order);
+
+
+
+
+    }
     //endregion
 
     //region OrderDetail
@@ -177,14 +245,58 @@ class OrderController extends ControllerBase
      */
     public function addOrderDetailLine($orderLine)
     {
-        $this->checkOrderLinePrice($orderLine);
-        $lastId = $this->db->insert(OrderDetail::TABLE_NAME,
-            OrderDetail::toDbArray($orderLine));
+        $apiResponse = new ApiResponse();
 
-        if($lastId != 0)
-            return $this->getOrderDetailLine($lastId);
-        else
-            return $this->db->error();
+        /** @var Product $product */
+        $product = $this->pc->getProduct($orderLine->productId);
+        if(!isset($product[Product::ID_COL])){
+            $apiResponse->code = 406;
+            $apiResponse->message = "The product id isn't known.";
+            return $apiResponse;
+        }
+        $product = Product::fromJson($product);
+
+        /** @var Order $order */
+        $order = $this->getOrder($orderLine->orderId);
+        if(isset($order[Order::ID_COL])){
+            $order= Order::fromJson($order);
+            if($order->restaurantId != $product->restaurantId){
+                $apiResponse->code = 406;
+                $apiResponse->message = "You can only buy products from one restaurant in one order.";
+                return $apiResponse;
+            }
+        }
+        else{
+            $apiResponse->code = 404;
+            $apiResponse->message = "Supplied order No not found.";
+            return $apiResponse;
+        }
+
+
+        /** @var OrderDetail $dbOrderLine */
+        $dbOrderLine = $this->updateOrderDetailLineByLineInfo($orderLine);
+        if(isset($dbOrderLine->id)){
+            $orderLine->id = $dbOrderLine->id;
+            $orderLine->quantity = $orderLine->quantity + $dbOrderLine->quantity;
+            if($orderLine->quantity < 0){
+                $apiResponse->code = 406;
+                $apiResponse->message = "The quantity provided will result in a negative value on a order line.";
+                return $apiResponse;
+            }
+
+            $this->updateOrderDetailLine($orderLine);
+        }
+        else{
+            $lastId = $this->db->insert(OrderDetail::TABLE_NAME,
+                OrderDetail::toDbArray($orderLine));
+
+            if($lastId != 0)
+                return $this->getOrderDetail($order->id);
+            else
+                return $this->db->error();
+        }
+
+        return $this->getOrderDetail($order->id);
     }
 
     public function getOrderDetailLine($id)
@@ -196,9 +308,35 @@ class OrderController extends ControllerBase
             ]);
     }
 
+    /**
+     * @param $orderDetail OrderDetail
+     * @return bool
+     */
+    public function updateOrderDetailLineByLineInfo(&$orderDetail)
+    {
+        $result = $this->db->get(OrderDetail::TABLE_NAME,
+            [
+                OrderDetail::ID_COL,
+                OrderDetail::QUANTITY_COL
+            ],
+            [
+                "AND" => [
+                    OrderDetail::ORDER_ID_COL => $orderDetail->orderId,
+                    OrderDetail::PRODUCT_ID_COL => $orderDetail->productId
+                ]
+            ]);
+
+
+        if(isset($result[OrderDetail::ID_COL])){
+            return OrderDetail::fromJson($result);
+        }
+        return false;
+    }
+
     public function getOrderLines($orderId)
     {
-        return $this->db->select(OrderDetail::TABLE_NAME,
+        /** @var OrderDetail[] $orderDetails */
+        $orderDetails =  $this->db->select(OrderDetail::TABLE_NAME,
             [
                 "[><]".Product::TABLE_NAME =>[
                     OrderDetail::PRODUCT_ID_COL => Product::ID_COL
@@ -209,13 +347,22 @@ class OrderController extends ControllerBase
                 OrderDetail::TABLE_NAME.".".OrderDetail::ID_COL,
                 OrderDetail::PRODUCT_ID_COL,
                 Product::NAME_COL,
-                OrderDetail::QUANTITY_COL,
-                OrderDetail::UNIT_PRICE_COL,
-                OrderDetail::LINE_TOTAL_COL
+                Product::PRICE_COL,
+                OrderDetail::QUANTITY_COL
             ],
             [
                 OrderDetail::ORDER_ID_COL => $orderId
             ]);
+
+        if(count($orderDetails) != 0)
+            $orderDetails = OrderDetail::fromJsonArray($orderDetails);
+        else
+            return [];
+
+        foreach($orderDetails as $detail){
+            $detail->lineTotal = bcmul($detail->price,$detail->quantity);
+        }
+        return $orderDetails;
     }
 
     /**
@@ -225,22 +372,37 @@ class OrderController extends ControllerBase
      */
     public function updateOrderDetailLine($orderLine)
     {
-        $this->checkOrderLinePrice($orderLine);
+//        $this->checkOrderLinePrice($orderLine);
         $this->db->update(OrderDetail::TABLE_NAME,
             OrderDetail::toDbArray($orderLine),
             [
-                OrderDetail::ID_COL => $orderLine->id
+                "AND"=> [
+                    OrderDetail::ID_COL => $orderLine->id,
+                    OrderDetail::ORDER_ID_COL => $orderLine->orderId
+                ]
             ]);
-        return $this->db->error();
+        return $this->getOrderDetail($orderLine->orderId);
     }
 
     public function deleteOrderDetailLine($id)
     {
-        $this->db->delete(OrderDetail::TABLE_NAME,
+        $changes = $this->db->delete(OrderDetail::TABLE_NAME,
             [
                 OrderDetail::ID_COL => $id
             ]);
-        return $this->db->error();
+
+        $response = new ApiResponse();
+        if($changes == 0) {
+            $response->code = 406;
+            $response->message = "Deletion failed.";
+            $response->data = $this->db->error();
+        }
+        else {
+            $response->code = 200;
+            $response->message = "Deletion succes";
+        }
+
+        return $response;
     }
     //endregion
 
@@ -268,5 +430,13 @@ class OrderController extends ControllerBase
 //        var_dump($lineTotal != $orderLine->lineTotal);
         if($lineTotal != $orderLine->lineTotal)
             throw new OrderDetailException("Order Detail total isn't correct.");
+    }
+
+    /**
+     * @param $orderDetail OrderDetail
+     */
+    public function addProduct($orderDetail)
+    {
+
     }
 }

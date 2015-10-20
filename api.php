@@ -1060,6 +1060,13 @@ $app->group('/order', function() use ($app){
         );
     });
 
+    $app->get('/detailed/:id', function($id) use ($app,$oc){
+        CrossDomainAjax::PrintCrossDomainCall(
+            $app,
+            $oc->getOrderDetail($id,true)
+        );
+    });
+
     $app->post('/', function() use ($app,$oc){
         $o = json_decode($app->request->getBody());
         CrossDomainAjax::PrintCrossDomainCall(
@@ -1080,6 +1087,20 @@ $app->group('/order', function() use ($app){
         CrossDomainAjax::PrintCrossDomainCall(
             $app,
             $oc->deleteOrder($id)
+        );
+    });
+
+    $app->get('/submit/:id', function($id) use ($app,$oc){
+        CrossDomainAjax::PrintCrossDomainCall(
+            $app,
+            $oc->submitOrder($id)
+        );
+    });
+
+    $app->get('/paymenthook/', function($id) use ($app,$oc){
+        CrossDomainAjax::PrintCrossDomainCall(
+            $app,
+            $oc->submitOrder($id)
         );
     });
 

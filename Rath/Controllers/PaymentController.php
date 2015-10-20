@@ -37,14 +37,14 @@ class PaymentController extends ControllerBase
     public function CreateMollieTransaction($order)
     {
         try {
-            var_dump($order);
+            $this->log->debug($order);
             $webhook = $this->getMollieWebhookUrl();
             if (!isset($webhook))
                 throw new \Exception("Invalid platform to test payments");
             $data = [
                 "amount" => $order->amount,
                 "description" => Order::getOrderDescription($order),
-                "redirectUrl" => "http://playground.restaurantathome.be",
+                "redirectUrl" => "http://playground.restaurantathome.be", //TODO:Parameter?
                 "webhookUrl" => $webhook,
                 "metadata" => [
                     "orderId" => $order->id
@@ -113,7 +113,7 @@ class PaymentController extends ControllerBase
             case "TEST":
                 return "test";
             default :
-                return "http://playground.restaurantathome.be/api/ping";
+                return "http://playground.restaurantathome.be/api/order/paymenthook/";
         }
     }
 }

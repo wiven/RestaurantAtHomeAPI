@@ -25,7 +25,7 @@ class ProductController extends ControllerBase
     //region General
 
     /**
-     * @param $id
+     * @param $id int
      * @return array|bool
      */
     public function getProduct($id){
