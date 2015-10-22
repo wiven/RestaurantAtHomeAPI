@@ -33,6 +33,9 @@ class Order extends EntityBase
     const SLOT_TEMPLATE_ID_COL = "slottemplateId";
     const MOLLIE_ID_COL = "mollieinfoid";
     const PAYMENT_METHOD_ID = "paymentmethodid";
+    const PAYMENT_STATUS_COL = "paymentStatus";
+        const PAYMENT_STATUS_VAL_PENDING = "Pending";
+        const PAYMENT_STATUS_VAL_PAYED = "Payed";
 
     /**
      * @var int
@@ -91,6 +94,11 @@ class Order extends EntityBase
      */
     public $paymentmethodid;
 
+    /**
+     * @var string | null
+     */
+    public $paymentStatus;
+
     public $lines;
 
     /**
@@ -142,9 +150,10 @@ class Order extends EntityBase
 
     /**
      * @param $order Order
+     * @param bool $submit
      * @return array
      */
-    public static function toDbUpdateArray($order)
+    public static function toDbUpdateArray($order,$submit = false)
     {
         $data = [];
 
@@ -174,6 +183,17 @@ class Order extends EntityBase
 
         if(!empty($order->paymentmethodid))
             $data[self::PAYMENT_METHOD_ID] = $order->paymentmethodid;
+
+
+
+        if($submit)
+        {
+            if(!empty($order->submitted))
+                $data[self::SUBMITTED_COL] = $order->submitted;
+            if(!empty($order->paymentStatus))
+                $data[self::PAYMENT_STATUS_COL] = $order->paymentStatus;
+
+        }
 
         return $data;
     }

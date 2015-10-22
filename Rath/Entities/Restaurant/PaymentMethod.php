@@ -17,6 +17,11 @@ class PaymentMethod
     const NAME_COL = "name";
     const MOLLIE_ID_COL = "mollieinfoid";
 
+    //handled by resto
+    const CASH_PAYMENT_ID = 1;
+    //Handled by mollie
+    const BANCONTACT_PAYMENT_ID = 2;
+
     public $id;
     public $name;
     public $mollieId;

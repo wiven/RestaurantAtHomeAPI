@@ -16,6 +16,7 @@ use Rath\Entities\Order\Order;
 use Rath\Entities\Order\OrderDetail;
 use Rath\Entities\Order\OrderStatus;
 use Rath\Entities\Product\Product;
+use Rath\Entities\Restaurant\PaymentMethod;
 use Rath\Entities\Slots\SlotTemplate;
 use Rath\Exceptions\OrderDetailException;
 use Rath\Helpers\General;
@@ -153,7 +154,7 @@ class OrderController extends ControllerBase
             if($order->mollieinfoid != 0)
                 $order->paymentInfo = $mc->getMollieInfoPublic($order->mollieinfoid);
             else
-                $order->paymentInfo = "Cash";
+                $order->paymentInfo = null;
 
 
             if($order->couponId != 0)
@@ -166,6 +167,10 @@ class OrderController extends ControllerBase
 
             if($order->addressId != 0)
                 $order->addressDetail = $gc->getAddress($order->addressId);
+            else
+                $order->addressDetail = null;
+
+            $this->log->debug($order);
 
             unset($order->addressId);
             unset($order->userId);
@@ -177,12 +182,13 @@ class OrderController extends ControllerBase
 
     /**
      * @param $order Order
+     * @param bool $submit
      * @return array
      */
-    public function updateOrder($order)
+    public function updateOrder($order, $submit = false)
     {
         $this->db->update(Order::TABLE_NAME,
-            Order::toDbUpdateArray($order),
+            Order::toDbUpdateArray($order,$submit),
             [
                 Order::ID_COL => $order->id
             ]);
@@ -215,26 +221,89 @@ class OrderController extends ControllerBase
         return $this->db->error();
     }
 
+    /**
+     * @param $id
+     * @return ApiResponse
+     * @throws \Exception
+     */
     public function submitOrder($id)
     {
         $response = new ApiResponse();
+        $error = false;
 
         /** @var Order $order */
         $order = $this->getOrder($id);
-        $order = Order::fromJson($order);
-        if($order->submitted)
+        $this->log->debug($order);
+        if(isset($order[Order::ID_COL]))
+        {
+            $order = Order::fromJson($order);
+        }
+        else {
+            $error = true;
+        }
+
+        if($order->paymentStatus != null or $error)
         {
             $response->code = 400;
             $response->message = "Order already submitted";
             return $response;
         }
 
-        $pc = new PaymentController();
-        $pc->CreateMollieTransaction($order);
 
+        $links = null;
+        if($order->paymentmethodid != PaymentMethod::CASH_PAYMENT_ID)
+        {
+            $pc = new PaymentController();
+            $links = $pc->CreateMollieTransaction($order);
+            if($links != null)
+            {
+                $order->paymentStatus = Order::PAYMENT_STATUS_VAL_PENDING;
+                $this->updateOrder($order,true);
+            }else{
+                $response->code = 500;
+                $response->message = "Something went wrong in submitting the order";
+                return $response;
+            }
+        }
 
+        $order->submitted = true;
+        $order->paymentStatus = Order::PAYMENT_STATUS_VAL_PENDING;
+        $this->updateOrder($order,true);
 
+        $response->code = 200;
+        $response->message = "Order submitted succesfully";
+        $response->data = $links;
 
+        return $response;
+    }
+
+    public function checkOrderPayment($id)
+    {
+        $response = new ApiResponse();
+
+        /** @var Order $order */
+        $order = $this->getOrderPublic($id);
+        if(isset($order[Order::ID_COL]))
+        {
+            $order = Order::fromJson($order);
+        } else
+        {
+            $response->code = 400;
+            $response->message = "Order could not be found";
+            return $response;
+        }
+
+        if($order->paymentStatus == Order::PAYMENT_STATUS_VAL_PAYED){
+            $response->code = 200;
+            $response->message = "Your order has been payed";
+            $response->data = $order;
+            return $response;
+        }
+
+        $response->code = 400;
+        $response->message = "Your order hasn't been payed";
+        $response->data = $order;
+        return $response;
     }
     //endregion
 
@@ -287,6 +356,7 @@ class OrderController extends ControllerBase
             $this->updateOrderDetailLine($orderLine);
         }
         else{
+            $this->log->debug($orderLine);
             $lastId = $this->db->insert(OrderDetail::TABLE_NAME,
                 OrderDetail::toDbArray($orderLine));
 
@@ -384,25 +454,36 @@ class OrderController extends ControllerBase
         return $this->getOrderDetail($orderLine->orderId);
     }
 
-    public function deleteOrderDetailLine($id)
+    public function deleteOrderDetailLine($orderId,$id)
     {
+        $response = new ApiResponse();
+
+        /** @var Order $order */
+        $order = $this->getOrder($orderId);
+        if(isset($order[Order::ID_COL]))
+            $order = Order::fromJson($order);
+
+        if($order->submitted or $order->paymentStatus != null)
+        {
+            $response->code = 406;
+            $response->message = "This line cannot be deteled.";
+            return $response;
+        }
+
         $changes = $this->db->delete(OrderDetail::TABLE_NAME,
             [
                 OrderDetail::ID_COL => $id
             ]);
 
-        $response = new ApiResponse();
+
         if($changes == 0) {
             $response->code = 406;
             $response->message = "Deletion failed.";
             $response->data = $this->db->error();
-        }
-        else {
-            $response->code = 200;
-            $response->message = "Deletion succes";
+            return $response;
         }
 
-        return $response;
+        return $this->getOrderDetail($orderId);
     }
     //endregion
 

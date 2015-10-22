@@ -11,8 +11,13 @@ namespace Rath\Controllers;
 
 use Mollie_API_Client;
 use Mollie_API_Exception;
+use Mollie_API_Object_Payment;
+use Mollie_API_Resource_Payments;
 use Rath\Controllers\Data\ControllerBase;
+use Rath\Controllers\Data\DataControllerFactory;
+use Rath\Entities\Order\MollieInfo;
 use Rath\Entities\Order\Order;
+use Rath\Helpers\General;
 
 class PaymentController extends ControllerBase
 {
@@ -32,15 +37,19 @@ class PaymentController extends ControllerBase
 
     /**
      * @param $order Order
+     * @return null|object
      * @throws \Exception
      */
     public function CreateMollieTransaction($order)
     {
         try {
             $this->log->debug($order);
+
             $webhook = $this->getMollieWebhookUrl();
             if (!isset($webhook))
                 throw new \Exception("Invalid platform to test payments");
+
+            //TODO: add payment method parameter
             $data = [
                 "amount" => $order->amount,
                 "description" => Order::getOrderDescription($order),
@@ -54,36 +63,77 @@ class PaymentController extends ControllerBase
             $payment = $this->mollie->payments->create($data);
             $this->log->debug($payment);
 
+            $mollieInfoId = $this->paymentInfoToDatabase($payment);
+            if(gettype($mollieInfoId) != General::integerType)
+                throw new \Exception("Failed to insert mollieInfo");
+
             $change = $this->db->update(Order::TABLE_NAME,
                 [
-                    Order::MOLLIE_ID_COL => $payment->id
+                    Order::MOLLIE_ID_COL => $mollieInfoId,
                 ],
                 [
                     Order::ID_COL => $order->id
                 ]);
+
             if($change == 0){
+                $this->log->error("No change when updating the Order:");
                 $this->log->error($this->db->last_query());
                 $this->log->error($this->db->error());
             }
+            return $payment->links;
 
         } catch (Mollie_API_Exception  $e) {
             $this->log->error(json_last_error_msg() );
             $this->log->error("Unable to create Mollie Payment",$e);
+        } catch(\Exception $ex)
+        {
+            $this->log->error(json_last_error_msg() );
+            $this->log->error("Unable to create Mollie Payment",$ex);
         }
+        return null;
+    }
+
+    /**
+     * @param $payment Mollie_API_Object_Payment
+     * @return array|bool
+     */
+    private function paymentInfoToDatabase($payment)
+    {
+        $mic = DataControllerFactory::getMollieInfoController();
+
+        $info = new MollieInfo();
+        $info->mollieId = $payment->id;
+        $info->method = $payment->method;
+        $info->mode = $payment->mode;
+        return $mic->createMollieInfo($info);
     }
 
     public function handleMollieWebhook()
     {
+        $oc = DataControllerFactory::getOrderController();
+
+        //Get mollie payment info
         $payment = $this->mollie->payments->get($_POST["id"]);
 
         $orderId = $payment->metadata->orderId;
+        /** @var Order $order */
+        $order = $oc->getOrder($orderId);
+        if(isset($order[Order::ID_COL]))
+            $order = Order::fromJson($order);
+
         if($payment->isPaid())
         {
             //Payment ok, start final handling
+            $order->submitted = true;
+            $order->paymentStatus = Order::PAYMENT_STATUS_VAL_PAYED;
+            $oc->updateOrder($order,true);
         }
         elseif(!$payment->isOpen())
         {
             // isn't paid & not open -> aborted
+            $order->submitted = false;
+            $order->paymentStatus = null;
+            $oc->updateOrder($order);
         }
     }
 

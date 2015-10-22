@@ -13,13 +13,21 @@ use Rath\Entities\Order\MollieInfo;
 
 class MollieInfoController extends ControllerBase
 {
-    public function createMollieInfo($info)
+    /**
+     * @param $info MollieInfo
+     * @param bool|true $idOnly
+     * @return array|bool|int
+     */
+    public function createMollieInfo($info,$idOnly = true)
     {
         $lastId = $this->db->insert(MollieInfo::TABLE_NAME,
             MollieInfo::toDbArray($info));
 
         if($lastId != 0)
-            return $this->getMollieInfo($lastId);
+            if(!$idOnly)
+                return $this->getMollieInfo($lastId);
+            elseif($idOnly)
+                return $lastId;
 
         return $this->db->error();
     }

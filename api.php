@@ -1052,6 +1052,7 @@ $app->group('/promotion', function () use ($app) {
 //region Order
 $app->group('/order', function() use ($app){
     $oc = DataControllerFactory::getOrderController();
+    $pc = ControllerFactory::getPaymentController();
 
     $app->get('/:id', function($id) use ($app,$oc){
         CrossDomainAjax::PrintCrossDomainCall(
@@ -1097,10 +1098,17 @@ $app->group('/order', function() use ($app){
         );
     });
 
-    $app->get('/paymenthook/', function($id) use ($app,$oc){
+    $app->get('/paymenthook/', function() use ($app,$pc){
         CrossDomainAjax::PrintCrossDomainCall(
             $app,
-            $oc->submitOrder($id)
+            $pc->handleMollieWebhook()
+        );
+    });
+
+    $app->get('/paymentstatus/:id', function($id) use ($app,$oc){
+        CrossDomainAjax::PrintCrossDomainCall(
+            $app,
+            $oc->checkOrderPayment($id)
         );
     });
 
@@ -1128,10 +1136,10 @@ $app->group('/order', function() use ($app){
             );
         });
 
-        $app->get('/delete/:id', function($id) use ($app,$oc){
+        $app->get('/delete/:orderId/:id', function($orderId,$id) use ($app,$oc){
             CrossDomainAjax::PrintCrossDomainCall(
                 $app,
-                $oc->deleteOrderDetailLine($id)
+                $oc->deleteOrderDetailLine($orderId,$id)
             );
         });
     });

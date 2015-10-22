@@ -62,7 +62,7 @@ class OrderDetail extends EntityBase
             OrderDetail::QUANTITY_COL => $od->quantity
         ];
 
-        if(isset($data[OrderDetail::PRODUCT_ID_COL]))
+        if(isset($od->productId))
             $data[OrderDetail::PRODUCT_ID_COL] = $od->productId;
 
         return $data;
