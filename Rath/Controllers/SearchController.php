@@ -84,7 +84,10 @@ class SearchController extends ControllerBase
         }
 
         if(!empty($searchResult)) //do after array conversions
+        {
+            $this->addExtraRestaurantInfo($searchResult);
             $searchResult = PhotoManagement::getPhotoUrlsForArray($searchResult,Restaurant::LOGO_PHOTO_COL);
+        }
 
 
         return[
@@ -276,6 +279,23 @@ class SearchController extends ControllerBase
         return $result;
     }
 
+    /**
+     * @param $restos array
+     */
+    public function addExtraRestaurantInfo(&$restos)
+    {
+        $this->log->debug("Start add extra info");
+        $rc = DataControllerFactory::getRestaurantController();
+
+        for($i = 0; $i < count($restos);$i++)
+        {
+            $restoId = $restos[$i][Restaurant::ID_COL];
+            $restos[$i]["specialities"] = $rc->getRestaurantSpecialties($restoId);
+            $restos[$i]["open"] = $rc->getIsOpen($restoId);
+            $restos[$i]["hasPromotions"] = $rc->getHasPromotions($restoId);
+        }
+    }
+
     public function getRestaurantDefaultFields()
     {
         return
@@ -283,6 +303,8 @@ class SearchController extends ControllerBase
                 Restaurant::TABLE_NAME.".".Restaurant::ID_COL,
                 Restaurant::TABLE_NAME.".".Restaurant::NAME_COL,
                 Restaurant::TABLE_NAME.".".Restaurant::LOGO_PHOTO_COL,
+                Restaurant::TABLE_NAME.".".Restaurant::COMMENT_COL,
+                KitchenType::TABLE_NAME.".".KitchenType::NAME_COL."(kitchenType)",
 
                 Address::TABLE_NAME.".".Address::STREET_COL,
                 Address::TABLE_NAME.".".Address::NUMBER_COL,
@@ -290,8 +312,7 @@ class SearchController extends ControllerBase
                 Address::TABLE_NAME.".".Address::CITY_COL,
                 Address::TABLE_NAME.".".Address::LATITUDE_COL,
                 Address::TABLE_NAME.".".Address::LONGITUDE_COL,
-                DistanceMatrix::TABLE_NAME.".".DistanceMatrix::DISTANCE_COL,
-
+                DistanceMatrix::TABLE_NAME.".".DistanceMatrix::DISTANCE_COL
             ];
     }
 
@@ -612,13 +633,6 @@ class SearchController extends ControllerBase
     //endregion
     //endregion
 
-
-
-    //region Extra Data  functions
-
-
-
-    //endregion
 
     //region Query Parsing
 

@@ -9,7 +9,9 @@
 namespace Rath\Entities\Restaurant;
 
 
-class OpeningHours
+use Rath\Entities\EntityBase;
+
+class OpeningHours extends EntityBase
 {
     const TABLE_NAME = "openinghours";
 
@@ -20,11 +22,29 @@ class OpeningHours
     const TO_TIME_COL = "toTime";
     const OPEN_COL = "open";
 
+    /**
+     * @var int
+     */
     public $id;
+    /**
+     * @var int
+     */
     public $restaurantId;
+    /**
+     * @var int
+     */
     public $dayOfWeek;
+    /**
+     * @var string | null
+     */
     public $fromTime;
+    /**
+     * @var string | null
+     */
     public $toTime;
+    /**
+     * @var bool
+     */
     public $open;
 
     public static function toDbArray($oH){

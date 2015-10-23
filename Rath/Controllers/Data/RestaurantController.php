@@ -314,6 +314,36 @@ class RestaurantController extends ControllerBase
             ]);
         return $this->db->error();
     }
+
+    /**
+     * @param $restoId int
+     * @return bool
+     */
+    public function getIsOpen($restoId)
+    {
+        $result = $this->db->select(OpeningHours::TABLE_NAME,
+            [
+                OpeningHours::ID_COL,
+                OpeningHours::OPEN_COL
+            ],
+            [
+                "AND" => [
+                    OpeningHours::DAY_OF_WEEK_COL => General::getCurrentDayOfWeek(),
+                    OpeningHours::FROM_TIME_COL."[<=]" => General::getCurrentTime(),
+                    OpeningHours::TO_TIME_COL."[>=]" => General::getCurrentTime(),
+                    OpeningHours::RESTAURANT_ID_COL => $restoId
+                ]
+            ]);
+
+        $result = OpeningHours::fromJsonArray($result);
+//        $this->log->debug($result);
+        foreach ($result as $oh) {
+            /** @var OpeningHours $oh*/
+            if($oh->open)
+                return true;
+        }
+        return false;
+    }
     //endregion
 
     //region Restaurant PaymentMethod
@@ -357,7 +387,7 @@ class RestaurantController extends ControllerBase
     }
     //endregion
 
-    //region Restaurant Speciality
+    //region Speciality
 
     public function getRestaurantSpecialties($restoId){
         return $this->db->select(RestaurantHasSpeciality::TABLE_NAME,
@@ -479,6 +509,17 @@ class RestaurantController extends ControllerBase
                 Promotion::RESTAURANT_ID_COL => $restoId,
                 "LIMIT" => [$count,$skip]
             ]);
+    }
+
+    /**
+     * @param $restoId Int
+     * @return bool
+     */
+    public function getHasPromotions($restoId)
+    {
+        $result = $this->getActivePromotions($restoId,0,1);
+        $this->log->debug($result);
+        return count($result) != 0;
     }
     //endregion
 
@@ -926,6 +967,5 @@ class RestaurantController extends ControllerBase
             ]);
     }
     //endregion
-
 
 }
