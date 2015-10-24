@@ -9,6 +9,7 @@
 namespace Rath\Controllers\Data;
 
 use Rath\Entities\General\Address;
+use Rath\Entities\Order\Order;
 use Rath\Entities\Restaurant\Restaurant;
 use Rath\Entities\User\LoyaltyPoints;
 use Rath\Helpers\General;
@@ -328,6 +329,31 @@ class UserController extends ControllerBase
             [
                 Restaurant::USER_ID_COL => Authorization::$userId
             ]);
+    }
+
+    public function getUserActiveOrder()
+    {
+        $orderIds = $this->db->get(Order::TABLE_NAME,
+            [
+                Order::ID_COL
+            ],
+            [
+                "AND" => [
+                    Order::USER_ID_COL => Authorization::$userId,
+                    Order::SUBMITTED_COL => false
+                ]
+            ]);
+        $this->logLastQuery();
+        $this->log->debug($orderIds);
+        if(isset($orderIds[Order::ID_COL])){
+            $oc = DataControllerFactory::getOrderController();
+            return $oc->getOrderDetail($orderIds[Order::ID_COL]);
+        }
+
+        $response = new ApiResponse();
+        $response->code = 404;
+        $response->message = "No active order for this user";
+        return $response;
     }
 
     //region Password Recovery

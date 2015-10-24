@@ -199,6 +199,11 @@ $app->group('/user', function() use ($app){
             $user->getUserRestaurants());
     });
 
+    $app->get('/order/', function() use ($app,$user){
+        CrossDomainAjax::PrintCrossDomainCall(
+            $app,
+            $user->getUserActiveOrder());
+    });
 
     $app->group('/address', function() use ($app){
         $gen = new \Rath\Controllers\Data\GeneralController();
