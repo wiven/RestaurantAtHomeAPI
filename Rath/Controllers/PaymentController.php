@@ -9,6 +9,7 @@
 namespace Rath\Controllers;
 
 
+use Exception;
 use Mollie_API_Client;
 use Mollie_API_Exception;
 use Mollie_API_Object_Payment;
@@ -18,6 +19,7 @@ use Rath\Controllers\Data\DataControllerFactory;
 use Rath\Entities\Order\MollieInfo;
 use Rath\Entities\Order\Order;
 use Rath\Helpers\General;
+use Slim\Slim;
 
 class PaymentController extends ControllerBase
 {
@@ -108,33 +110,43 @@ class PaymentController extends ControllerBase
         return $mic->createMollieInfo($info);
     }
 
-    public function handleMollieWebhook()
+    /**
+     * @param $app Slim
+     * @return array
+     */
+    public function handleMollieWebhook($app)
     {
-        $oc = DataControllerFactory::getOrderController();
+        try {
+            $oc = DataControllerFactory::getOrderController();
 
-        //Get mollie payment info
-        $payment = $this->mollie->payments->get($_POST["id"]);
+            //Get mollie payment info
+            $payment = $this->mollie->payments->get($_POST["id"]);
 
-        $orderId = $payment->metadata->orderId;
-        /** @var Order $order */
-        $order = $oc->getOrder($orderId);
-        if(isset($order[Order::ID_COL]))
-            $order = Order::fromJson($order);
+            $orderId = $payment->metadata->orderId;
+            /** @var Order $order */
+            $order = $oc->getOrder($orderId);
+            if (isset($order[Order::ID_COL]))
+                $order = Order::fromJson($order);
 
-        if($payment->isPaid())
-        {
-            //Payment ok, start final handling
-            $order->submitted = true;
-            $order->paymentStatus = Order::PAYMENT_STATUS_VAL_PAYED;
-            $oc->updateOrder($order,true);
+            if ($payment->isPaid()) {
+                //Payment ok, start final handling
+                $order->submitted = true;
+                $order->paymentStatus = Order::PAYMENT_STATUS_VAL_PAYED;
+                $oc->updateOrder($order, true);
+            } elseif (!$payment->isOpen()) {
+                // isn't paid & not open -> aborted
+                $order->submitted = false;
+                $order->paymentStatus = null;
+                $oc->updateOrder($order);
+            }
+        } catch (Exception $e) {
+            $this->log->fatal("Something went wrong excepting a user payment!",$e);
+            $this->logLastQuery();
+            $this->logMedooError();
+            $app->halt(500,"error processing response");
         }
-        elseif(!$payment->isOpen())
-        {
-            // isn't paid & not open -> aborted
-            $order->submitted = false;
-            $order->paymentStatus = null;
-            $oc->updateOrder($order);
-        }
+
+        return ["Ok"];
     }
 
     public function logMolliePaymentMethods()

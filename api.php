@@ -1103,10 +1103,10 @@ $app->group('/order', function() use ($app){
         );
     });
 
-    $app->get('/paymenthook/', function() use ($app,$pc){
+    $app->post('/paymenthook/', function() use ($app,$pc){
         CrossDomainAjax::PrintCrossDomainCall(
             $app,
-            $pc->handleMollieWebhook()
+            $pc->handleMollieWebhook($app)
         );
     });
 
