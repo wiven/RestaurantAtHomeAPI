@@ -59,6 +59,8 @@ class SearchController extends ControllerBase
         if(!$this->fromCityFilterApplied($response,$filterFields))
             return $response;
 
+        $fromCity = $this->getFromCityInfo($where);
+
         $this->log->debug("Search resto Ids");
         $restoIdsResult = $this->searchRestaurants($this->getRestaurantIdFields(),$where);
         $this->log->debug("resto Ids result:");
@@ -91,6 +93,7 @@ class SearchController extends ControllerBase
 
 
         return[
+            "fromCity" => $fromCity,
             "tagUse" => $tagUse,
             "promotionUse" => $promoTypeUse,
             "results" => $searchResult,
@@ -294,6 +297,21 @@ class SearchController extends ControllerBase
             $restos[$i]["open"] = $rc->getIsOpen($restoId);
             $restos[$i]["hasPromotions"] = $rc->getHasPromotions($restoId);
         }
+    }
+
+    /**
+     * @param $where
+     * @return array|bool
+     */
+    public function getFromCityInfo($where)
+    {
+        if(isset($where["AND"][DistanceMatrix::TABLE_NAME.".".DistanceMatrix::FROM_CITY_ID_COL])){
+            $gc = DataControllerFactory::getGeneralController();
+            return $gc->getCity($where["AND"][DistanceMatrix::TABLE_NAME.".".DistanceMatrix::FROM_CITY_ID_COL]);
+        }
+        $this->log->debug("FromCity  value not found");
+        $this->log->debug($where);
+        return [];
     }
 
     public function getRestaurantDefaultFields()

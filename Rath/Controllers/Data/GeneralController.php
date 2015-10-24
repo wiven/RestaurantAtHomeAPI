@@ -9,6 +9,7 @@
 namespace Rath\Controllers\Data;
 
 
+use Rath\Entities\AppMgt\City;
 use Rath\Entities\General\Address;
 use Rath\Entities\General\Partner;
 use Rath\Entities\General\SocialMediaType;
@@ -214,4 +215,13 @@ class GeneralController extends ControllerBase
         return $this->db->error();
     }
     //endregion
+
+    public function getCity($cityId)
+    {
+        return $this->db->get(City::TABLE_NAME,
+            "*",
+            [
+                City::ID_COL => $cityId
+            ]);
+    }
 }
