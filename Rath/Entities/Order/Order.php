@@ -110,7 +110,7 @@ class Order extends EntityBase
     {
         $rc = DataControllerFactory::getRestaurantController();
         $resto = $rc->getRestaurant($order->restaurantId);
-        return "Order ".$order->id." - ".$resto[Restaurant::NAME_COL]." - ".$order->amount." EURO";
+        return "O".$order->id." - ".$resto[Restaurant::NAME_COL]." - ".$order->amount." EURO";
     }
 
     /**

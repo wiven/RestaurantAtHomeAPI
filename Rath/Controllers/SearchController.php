@@ -110,6 +110,7 @@ class SearchController extends ControllerBase
     public function fromCityFilterApplied(&$response,$filterFields)
     {
         $this->log->debug('Check if fromCityId is defined as filterField');
+        $this->log->debug($filterFields);
         $result = from($filterFields)
             ->singleOrDefault(null, function($field){
                 if(isset($field->id))
@@ -657,10 +658,11 @@ class SearchController extends ControllerBase
     /**
      * @param $query string
      * @param $fields FilterField[]
+     * @param bool $storeFields
      * @return array
      * @throws \Exception
      */
-    public function getFilterFieldsToMedooWhereArray($query,&$fields = null)
+    public function getFilterFieldsToMedooWhereArray($query,&$fields,$storeFields = true)
     {
         /* @var $field Filterfield|string */
         $fc = DataControllerFactory::getFilterFieldController();
@@ -679,7 +681,7 @@ class SearchController extends ControllerBase
                 $value = $keyValuePair[1];
 
                 //Store fields
-                if($fields != null)
+                if($storeFields)
                     array_push($fields,$field);
 
                 //Allow custom options to be passed

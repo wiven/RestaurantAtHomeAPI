@@ -651,7 +651,10 @@ class OrderController extends ControllerBase
 
         $changes = $this->db->delete(OrderDetail::TABLE_NAME,
             [
-                OrderDetail::ID_COL => $id
+                "AND"=>[
+                    OrderDetail::ID_COL => $id,
+                    OrderDetail::ORDER_ID_COL => $orderId
+                ]
             ]);
 
 

@@ -135,9 +135,10 @@ class PaymentController extends ControllerBase
         try {
             $oc = DataControllerFactory::getOrderController();
 
-            //Get mollie payment info
+            $this->log->debug("Get mollie payment info");
             $payment = $this->mollie->payments->get($_POST["id"]);
 
+            $this->log->debug($payment);
             $orderId = $payment->metadata->orderId;
             /** @var Order $order */
             $order = $oc->getOrder($orderId);
@@ -153,7 +154,7 @@ class PaymentController extends ControllerBase
                 // isn't paid & not open -> aborted
                 $order->submitted = false;
                 $order->paymentStatus = null;
-                $oc->updateOrder($order);
+                $oc->updateOrder($order,true);
             }
         } catch (Exception $e) {
             $this->log->fatal("Something went wrong excepting a user payment!",$e);
