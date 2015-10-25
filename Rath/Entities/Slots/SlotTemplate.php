@@ -9,7 +9,9 @@
 namespace Rath\Entities\Slots;
 
 
-class SlotTemplate
+use Rath\Entities\EntityBase;
+
+class SlotTemplate extends  EntityBase
 {
     const TABLE_NAME = "slottemplate";
 
@@ -20,12 +22,46 @@ class SlotTemplate
     const TO_TIME_COL = "toTime";
     const QUANTITY_COL = "quantity";
 
+    /**
+     * @var int
+     */
     public $id;
+    /**
+     * @var int
+     */
     public $restaurantId;
+    /**
+     * @var int
+     */
     public $dayOfWeek;
+    /**
+     * @var string
+     */
     public $fromTime;
+    /**
+     * @var string
+     */
     public $toTime;
+    /**
+     * @var int
+     */
     public $quantity;
+    /**
+     * @var int | null
+     */
+    public $changeId;
+    /**
+     * @var int | null
+     */
+    public $changeQty;
+
+    public function getSlotAvailability()
+    {
+        if($this->changeQty!=0)
+            return $this->changeQty;
+        return $this->quantity;
+    }
+
 
     /**
      * @param $st SlotTemplate

@@ -22,18 +22,23 @@ class GeneralController extends ControllerBase
      * @param $id
      * @return array|bool
      */
-    public function getAddress($id){
-        return $this->db->select(Address::TABLE_NAME,
-            [
-                Address::ID_COL,
-                Address::STREET_COL,
-                Address::NUMBER_COL,
-                Address::ADDITION_COL,
-                Address::POSTCODE_COL,
-                Address::CITY_COL,
-                Address::LATITUDE_COL,
-                Address::LONGITUDE_COL
-            ],
+    public function getAddress($id,$public = true){
+        $fields = [
+            Address::ID_COL,
+            Address::STREET_COL,
+            Address::NUMBER_COL,
+            Address::ADDITION_COL,
+            Address::POSTCODE_COL,
+            Address::CITY_COL,
+            Address::LATITUDE_COL,
+            Address::LONGITUDE_COL
+        ];
+
+        if(!$public)
+            array_push($fields,Address::USER_ID_COL);
+
+        return $this->db->get(Address::TABLE_NAME,
+            $fields,
             [
                 Address::ID_COL => $id
             ]);

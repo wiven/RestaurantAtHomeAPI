@@ -100,6 +100,7 @@ class Order extends EntityBase
     public $paymentStatus;
 
     public $lines;
+    public $couponCode;
 
     /**
      * @param $order Order

@@ -45,6 +45,8 @@ class PromotionController Extends ControllerBase
      */
     public function addPromotion($promo)
     {
+        //Todo: validations
+
         $lastId = $this->db->insert(Promotion::TABLE_NAME,
             Promotion::toDbArray($promo));
         if($lastId != 0){
@@ -62,6 +64,7 @@ class PromotionController Extends ControllerBase
      */
     public function updatePromotion($promo)
     {
+        //Todo: validations
         $this->db->update(Promotion::TABLE_NAME,
             Promotion::toDbArray($promo),
             [

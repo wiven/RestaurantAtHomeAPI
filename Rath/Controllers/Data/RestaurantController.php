@@ -365,6 +365,21 @@ class RestaurantController extends ControllerBase
             ]);
     }
 
+    /**
+     * @param $restoId
+     * @param $paymentMethodId
+     * @return bool
+     */
+    public function getRestaurantHasPaymentMethod($restoId,$paymentMethodId){
+        return $this->db->has(RestaurantHasPaymentMethod::TABLE_NAME,
+            [
+                "AND"=>[
+                    RestaurantHasPaymentMethod::RESTAURANT_ID_COL => $restoId,
+                    RestaurantHasPaymentMethod::PAYMENT_METHOD_ID_COL => $paymentMethodId
+                ]
+            ]);
+    }
+
     public function addRestaurantPaymentMethod($restoId,$payMeth){
         $this->db->insert(RestaurantHasPaymentMethod::TABLE_NAME,
             [
@@ -660,7 +675,7 @@ class RestaurantController extends ControllerBase
      * @return array|bool
      */
     public function getPaymentMethod($id){
-        return $this->db->select(PaymentMethod::TABLE_NAME,
+        return $this->db->get(PaymentMethod::TABLE_NAME,
             "*",
             [
                 PaymentMethod::ID_COL => $id
@@ -879,7 +894,7 @@ class RestaurantController extends ControllerBase
             $where);
     }
 
-    public function getSlotOverview($restoId, $date = null)
+    public function getSlotOverview($restoId, $date = null,$time = null)
     {
         if($date == null){
             $date = General::getCurrentDate();
@@ -888,41 +903,82 @@ class RestaurantController extends ControllerBase
         else
             $dayOfWeek = date('w', strtotime($date));
 
-
-        $result = $this->db->select(SlotTemplate::TABLE_NAME,
-            [
-                "[>]".SlotTemplateChange::TABLE_NAME =>
-                    [
-                        SlotTemplate::TABLE_NAME.".".SlotTemplate::ID_COL => SlotTemplateChange::SLOT_TEMPLATE_ID_COL
-                    ]
-            ],
-            [
-                SlotTemplate::TABLE_NAME.".".SlotTemplate::ID_COL,
-                SlotTemplate::FROM_TIME_COL,
-                SlotTemplate::TO_TIME_COL,
-                SlotTemplate::TABLE_NAME.".".SlotTemplate::QUANTITY_COL,
-                SlotTemplateChange::TABLE_NAME.".".SlotTemplateChange::ID_COL."(changeId)",
-                SlotTemplateChange::TABLE_NAME.".".SlotTemplateChange::QUANTITY_COL."(changeQty)"
-            ],
-            [
-                "AND" => [
-                    SlotTemplate::RESTAURANT_ID_COL => $restoId,
-                    SlotTemplate::DAY_OF_WEEK_COL => $dayOfWeek,
-                    "OR" => [
-                        "OR #datesIsDate" => [
-                            SlotTemplateChange::TABLE_NAME.".".SlotTemplateChange::DATE_COL => $date
-                        ],
-                        "OR #datesIsNull" => [
-                            SlotTemplateChange::TABLE_NAME.".".SlotTemplateChange::DATE_COL => null
-                        ]
+        $where = [
+            "AND" => [
+                SlotTemplate::RESTAURANT_ID_COL => $restoId,
+                SlotTemplate::DAY_OF_WEEK_COL => $dayOfWeek,
+                "OR" => [
+                    "OR #datesIsDate" => [
+                        SlotTemplateChange::TABLE_NAME.".".SlotTemplateChange::DATE_COL => $date
+                    ],
+                    "OR #datesIsNull" => [
+                        SlotTemplateChange::TABLE_NAME.".".SlotTemplateChange::DATE_COL => null
                     ]
                 ]
-            ]);
-//        var_dump($this->db->last_query());
-//        var_dump($this->db->error());
+            ]
+        ];
+
+        if($time != null){
+            $where["AND"][SlotTemplate::FROM_TIME_COL."[<]"] = $time;
+            $where["AND"][SlotTemplate::TO_TIME_COL."[>=]"] = $time;
+        }
+
+        $fields= [
+            SlotTemplate::TABLE_NAME.".".SlotTemplate::ID_COL,
+            SlotTemplate::FROM_TIME_COL,
+            SlotTemplate::TO_TIME_COL,
+            SlotTemplate::TABLE_NAME.".".SlotTemplate::QUANTITY_COL,
+            SlotTemplateChange::TABLE_NAME.".".SlotTemplateChange::ID_COL."(changeId)",
+            SlotTemplateChange::TABLE_NAME.".".SlotTemplateChange::QUANTITY_COL."(changeQty)"
+        ];
+
+        $join = [
+            "[>]".SlotTemplateChange::TABLE_NAME =>
+                [
+                    SlotTemplate::TABLE_NAME.".".SlotTemplate::ID_COL => SlotTemplateChange::SLOT_TEMPLATE_ID_COL
+                ]
+        ];
+
+        if($time == null)
+            $result = $this->db->select(SlotTemplate::TABLE_NAME,
+                $join,
+                $fields,
+                $where);
+        else
+            $result = $this->db->get(SlotTemplate::TABLE_NAME,
+                $join,
+                $fields,
+                $where);
+
+//        $this->logLastQuery();
+//        $this->logMedooError();
+        $this->log->debug($result);
         return $result;
     }
 
+    /**
+     * @param $order Order
+     * @return string
+     */
+    public function getSlotUsage($order)
+    {
+        $date = $this->db->quote(date($order->orderDateTime));
+        $query =
+            "SELECT SUM(product.slots * orderdetail.quantity) as total FROM orders
+            INNER JOIN orderdetail ON orders.id = orderdetail.orderId
+            INNER JOIN product ON orderdetail.productId = product.id
+            WHERE orders.slottemplateId = ".$order->slottemplateId
+            ." and date(orders.creationDateTime) = ".$date
+            ." and orders.id != ".$order->id;
+
+        $pdoQuery = $this->db->query($query);
+        $result = $pdoQuery->fetchColumn(0);
+
+        $this->logLastQuery();
+        $this->logMedooError();
+        $this->log->debug($result);
+        return $result;
+    }
     //endregion
 
     //region LoyaltyBonus

@@ -1096,10 +1096,13 @@ $app->group('/order', function() use ($app){
         );
     });
 
-    $app->get('/submit/:id', function($id) use ($app,$oc){
+    $app->put('/submit/:orderId', function($orderId) use ($app,$oc){
+        $o = json_decode($app->request->getBody());
+        $o = \Rath\Entities\Order\Order::fromJson($o);
+        $o->id = $orderId;
         CrossDomainAjax::PrintCrossDomainCall(
             $app,
-            $oc->submitOrder($id)
+            $oc->submitOrder($o)
         );
     });
 
@@ -1493,7 +1496,7 @@ $app->group('/coupon',function() use ($app){
     $app->get('/validate/:code',function($code) use ($app,$cc){
         CrossDomainAjax::PrintCrossDomainCall(
             $app,
-            $cc->validateCode($code,false)
+            $cc->validateCodeCreation($code,false)
         );
     });
 });

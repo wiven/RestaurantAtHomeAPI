@@ -11,16 +11,19 @@ namespace Rath\Controllers\Data;
 
 use Rath\Controllers\PaymentController;
 use Rath\Entities\ApiResponse;
+use Rath\Entities\General\Address;
 use Rath\Entities\Order\Coupon;
 use Rath\Entities\Order\Order;
 use Rath\Entities\Order\OrderDetail;
 use Rath\Entities\Order\OrderStatus;
 use Rath\Entities\Product\Product;
+use Rath\Entities\Promotion\Promotion;
 use Rath\Entities\Restaurant\PaymentMethod;
 use Rath\Entities\Slots\SlotTemplate;
 use Rath\Exceptions\OrderDetailException;
 use Rath\Helpers\General;
 use Rath\Entities\DynamicClass;
+use Rath\Slim\Middleware\Authorization;
 
 class OrderController extends ControllerBase
 {
@@ -173,9 +176,9 @@ class OrderController extends ControllerBase
             $this->log->debug($order);
 
             unset($order->addressId);
-            unset($order->userId);
             unset($order->mollieinfoid);
         }
+        unset($order->userId);
 
         return $order;
     }
@@ -222,43 +225,51 @@ class OrderController extends ControllerBase
     }
 
     /**
-     * @param $id
+     * @param $order Order
      * @return ApiResponse
-     * @throws \Exception
      */
-    public function submitOrder($id)
+    public function submitOrder($order)
     {
         $response = new ApiResponse();
         $error = false;
 
-        /** @var Order $order */
-        $order = $this->getOrder($id);
-        $this->log->debug($order);
-        if(isset($order[Order::ID_COL]))
+        /** @var Order $dbOrder */
+        $dbOrder = $this->getOrder($order->id);
+        $this->log->debug($dbOrder);
+        if(isset($dbOrder[Order::ID_COL]))
         {
-            $order = Order::fromJson($order);
+            $dbOrder = Order::fromJson($dbOrder);
         }
         else {
             $error = true;
         }
 
-        if($order->paymentStatus != null or $error)
+        if($dbOrder->paymentStatus != null or $error)
         {
             $response->code = 400;
             $response->message = "Order already submitted";
             return $response;
         }
 
+        //Transfer new info
+        $dbOrder->comment = $order->comment;
+        $dbOrder->addressId = $order->addressId;
+        $dbOrder->couponCode = $order->couponCode;
+        $dbOrder->orderDateTime = $order->orderDateTime;
+        $dbOrder->paymentmethodid = $order->paymentmethodid;
+
+        if(!$this->updateFinalizationData($dbOrder,$response))
+            return $response;
 
         $links = null;
-        if($order->paymentmethodid != PaymentMethod::CASH_PAYMENT_ID)
+        if($dbOrder->paymentmethodid != PaymentMethod::CASH_PAYMENT_ID)
         {
             $pc = new PaymentController();
-            $links = $pc->CreateMollieTransaction($order);
+            $links = $pc->CreateMollieTransaction($dbOrder);
             if($links != null)
             {
-                $order->paymentStatus = Order::PAYMENT_STATUS_VAL_PENDING;
-                $this->updateOrder($order,true);
+                $dbOrder->paymentStatus = Order::PAYMENT_STATUS_VAL_PENDING;
+                $this->updateOrder($dbOrder,true);
             }else{
                 $response->code = 500;
                 $response->message = "Something went wrong in submitting the order";
@@ -266,9 +277,9 @@ class OrderController extends ControllerBase
             }
         }
 
-        $order->submitted = true;
-        $order->paymentStatus = Order::PAYMENT_STATUS_VAL_PENDING;
-        $this->updateOrder($order,true);
+        $dbOrder->submitted = true;
+        $dbOrder->paymentStatus = Order::PAYMENT_STATUS_VAL_PENDING;
+        $this->updateOrder($dbOrder,true);
 
         $response->code = 200;
         $response->message = "Order submitted succesfully";
@@ -305,9 +316,103 @@ class OrderController extends ControllerBase
         $response->data = $order;
         return $response;
     }
+
+    /**
+     * @param $order Order
+     * @param $response ApiResponse
+     * @return bool
+     */
+    public function updateFinalizationData(&$order,&$response)
+    {
+        $gc = DataControllerFactory::getGeneralController();
+        $rc = DataControllerFactory::getRestaurantController();
+
+        $this->log->debug($order);
+        //check addressId
+        /** @var Address $address */
+        $address = $gc->getAddress($order->addressId,false);
+        $this->log->debug($address);
+        if(isset($address[Address::ID_COL]))
+            $address = Address::fromJson($address);
+        else{
+            $response->code = 300;
+            $response->message = "Address could not be found.";
+            return false;
+
+        }
+        if($address->userId != Authorization::$userId){
+            $response->code = 301;
+            $response->message = "Address doesn't belong to the user";
+            return false;
+        }
+
+        //Check order date Time & slots
+        if(empty($order->orderDateTime)){
+            $response->code = 310;
+            $response->message = "No order date & time supplied";
+            return false;
+        }
+        $orderDT = new \DateTime($order->orderDateTime);
+        /** @var SlotTemplate $restoSlot */
+        $restoSlot = $rc->getSlotOverview($order->restaurantId,$orderDT->format(General::dateFormat),$orderDT->format(General::timeFormat));
+        if(isset($restoSlot[SlotTemplate::ID_COL]))
+
+            $restoSlot = SlotTemplate::fromJson($restoSlot);
+        else{
+            $response->code = 311;
+            $response->message = "there are no slots available on this time";
+            return false;
+        }
+        $order->slottemplateId = $restoSlot->id;
+
+        /** @var int $orderWeight */
+        $orderWeight = $this->getSlotWeight($order->id);
+        /** @var int $slotUsage */
+        $slotUsage = $rc->getSlotUsage($order);
+        if($restoSlot->getSlotAvailability() < ($slotUsage + $orderWeight))
+        {
+            $response->code = 312;
+            $response->message = "The selected slot is full.";
+            return false;
+        }
+
+        //Check Coupon
+        $cc = DataControllerFactory::getCouponController();
+        /** @var Coupon $coupon */
+        $coupon = $cc->checkCodeIsValid($order->couponCode,$order->restaurantId);
+        if($coupon == null){
+            $response->code = 320;
+            $response->message = "Invalid coupon code";
+            return false;
+        }
+
+        $this->log->debug($coupon);
+        if($cc->getCouponUsage($coupon->id) < $coupon->quantity)
+            $order->couponId = $coupon->id;
+        else{
+            $response->code = 321;
+            $response->message = "Coupon code used up";
+            return false;
+        }
+
+        //check paymentMethod
+        if(!$rc->getRestaurantHasPaymentMethod($order->restaurantId,$order->paymentmethodid)){
+            $response->code = 330;
+            $response->message = "Selected paymentmethod isn't allowed";
+            return false;
+        }
+
+        $this->log->debug("Validated order before update");
+        $this->log->debug($order);
+        $this->updateOrder($order);
+        //TODO: Product stock
+
+
+        return true;
+    }
     //endregion
 
-    //region OrderDetail
+    //region OrderDetail (lines)
     /**
      * @param $orderLine OrderDetail
      * @return array|bool
@@ -405,36 +510,89 @@ class OrderController extends ControllerBase
 
     public function getOrderLines($orderId)
     {
+        $where = [
+            "AND" => [
+                OrderDetail::ORDER_ID_COL => $orderId
+            ]
+        ];
+        $this->addDefaultPromotionFilters($where);
+
         /** @var OrderDetail[] $orderDetails */
         $orderDetails =  $this->db->select(OrderDetail::TABLE_NAME,
             [
                 "[><]".Product::TABLE_NAME =>[
                     OrderDetail::PRODUCT_ID_COL => Product::ID_COL
+                ],
+                "[>]".Promotion::TABLE_NAME =>[
+                    Product::TABLE_NAME.".".Product::PROMOTION_ID_COL=> Promotion::ID_COL
                 ]
             ],
             [
                 OrderDetail::ORDER_ID_COL,
                 OrderDetail::TABLE_NAME.".".OrderDetail::ID_COL,
                 OrderDetail::PRODUCT_ID_COL,
-                Product::NAME_COL,
+                Product::TABLE_NAME.".".Product::NAME_COL,
                 Product::PRICE_COL,
-                OrderDetail::QUANTITY_COL
+                OrderDetail::QUANTITY_COL,
+                Promotion::TABLE_NAME.".".Promotion::ID_COL."(promotionId)",
+                Promotion::TABLE_NAME.".".Promotion::DISCOUNT_TYPE_COL,
+                Promotion::TABLE_NAME.".".Promotion::DISCOUNT_AMOUNT_COL
             ],
-            [
-                OrderDetail::ORDER_ID_COL => $orderId
-            ]);
+            $where
+            );
 
+        $this->logLastQuery();
+        $this->logMedooError();
+        $this->log->debug($orderDetails);
         if(count($orderDetails) != 0)
             $orderDetails = OrderDetail::fromJsonArray($orderDetails);
         else
             return [];
 
         foreach($orderDetails as $detail){
+            //check price (promotion?)
+            if($detail->discountType != null){
+                $detail->oldPrice = $detail->price;
+                switch($detail->discountType){
+                    case Promotion::DISCOUNT_TYPE_VAL_PERS:
+                        $mul = 1 - bcdiv($detail->discountAmount,100);
+                        $detail->price = bcmul($detail->price, $mul);
+                        break;
+                    case Promotion::DISCOUNT_TYPE_VAL_AMOUNT:
+                        $detail->price -= $detail->discountAmount;
+                }
+                if($detail->price < 0)
+                    $detail->price = 0;
+            }
+
             $detail->lineTotal = bcmul($detail->price,$detail->quantity);
         }
         return $orderDetails;
     }
 
+    /**
+     * @param $where array
+     */
+    public function addDefaultPromotionFilters(&$where)
+    {
+        $date = General::getCurrentDate();
+        $where["AND"]["OR #from"] = [
+            "OR #fromIsData" => [
+                Promotion::TABLE_NAME.".".Promotion::FROM_DATE_COL."[<=]" => $date
+            ],
+            "OR #fromIsNull" => [
+                Promotion::TABLE_NAME.".".Promotion::FROM_DATE_COL => null
+            ]
+        ];
+        $where["AND"]["OR #to"] = [
+            "OR #fromIsData" => [
+                Promotion::TABLE_NAME.".".Promotion::TO_DATE_COL."[>=]" => $date
+            ],
+            "OR #fromIsNull" => [
+                Promotion::TABLE_NAME.".".Promotion::TO_DATE_COL => null
+            ]
+        ];
+    }
     /**
      * @param $orderLine OrderDetail
      * @return array
@@ -513,11 +671,26 @@ class OrderController extends ControllerBase
             throw new OrderDetailException("Order Detail total isn't correct.");
     }
 
-    /**
-     * @param $orderDetail OrderDetail
-     */
-    public function addProduct($orderDetail)
-    {
 
+    /**
+     * @param $orderId int
+     * @return bool|int
+     */
+    public function getSlotWeight($orderId)
+    {
+        //TODO: replace with constants
+        $query =
+            "SELECT SUM(product.slots * orderdetail.quantity) as total FROM orders
+            INNER JOIN orderdetail ON orders.id = orderdetail.orderId
+            INNER JOIN product ON orderdetail.productId = product.id
+            WHERE orders.id = ".$orderId.";";
+
+        $pdoQuery = $this->db->query($query);
+        $result = $pdoQuery->fetchColumn(0);
+
+        $this->logLastQuery();
+        $this->logMedooError();
+        $this->log->debug($result);
+        return $result;
     }
 }

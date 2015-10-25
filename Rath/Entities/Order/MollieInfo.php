@@ -11,17 +11,19 @@ namespace Rath\Entities\Order;
 
 class MollieInfo
 {
-    const TABLE_NAME = "coupon";
+    const TABLE_NAME = "mollieinfo";
 
     const ID_COL = "id";
-    const MOLLIE_ID_COL = "mollieinfoid";
+    const MOLLIE_ID_COL = "mollieid";
     const MODE_COL ="mode";
     const METHOD_COL ="method";
+    const PAYMENT_URL_COL = "paymentUrl";
 
     public $id;
     public $mollieId;
     public $mode;
     public $method;
+    public $paymentUrl;
 
     /**
      * @param $info MollieInfo
@@ -32,7 +34,8 @@ class MollieInfo
         return[
             self::MOLLIE_ID_COL => $info->mollieId,
             self::MODE_COL => $info->mode,
-            self::METHOD_COL => $info->method
+            self::METHOD_COL => $info->method,
+            self::PAYMENT_URL_COL => $info->paymentUrl
         ];
     }
 }

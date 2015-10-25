@@ -10,6 +10,7 @@ namespace Rath\Controllers\Data;
 
 
 use Rath\Entities\Order\Coupon;
+use Rath\Entities\Order\Order;
 use Rath\Helpers\General;
 
 class CouponController extends ControllerBase
@@ -21,6 +22,15 @@ class CouponController extends ControllerBase
             "*",
             [
                 Coupon::ID_COL => $id
+            ]);
+    }
+
+    public function getCouponByCode($code)
+    {
+        return $this->db->get(Coupon::TABLE_NAME,
+            "*",
+            [
+                Coupon::CODE_COL => $code
             ]);
     }
 
@@ -73,7 +83,7 @@ class CouponController extends ControllerBase
             for ($i = 0; $i < 10; $i++) {
                 $res .= $chars[mt_rand(0, strlen($chars) - 1)];
             }
-        }while (!$this->validateCode($res));
+        }while (!$this->validateCodeCreation($res));
 
         return $res;
     }
@@ -84,7 +94,7 @@ class CouponController extends ControllerBase
      * @param bool $boolResponse
      * @return bool
      */
-    public function validateCode($code,$boolResponse = true)
+    public function validateCodeCreation($code,$boolResponse = true)
     {
         $result = $this->db->get(Coupon::TABLE_NAME,
             [
@@ -101,5 +111,47 @@ class CouponController extends ControllerBase
                 "available" => !isset($result[Coupon::ID_COL])
             ];
 
+    }
+
+    /**
+     * @param $code string
+     * @return Coupon | null
+     */
+    public function checkCodeIsValid($code,$restoId)
+    {
+        $today = General::getCurrentDate();
+        /** @var Coupon $coupon */
+        $coupon = $this->getCouponByCode($code);
+        if(isset($coupon[Coupon::ID_COL]))
+            $coupon = Coupon::fromJson($coupon);
+        $this->log->debug($coupon);
+
+        if($coupon->restaurantid == $restoId || $coupon->restaurantid == null){
+            $this->log->debug("restoId or Null: OK");
+            if($today >= $coupon->startDate && $today <= $coupon->endDate){
+                $this->log->debug("Data validation: OK");
+                return $coupon;
+            }
+        }
+
+
+        return null;
+    }
+
+    /**
+     * @param $id int
+     * @return bool|int
+     */
+    public function getCouponUsage($id)
+    {
+        $count = $this->db->count(Order::TABLE_NAME,
+            [
+                Order::COUPON_ID
+            ],
+            [
+                Order::COUPON_ID => $id
+            ]);
+        $this->log->debug($count);
+        return $count;
     }
 }

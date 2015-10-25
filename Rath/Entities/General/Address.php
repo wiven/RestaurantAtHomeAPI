@@ -9,7 +9,9 @@
 namespace Rath\Entities\General;
 
 
-class Address
+use Rath\Entities\EntityBase;
+
+class Address extends EntityBase
 {
     const TABLE_NAME = "address";
 
@@ -24,14 +26,41 @@ class Address
     const LONGITUDE_COL = "longitude";
     const CITY_ID_COL = "cityid";
 
+    /**
+     * @var int
+     */
     public $id;
+    /**
+     * @var string
+     */
     public $street;
+    /**
+     * @var int
+     */
     public $number;
+    /**
+     * @var string
+     */
     public $addition;
+    /**
+     * @var string
+     */
     public $postcode;
+    /**
+     * @var string
+     */
     public $city;
+    /**
+     * @var float
+     */
     public $latitude;
+    /**
+     * @var float
+     */
     public $longitude;
+    /**
+     * @var int
+     */
     public $cityid;
 
     /**

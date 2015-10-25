@@ -18,6 +18,7 @@ use Rath\Controllers\Data\ControllerBase;
 use Rath\Controllers\Data\DataControllerFactory;
 use Rath\Entities\Order\MollieInfo;
 use Rath\Entities\Order\Order;
+use Rath\Entities\Restaurant\PaymentMethod;
 use Rath\Helpers\General;
 use Slim\Slim;
 
@@ -46,7 +47,13 @@ class PaymentController extends ControllerBase
     {
         try {
             $this->log->debug($order);
+            $rc = DataControllerFactory::getRestaurantController();
+            /** @var PaymentMethod $paymMethod */
+            $paymMethod = $rc->getPaymentMethod($order->paymentmethodid);
+            if(isset($paymMethod[PaymentMethod::ID_COL]))
+                $paymMethod = PaymentMethod::fromJson($paymMethod);
 
+            $this->log->debug($paymMethod);
             $webhook = $this->getMollieWebhookUrl();
             if (!isset($webhook))
                 throw new \Exception("Invalid platform to test payments");
@@ -57,6 +64,7 @@ class PaymentController extends ControllerBase
                 "description" => Order::getOrderDescription($order),
                 "redirectUrl" => "http://playground.restaurantathome.be", //TODO:Parameter?
                 "webhookUrl" => $webhook,
+                "method" => $paymMethod->mollieId,
                 "metadata" => [
                     "orderId" => $order->id
                 ]
@@ -66,7 +74,8 @@ class PaymentController extends ControllerBase
             $this->log->debug($payment);
 
             $mollieInfoId = $this->paymentInfoToDatabase($payment);
-            if(gettype($mollieInfoId) != General::integerType)
+            $this->log->debug($mollieInfoId);
+            if(($mollieInfoId) === false)
                 throw new \Exception("Failed to insert mollieInfo");
 
             $change = $this->db->update(Order::TABLE_NAME,
@@ -101,13 +110,20 @@ class PaymentController extends ControllerBase
      */
     private function paymentInfoToDatabase($payment)
     {
+        //TODO: update old entry if exists?
+        $this->log->debug($payment);
         $mic = DataControllerFactory::getMollieInfoController();
 
         $info = new MollieInfo();
         $info->mollieId = $payment->id;
         $info->method = $payment->method;
         $info->mode = $payment->mode;
-        return $mic->createMollieInfo($info);
+        $info->paymentUrl = $payment->links->paymentUrl;
+        $change =  $mic->createMollieInfo($info);
+
+        $this->logLastQuery();
+        $this->logMedooError();
+        return $change;
     }
 
     /**

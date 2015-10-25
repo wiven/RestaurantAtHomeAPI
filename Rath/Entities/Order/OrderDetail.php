@@ -46,10 +46,24 @@ class OrderDetail extends EntityBase
      * @var float
      */
     public $price;
+
     /**
      * @var float
      */
     public $lineTotal;
+    /**
+     * @var float | null
+     */
+    public $oldPrice;
+
+    /**
+     * @var string | null
+     */
+    public $discountType;
+    /**
+     * @var float | null
+     */
+    public $discountAmount;
 
     /**
      * @param $od OrderDetail

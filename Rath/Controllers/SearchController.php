@@ -660,7 +660,7 @@ class SearchController extends ControllerBase
      * @return array
      * @throws \Exception
      */
-    public function getFilterFieldsToMedooWhereArray($query,&$fields)
+    public function getFilterFieldsToMedooWhereArray($query,&$fields = null)
     {
         /* @var $field Filterfield|string */
         $fc = DataControllerFactory::getFilterFieldController();
@@ -679,7 +679,8 @@ class SearchController extends ControllerBase
                 $value = $keyValuePair[1];
 
                 //Store fields
-                array_push($fields,$field);
+                if($fields != null)
+                    array_push($fields,$field);
 
                 //Allow custom options to be passed
                 if(gettype($field) != General::objectType){

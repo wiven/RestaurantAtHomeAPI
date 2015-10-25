@@ -9,7 +9,9 @@
 namespace Rath\Entities\Order;
 
 
-class Coupon
+use Rath\Entities\EntityBase;
+
+class Coupon extends EntityBase
 {
     const TABLE_NAME = "coupon";
 
@@ -24,13 +26,37 @@ class Coupon
     const CODE_COL = "code";
     const RESTAURANT_ID_COL = "restaurantid";
 
+    /**
+     * @var int
+     */
     public $id;
+    /**
+     * @var int | null
+     */
     public $restaurantid;
+    /**
+     * @var string
+     */
     public $code;
+    /**
+     * @var string
+     */
     public $startDate;
+    /**
+     * @var string
+     */
     public $endDate;
+    /**
+     * @var string
+     */
     public $discountType;
+    /**
+     * @var float
+     */
     public $discountAmount;
+    /**
+     * @var int
+     */
     public $quantity;
 
     /**

@@ -9,21 +9,33 @@
 namespace Rath\Entities\Restaurant;
 
 
-class PaymentMethod
+use Rath\Entities\EntityBase;
+
+class PaymentMethod extends EntityBase
 {
     const TABLE_NAME = "paymentmethod";
 
+
     const ID_COL = "id";
     const NAME_COL = "name";
-    const MOLLIE_ID_COL = "mollieinfoid";
+    const MOLLIE_ID_COL = "mollieid";
 
     //handled by resto
     const CASH_PAYMENT_ID = 1;
     //Handled by mollie
     const BANCONTACT_PAYMENT_ID = 2;
 
+    /**
+     * @var int
+     */
     public $id;
+    /**
+     * @var string
+     */
     public $name;
+    /**
+     * @var string
+     */
     public $mollieId;
 
     /**
