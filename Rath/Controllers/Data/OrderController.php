@@ -13,6 +13,7 @@ use Rath\Controllers\PaymentController;
 use Rath\Entities\ApiResponse;
 use Rath\Entities\General\Address;
 use Rath\Entities\Order\Coupon;
+use Rath\Entities\Order\MollieInfo;
 use Rath\Entities\Order\Order;
 use Rath\Entities\Order\OrderDetail;
 use Rath\Entities\Order\OrderStatus;
@@ -102,7 +103,6 @@ class OrderController extends ControllerBase
         if($includeIds){
             array_push($fields,Order::ADDRESS_ID_COL);
             array_push($fields,Order::USER_ID_COL);
-            array_push($fields,Order::MOLLIE_ID_COL);
         }
 
         $order = $this->db->get(Order::TABLE_NAME,
@@ -142,22 +142,19 @@ class OrderController extends ControllerBase
 
         if($order->amount != $orderTotal){
             $order->amount = $orderTotal;
-            $this->updateOrder($order);
+            $this->updateOrderAmount($order);
         }
 
         $order->lines = $lines;
 
         if($full)
         {
-            $mc = DataControllerFactory::getMollieInfoController();
             $uc = DataControllerFactory::getUserController();
             $gc = DataControllerFactory::getGeneralController();
             $cc = DataControllerFactory::getCouponController();
 
-            if($order->mollieinfoid != 0)
-                $order->paymentInfo = $mc->getMollieInfoPublic($order->mollieinfoid);
-            else
-                $order->paymentInfo = null;
+
+            $order->paymentInfo = $this->getMollieInfoPublic($order->id);
 
 
             if($order->couponId != 0)
@@ -176,7 +173,6 @@ class OrderController extends ControllerBase
             $this->log->debug($order);
 
             unset($order->addressId);
-            unset($order->mollieinfoid);
         }
         unset($order->userId);
 
@@ -185,18 +181,50 @@ class OrderController extends ControllerBase
 
     /**
      * @param $order Order
-     * @param bool $submit
      * @return array
      */
-    public function updateOrder($order, $submit = false)
+    public function updateOrderFull($order)
     {
+        $this->log->debug(Order::toDbUpdateArray($order));
+
         $this->db->update(Order::TABLE_NAME,
-            Order::toDbUpdateArray($order,$submit),
+            Order::toDbUpdateArray($order),
             [
                 Order::ID_COL => $order->id
             ]);
         return $this->db->error();
     }
+
+    public function updateOrderPaymentState($order)
+    {
+        $this->db->update(Order::TABLE_NAME,
+            [
+                Order::SUBMITTED_COL => $order->submitted,
+                Order::PAYMENT_STATUS_COL => $order->paymentStatus
+            ],
+            [
+                Order::ID_COL => $order->id
+            ]);
+        return $this->db->error();
+    }
+
+    /**
+     * @param $order Order
+     * @return array
+     */
+    public function updateOrderAmount($order)
+    {
+        $this->db->update(Order::TABLE_NAME,
+            [
+                Order::AMOUNT_COL => $order->amount
+            ],
+            [
+                Order::ID_COL => $order->id
+            ]);
+        return $this->db->error();
+    }
+
+
 
     /**
      * @param $id
@@ -241,13 +269,15 @@ class OrderController extends ControllerBase
             $dbOrder = Order::fromJson($dbOrder);
         }
         else {
-            $error = true;
+            $response->code = 400;
+            $response->message = "Order could not be found";
+            return $response;
         }
 
-        if($dbOrder->paymentStatus != null or $error)
+        if($dbOrder->paymentStatus != null)
         {
             $response->code = 400;
-            $response->message = "Order already submitted";
+            $response->message = "Order already submitted for payment";
             return $response;
         }
 
@@ -266,11 +296,8 @@ class OrderController extends ControllerBase
         {
             $pc = new PaymentController();
             $links = $pc->CreateMollieTransaction($dbOrder);
-            if($links != null)
+            if($links == null)
             {
-                $dbOrder->paymentStatus = Order::PAYMENT_STATUS_VAL_PENDING;
-                $this->updateOrder($dbOrder,true);
-            }else{
                 $response->code = 500;
                 $response->message = "Something went wrong in submitting the order";
                 return $response;
@@ -280,7 +307,9 @@ class OrderController extends ControllerBase
             $dbOrder->submitted = true;
 
         $dbOrder->paymentStatus = Order::PAYMENT_STATUS_VAL_PENDING;
-        $this->updateOrder($dbOrder,true);
+        $this->log->debug("Before full update");
+        $this->log->debug($dbOrder);
+        $this->updateOrderFull($dbOrder);
 
         $response->code = 200;
         $response->message = "Order submitted succesfully";
@@ -410,7 +439,7 @@ class OrderController extends ControllerBase
 
         $this->log->debug("Validated order before update");
         $this->log->debug($order);
-        $this->updateOrder($order);
+        $this->updateOrderFull($order);
         //TODO: Product stock
 
 
@@ -667,6 +696,22 @@ class OrderController extends ControllerBase
         }
 
         return $this->getOrderDetail($orderId);
+    }
+    //endregion
+
+
+    //region Mollie Info
+    public function getMollieInfoPublic($id)
+    {
+        return $this->db->get(MollieInfo::TABLE_NAME,
+            [
+                MollieInfo::MODE_COL,
+                MollieInfo::METHOD_COL,
+                MollieInfo::PAYMENT_URL_COL
+            ],
+            [
+                MollieInfo::ORDER_ID_COL => $id
+            ]);
     }
     //endregion
 

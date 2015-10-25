@@ -1085,7 +1085,7 @@ $app->group('/order', function() use ($app){
         $o = json_decode($app->request->getBody());
         CrossDomainAjax::PrintCrossDomainCall(
             $app,
-            $oc->updateOrder($o)
+            $oc->updateOrderFull($o)
         );
     });
 

@@ -43,16 +43,16 @@ class PaymentController extends ControllerBase
      * @return null|object
      * @throws \Exception
      */
-    public function CreateMollieTransaction($order)
+    public function CreateMollieTransaction(&$order)
     {
-        $order = new Order();
-        $order->paymentStatus = null;
-        echo "isset: ".(string)isset($order->paymentStatus);
-        echo "empty: ".(string)empty($order->paymentStatus);
-
-
-
-        return "OK";
+//        $order = new Order();
+//        $order->paymentStatus = null;
+//        echo "isset: ".(string)isset($order->paymentStatus);
+//        echo "empty: ".(string)empty($order->paymentStatus);
+//
+//
+//
+//        return "OK";
         try {
             $this->log->debug($order);
             $rc = DataControllerFactory::getRestaurantController();
@@ -82,26 +82,13 @@ class PaymentController extends ControllerBase
             $payment = $this->mollie->payments->create($data);
             $this->log->debug($payment);
 
-            $mollieInfoId = $this->paymentInfoToDatabase($payment);
+            $mollieInfoId = $this->paymentInfoToDatabase($order->id,$payment);
 
             $this->log->debug($mollieInfoId);
 
-            if(($mollieInfoId) === false)
+            if($mollieInfoId == false)
                 throw new \Exception("Failed to insert mollieInfo");
 
-            $change = $this->db->update(Order::TABLE_NAME,
-                [
-                    Order::MOLLIE_ID_COL => $mollieInfoId,
-                ],
-                [
-                    Order::ID_COL => $order->id
-                ]);
-
-            if($change == 0){
-                $this->log->error("No change when updating the Order:");
-                $this->log->error($this->db->last_query());
-                $this->log->error($this->db->error());
-            }
             return $payment->links;
 
         } catch (Mollie_API_Exception  $e) {
@@ -117,12 +104,11 @@ class PaymentController extends ControllerBase
 
     /**
      * @param $payment Mollie_API_Object_Payment
-     * @return array|bool
+     * @return bool
      */
-    private function paymentInfoToDatabase($payment)
+    private function paymentInfoToDatabase($orderId,$payment)
     {
-        //TODO: update old entry if exists?
-        $this->log->debug($payment);
+        $this->log->debug("Inserting payment");
         $mic = DataControllerFactory::getMollieInfoController();
 
         $info = new MollieInfo();
@@ -130,11 +116,12 @@ class PaymentController extends ControllerBase
         $info->method = $payment->method;
         $info->mode = $payment->mode;
         $info->paymentUrl = $payment->links->paymentUrl;
-        $change =  $mic->createMollieInfo($info);
+        $info->ordersid = $orderId;
+        $result = $mic->createMollieInfo($info);
 
         $this->logLastQuery();
         $this->logMedooError();
-        return $change;
+        return isset($result[MollieInfo::ID_COL]);
     }
 
     /**
@@ -160,14 +147,14 @@ class PaymentController extends ControllerBase
                 $this->log->debug("Payment ok, start final handling");
                 $order->submitted = true;
                 $order->paymentStatus = Order::PAYMENT_STATUS_VAL_PAYED;
-                $oc->updateOrder($order, true);
+                $oc->updateOrderPaymentState($order);
             } elseif (!$payment->isOpen() ||
                        $payment->isCancelled() ||
                         $payment->isExpired()) {
                 $this->log->debug("isn't paid & not open, canceled or expired -> aborted");
                 $order->submitted = false;
                 $order->paymentStatus = null;
-                $oc->updateOrder($order,true);
+                $oc->updateOrderPaymentState($order);
             }
         } catch (Exception $e) {
             $this->log->fatal("Something went wrong excepting a user payment!",$e);

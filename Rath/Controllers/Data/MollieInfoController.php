@@ -15,19 +15,15 @@ class MollieInfoController extends ControllerBase
 {
     /**
      * @param $info MollieInfo
-     * @param bool|true $idOnly
      * @return array|bool|int
      */
-    public function createMollieInfo($info,$idOnly = true)
+    public function createMollieInfo($info)
     {
         $lastId = $this->db->insert(MollieInfo::TABLE_NAME,
             MollieInfo::toDbArray($info));
 
         if($lastId != 0)
-            if(!$idOnly)
-                return $this->getMollieInfo($lastId);
-            elseif($idOnly)
-                return $lastId;
+            return $this->getMollieInfo($lastId);
 
         return $this->db->error();
     }
@@ -45,15 +41,16 @@ class MollieInfoController extends ControllerBase
             ]);
     }
 
-    public function getMollieInfoPublic($id)
+    public function getMollieInfoPublic($orderId)
     {
         return $this->db->get(MollieInfo::TABLE_NAME,
             [
                 MollieInfo::MODE_COL,
-                MollieInfo::METHOD_COL
+                MollieInfo::METHOD_COL,
+                MollieInfo::PAYMENT_URL_COL
             ],
             [
-                MollieInfo::ID_COL => $id
+                MollieInfo::ID_COL => $orderId
             ]);
     }
 

@@ -31,7 +31,6 @@ class Order extends EntityBase
     const CREATION_DATE_TIME_COL = "creationDateTime";
     const SUBMITTED_COL = "submitted";
     const SLOT_TEMPLATE_ID_COL = "slottemplateId";
-    const MOLLIE_ID_COL = "mollieinfoid";
     const PAYMENT_METHOD_ID = "paymentmethodid";
     const PAYMENT_STATUS_COL = "paymentStatus";
         const PAYMENT_STATUS_VAL_PENDING = "Pending";
@@ -88,10 +87,6 @@ class Order extends EntityBase
     /**
      * @var int
      */
-    public $mollieinfoid;
-    /**
-     * @var int
-     */
     public $paymentmethodid;
 
     /**
@@ -136,9 +131,6 @@ class Order extends EntityBase
         if(!empty($order->slottemplateId))
             $data[self::SLOT_TEMPLATE_ID_COL] = $order->slottemplateId;
 
-        if(!empty($order->mollieinfoid))
-            $data[self::MOLLIE_ID_COL] = $order->mollieinfoid;
-
         if(!empty($order->paymentmethodid))
             $data[self::PAYMENT_METHOD_ID] = $order->paymentmethodid;
 
@@ -151,10 +143,9 @@ class Order extends EntityBase
 
     /**
      * @param $order Order
-     * @param bool $submit
      * @return array
      */
-    public static function toDbUpdateArray($order,$submit = false)
+    public static function toDbUpdateArray($order)
     {
         $data = [];
 
@@ -179,19 +170,12 @@ class Order extends EntityBase
 //        if(!empty($order->slottemplateId))
             $data[self::SLOT_TEMPLATE_ID_COL] = $order->slottemplateId;
 
-//        if(!empty($order->mollieinfoid))
-            $data[self::MOLLIE_ID_COL] = $order->mollieinfoid;
-
 //        if(!isset($order->paymentmethodid))
             $data[self::PAYMENT_METHOD_ID] = $order->paymentmethodid;
 
-
-
-        if($submit)
-        {
             $data[self::SUBMITTED_COL] = $order->submitted;
             $data[self::PAYMENT_STATUS_COL] = $order->paymentStatus;
-        }
+
 
         return $data;
     }

@@ -18,12 +18,14 @@ class MollieInfo
     const MODE_COL ="mode";
     const METHOD_COL ="method";
     const PAYMENT_URL_COL = "paymentUrl";
+    const ORDER_ID_COL ="ordersid";
 
     public $id;
     public $mollieId;
     public $mode;
     public $method;
     public $paymentUrl;
+    public $ordersid;
 
     /**
      * @param $info MollieInfo
@@ -33,6 +35,7 @@ class MollieInfo
     {
         return[
             self::MOLLIE_ID_COL => $info->mollieId,
+            self::ORDER_ID_COL => $info->ordersid,
             self::MODE_COL => $info->mode,
             self::METHOD_COL => $info->method,
             self::PAYMENT_URL_COL => $info->paymentUrl
