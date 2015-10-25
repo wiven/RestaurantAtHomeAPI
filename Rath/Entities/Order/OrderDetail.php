@@ -10,6 +10,7 @@ namespace Rath\Entities\Order;
 
 
 use Rath\Entities\EntityBase;
+use Rath\Helpers\General;
 
 class OrderDetail extends EntityBase
 {
@@ -56,6 +57,7 @@ class OrderDetail extends EntityBase
      */
     public $oldPrice;
 
+    //Promotion join values
     /**
      * @var string | null
      */
@@ -64,6 +66,22 @@ class OrderDetail extends EntityBase
      * @var float | null
      */
     public $discountAmount;
+
+    /**
+     * @var string | null
+     */
+    public $fromDate;
+    /**
+     * @var string | null
+     */
+    public $toDate;
+
+    public function promotionValid()
+    {
+        $date = General::getCurrentDate();
+        return ($this->fromDate <= $date && $this->toDate >= $date);
+    }
+
 
     /**
      * @param $od OrderDetail

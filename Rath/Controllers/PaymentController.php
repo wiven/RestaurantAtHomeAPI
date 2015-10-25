@@ -185,6 +185,7 @@ class PaymentController extends ControllerBase
 
     public function getMollieWebhookUrl()
     {
+        return "http://playground.restaurantathome.be/api/order/paymenthook/";
         switch(APP_MODE){
             case "APIDEV":
                 return "test";

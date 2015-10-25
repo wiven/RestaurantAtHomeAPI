@@ -352,6 +352,11 @@ class OrderController extends ControllerBase
             $response->message = "No order date & time supplied";
             return false;
         }
+        if($order->orderDateTime < General::getCurrentDateTime()){
+            $response->code = 313;
+            $response->message = "You cannot order in the past.";
+            return false;
+        }
         $orderDT = new \DateTime($order->orderDateTime);
         /** @var SlotTemplate $restoSlot */
         $restoSlot = $rc->getSlotOverview($order->restaurantId,$orderDT->format(General::dateFormat),$orderDT->format(General::timeFormat));
@@ -423,6 +428,7 @@ class OrderController extends ControllerBase
 
         /** @var Product $product */
         $product = $this->pc->getProduct($orderLine->productId);
+        $this->log->debug($product);
         if(!isset($product[Product::ID_COL])){
             $apiResponse->code = 406;
             $apiResponse->message = "The product id isn't known.";
@@ -432,11 +438,17 @@ class OrderController extends ControllerBase
 
         /** @var Order $order */
         $order = $this->getOrder($orderLine->orderId);
+        $this->log->debug($order);
         if(isset($order[Order::ID_COL])){
             $order= Order::fromJson($order);
             if($order->restaurantId != $product->restaurantId){
                 $apiResponse->code = 406;
                 $apiResponse->message = "You can only buy products from one restaurant in one order.";
+                return $apiResponse;
+            }
+            if($order->paymentStatus != null || $order->submitted){
+                $apiResponse->code = 407;
+                $apiResponse->message = "Order is submitted and cannot be changed";
                 return $apiResponse;
             }
         }
@@ -449,9 +461,11 @@ class OrderController extends ControllerBase
 
         /** @var OrderDetail $dbOrderLine */
         $dbOrderLine = $this->updateOrderDetailLineByLineInfo($orderLine);
+        $this->log->debug($dbOrderLine);
         if(isset($dbOrderLine->id)){
             $orderLine->id = $dbOrderLine->id;
-            $orderLine->quantity = $orderLine->quantity + $dbOrderLine->quantity;
+            if($dbOrderLine->promotionValid())
+                $orderLine->quantity = $orderLine->quantity + $dbOrderLine->quantity;
             if($orderLine->quantity < 0){
                 $apiResponse->code = 406;
                 $apiResponse->message = "The quantity provided will result in a negative value on a order line.";
@@ -491,8 +505,15 @@ class OrderController extends ControllerBase
     {
         $result = $this->db->get(OrderDetail::TABLE_NAME,
             [
-                OrderDetail::ID_COL,
-                OrderDetail::QUANTITY_COL
+                "[>]".Promotion::TABLE_NAME =>[
+                    Product::TABLE_NAME.".".Product::PROMOTION_ID_COL=> Promotion::ID_COL
+                ]
+            ],
+            [
+                OrderDetail::TABLE_NAME.".".OrderDetail::ID_COL,
+                OrderDetail::TABLE_NAME.".".OrderDetail::QUANTITY_COL,
+                Promotion::TABLE_NAME.".".Promotion::FROM_DATE_COL,
+                Promotion::TABLE_NAME.".".Promotion::TO_DATE_COL
             ],
             [
                 "AND" => [
@@ -515,7 +536,7 @@ class OrderController extends ControllerBase
                 OrderDetail::ORDER_ID_COL => $orderId
             ]
         ];
-        $this->addDefaultPromotionFilters($where);
+        //$this->addDefaultPromotionFilters($where); doesn't show product if a promotion is passed!
 
         /** @var OrderDetail[] $orderDetails */
         $orderDetails =  $this->db->select(OrderDetail::TABLE_NAME,
