@@ -276,8 +276,9 @@ class OrderController extends ControllerBase
                 return $response;
             }
         }
+        else
+            $dbOrder->submitted = true;
 
-        $dbOrder->submitted = true;
         $dbOrder->paymentStatus = Order::PAYMENT_STATUS_VAL_PENDING;
         $this->updateOrder($dbOrder,true);
 

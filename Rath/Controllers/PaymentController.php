@@ -45,6 +45,14 @@ class PaymentController extends ControllerBase
      */
     public function CreateMollieTransaction($order)
     {
+        $order = new Order();
+        $order->paymentStatus = null;
+        echo "isset: ".(string)isset($order->paymentStatus);
+        echo "empty: ".(string)empty($order->paymentStatus);
+
+
+
+        return "OK";
         try {
             $this->log->debug($order);
             $rc = DataControllerFactory::getRestaurantController();
@@ -54,6 +62,7 @@ class PaymentController extends ControllerBase
                 $paymMethod = PaymentMethod::fromJson($paymMethod);
 
             $this->log->debug($paymMethod);
+
             $webhook = $this->getMollieWebhookUrl();
             if (!isset($webhook))
                 throw new \Exception("Invalid platform to test payments");
@@ -74,7 +83,9 @@ class PaymentController extends ControllerBase
             $this->log->debug($payment);
 
             $mollieInfoId = $this->paymentInfoToDatabase($payment);
+
             $this->log->debug($mollieInfoId);
+
             if(($mollieInfoId) === false)
                 throw new \Exception("Failed to insert mollieInfo");
 
@@ -146,12 +157,14 @@ class PaymentController extends ControllerBase
                 $order = Order::fromJson($order);
 
             if ($payment->isPaid()) {
-                //Payment ok, start final handling
+                $this->log->debug("Payment ok, start final handling");
                 $order->submitted = true;
                 $order->paymentStatus = Order::PAYMENT_STATUS_VAL_PAYED;
                 $oc->updateOrder($order, true);
-            } elseif (!$payment->isOpen()) {
-                // isn't paid & not open -> aborted
+            } elseif (!$payment->isOpen() ||
+                       $payment->isCancelled() ||
+                        $payment->isExpired()) {
+                $this->log->debug("isn't paid & not open, canceled or expired -> aborted");
                 $order->submitted = false;
                 $order->paymentStatus = null;
                 $oc->updateOrder($order,true);

@@ -158,42 +158,39 @@ class Order extends EntityBase
     {
         $data = [];
 
-        if(!empty($order->addressId))
+//        if(!empty($order->addressId))
             $data[Order::ADDRESS_ID_COL] = $order->addressId;
 
-        if(!empty($order->comment))
+//        if(!empty($order->comment))
             $data[Order::COMMENT_COL] = $order->comment;
 
-        if(!empty($order->orderDateTime))
+//        if(!empty($order->orderDateTime))
             $data[Order::ORDER_DATETIME_COL] = $order->orderDateTime;
 
-        if(!empty($order->amount))
+//        if(!empty($order->amount))
             $data[Order::AMOUNT_COL] = $order->amount;
 
-        if(!empty($order->orderStatusId))
+//        if(!empty($order->orderStatusId))
             $data[Order::ORDER_STATUS_ID_COL] = $order->orderStatusId;
 
-        if(!empty($order->couponId))
+//        if(!empty($order->couponId))
             $data[Order::COUPON_ID] = $order->couponId;
 
-        if(!empty($order->slottemplateId))
+//        if(!empty($order->slottemplateId))
             $data[self::SLOT_TEMPLATE_ID_COL] = $order->slottemplateId;
 
-        if(!empty($order->mollieinfoid))
+//        if(!empty($order->mollieinfoid))
             $data[self::MOLLIE_ID_COL] = $order->mollieinfoid;
 
-        if(!empty($order->paymentmethodid))
+//        if(!isset($order->paymentmethodid))
             $data[self::PAYMENT_METHOD_ID] = $order->paymentmethodid;
 
 
 
         if($submit)
         {
-            if(!empty($order->submitted))
-                $data[self::SUBMITTED_COL] = $order->submitted;
-            if(!empty($order->paymentStatus))
-                $data[self::PAYMENT_STATUS_COL] = $order->paymentStatus;
-
+            $data[self::SUBMITTED_COL] = $order->submitted;
+            $data[self::PAYMENT_STATUS_COL] = $order->paymentStatus;
         }
 
         return $data;
