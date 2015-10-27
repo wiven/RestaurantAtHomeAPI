@@ -121,6 +121,7 @@ class OrderController extends ControllerBase
 
     public function getOrderDetail($id, $full = false)
     {
+
         $apiResponse = new ApiResponse();
         $order = $this->getOrderPublic($id,true);
 
@@ -140,18 +141,38 @@ class OrderController extends ControllerBase
                 return $line->lineTotal;
             });
 
+        $cc = DataControllerFactory::getCouponController();
+        if($order->couponId != 0){
+            /** @var Coupon $coupon */
+            $coupon = $cc->getCoupon($order->couponId);
+            if($coupon->isValid()){
+                $order->origionalAmount = $orderTotal;
+                switch($coupon->discountType){
+                    case Coupon::DISCOUNT_TYPE_VAL_AMOUNT:
+                        $orderTotal -= $coupon->discountAmount;
+                        if($orderTotal < 0)
+                            $orderTotal = 0;
+                        break;
+                    case Coupon::DISCOUNT_TYPE_VAL_PERS:
+                        $mul = 1 - bcdiv($coupon->discountAmount,100);
+                        $orderTotal = bcmul($orderTotal, $mul);
+                        break;
+                }
+            }
+        }
+
+
         if($order->amount != $orderTotal){
             $order->amount = $orderTotal;
             $this->updateOrderAmount($order);
         }
-
         $order->lines = $lines;
 
         if($full)
         {
             $uc = DataControllerFactory::getUserController();
             $gc = DataControllerFactory::getGeneralController();
-            $cc = DataControllerFactory::getCouponController();
+
 
 
             $order->paymentInfo = $this->getMollieInfoPublic($order->id);
@@ -161,7 +182,6 @@ class OrderController extends ControllerBase
                 $order->couponDetail = $cc->getCoupon($order->couponId);
             else
                 $order->couponDetail = null;
-
 
             $order->userDetails = $uc->getUserDetails($order->userId);
 

@@ -10,6 +10,7 @@ namespace Rath\Entities\Order;
 
 
 use Rath\Entities\EntityBase;
+use Rath\Helpers\General;
 
 class Coupon extends EntityBase
 {
@@ -58,6 +59,12 @@ class Coupon extends EntityBase
      * @var int
      */
     public $quantity;
+
+    public function isValid()
+    {
+        $date = General::getCurrentDate();
+        return $this->startDate <= $date && $this->endDate >= $date;
+    }
 
     /**
      * @param $coupon Coupon
