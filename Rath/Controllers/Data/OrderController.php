@@ -460,8 +460,26 @@ class OrderController extends ControllerBase
         $this->log->debug("Validated order before update");
         $this->log->debug($order);
         $this->updateOrderFull($order);
-        //TODO: Product stock
 
+        //check product stock
+        $pc = DataControllerFactory::getProductController();
+        $stockErrors = [];
+        foreach($order->lines as $line){
+            /** @var ApiResponse $usageResult */
+            $usageResult = $pc->getProductStockUsage(date($order->orderDateTime),$line);
+            if($usageResult->code != 200){
+                $usageResult->orderLineId = $line->id;
+                array_push($stockErrors, [
+                    $usageResult
+                ]);
+            }
+        }
+        if(count($stockErrors) != 0){
+            $response->code = 340;
+            $response->message = "There are stock issues with your order";
+            $response->data = $stockErrors;
+            return $response;
+        }
 
         return true;
     }

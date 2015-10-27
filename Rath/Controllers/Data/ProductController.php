@@ -11,12 +11,16 @@ namespace Rath\Controllers\Data;
 
 use Rath\Controllers\ControllerFactory;
 use Rath\Controllers\Data\ControllerBase;
+use Rath\Entities\ApiResponse;
+use Rath\Entities\Order\Order;
+use Rath\Entities\Order\OrderDetail;
 use Rath\Entities\Product\Product;
 use Rath\Entities\Product\ProductHasTags;
 use Rath\Entities\Product\ProductStock;
 use Rath\Entities\Product\ProductType;
 use Rath\Entities\Product\RelatedProducts;
 use Rath\Entities\Product\Tag;
+use Rath\Helpers\General;
 use Rath\Helpers\PhotoManagement;
 use Rath\Libraries\UploadHandler;
 
@@ -148,6 +152,27 @@ class ProductController extends ControllerBase
             ]);
     }
 
+    /**
+     * @param $prodId
+     * @return array|bool
+     */
+    public function getProductStockForDay($prodId, $dayOfWeek)
+    {
+        return $this->db->select(ProductStock::TABLE_NAME,
+            [
+                ProductStock::ID_COL,
+                ProductStock::DAY_OF_WEEK_COL,
+                ProductStock::AMOUNT_COL
+            ],
+            [
+                "AND" =>[
+                    ProductStock::PRODUCT_ID_COL => $prodId,
+                    ProductStock::DAY_OF_WEEK_COL => $dayOfWeek
+                ]
+
+            ]);
+    }
+
     public function getSingleProductStock($id)
     {
         return $this->db->select(ProductStock::TABLE_NAME,
@@ -198,6 +223,50 @@ class ProductController extends ControllerBase
                 ProductStock::ID_COL => $id
             ]);
         return $this->db->error();
+    }
+
+    public function getProductStockUsage($date, $productId)
+    {
+        $response = new ApiResponse();
+
+        $stock = $this->getProductStockForDay($productId,General::getCurrentDayOfWeek());
+        if(!isset($stock[ProductStock::ID_COL])){
+            $response->code = 400;
+            $response->message = "There is no stock for the product ".$productId. " available.";
+            return $response;
+        }
+
+        $result = $this->db->sum(OrderDetail::TABLE_NAME,
+            [
+                "[><]".Order::TABLE_NAME => [
+                    OrderDetail::TABLE_NAME.".".OrderDetail::ORDER_ID_COL => Order::ID_COL
+                ]
+            ],
+            [
+                OrderDetail::TABLE_NAME.".".OrderDetail::QUANTITY_COL
+            ],
+            [
+                "AND"=>
+                [
+                    "date(".Order::ORDER_DATETIME_COL.")" => $date,
+                    OrderDetail::PRODUCT_ID_COL => $productId
+                ]
+            ]);
+
+        if(gettype($result) == General::booleanType){
+            $this->logMedooError();
+            $this->logLastQuery();
+            $response->code = 401;
+            $response->message = "Something went wrong getting the product usage.";
+            return $response;
+        }
+
+        $response->code= 200;
+        $response->message = "product stock check success";
+        $response->data = [
+            "available" => $stock[ProductStock::AMOUNT_COL] - $result
+        ];
+        return $response;
     }
     //endregion
 
