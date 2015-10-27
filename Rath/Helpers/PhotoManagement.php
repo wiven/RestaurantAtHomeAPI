@@ -41,7 +41,7 @@ class PhotoManagement
             $uploader = new UploadHandler();
             return [
                 "url" => $uploader->get_download_url($path),
-                "thumbnailUrl" => "To be found"
+                "thumbnailUrl" => $uploader->get_download_url($path,"thumbnail") //thumbnail is a "version" of the image.
             ];
         }
     }
