@@ -9,7 +9,9 @@
 namespace Rath\Entities\User;
 
 
-class LoyaltyPoints
+use Rath\Entities\EntityBase;
+
+class LoyaltyPoints extends EntityBase
 {
     const TABLE_NAME = "loyaltypoints";
 
@@ -18,9 +20,21 @@ class LoyaltyPoints
     const RESTAURANT_ID_COL = "restaurantid";
     const QUANTITY_COL = "quantity";
 
+    /**
+     * @var int
+     */
     public $id;
+    /**
+     * @var int
+     */
     public $userid;
+    /**
+     * @var int
+     */
     public $restaurantid;
+    /**
+     * @var int
+     */
     public $quantity;
 
     /**

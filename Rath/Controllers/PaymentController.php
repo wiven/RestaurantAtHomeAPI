@@ -132,6 +132,7 @@ class PaymentController extends ControllerBase
     {
         try {
             $oc = DataControllerFactory::getOrderController();
+            $uc = DataControllerFactory::getUserController();
 
             $this->log->debug("Get mollie payment info");
             $payment = $this->mollie->payments->get($_POST["id"]);
@@ -148,6 +149,12 @@ class PaymentController extends ControllerBase
                 $order->submitted = true;
                 $order->paymentStatus = Order::PAYMENT_STATUS_VAL_PAYED;
                 $oc->updateOrderPaymentState($order);
+
+                //assign loyalty points
+                $points = $oc->getOrderLoyaltyPoints($order->id);
+                if(gettype($points) == General::integerType)
+                    $uc->addLoyaltyPoints($order->restaurantId,$points);
+
             } elseif (!$payment->isOpen() ||
                        $payment->isCancelled() ||
                         $payment->isExpired()) {

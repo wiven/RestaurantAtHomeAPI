@@ -15,6 +15,7 @@ class LoyaltyPointsController extends ControllerBase
 {
     /**
      * @param $lp LoyaltyPoints
+     * @return array|bool
      */
     public function insertLoyaltyPointsEntry($lp)
     {

@@ -716,6 +716,26 @@ class OrderController extends ControllerBase
     //endregion
 
     /**
+     * @param $orderId
+     * @return bool|int
+     */
+    public function getOrderLoyaltyPoints($orderId)
+    {
+        return $this->db->sum(OrderDetail::TABLE_NAME,
+            [
+                "[><]".Product::TABLE_NAME =>[
+                    OrderDetail::PRODUCT_ID_COL => Product::ID_COL
+                ]
+            ],
+            [
+                Product::TABLE_NAME.".".Product::LOYALTY_POINTS_COL
+            ],
+            [
+                OrderDetail::ORDER_ID_COL => $orderId
+            ]);
+    }
+
+    /**
      * @param $orderLine OrderDetail
      * @throws OrderDetailException
      * @throws \Exception

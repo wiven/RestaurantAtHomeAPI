@@ -533,7 +533,52 @@ class UserController extends ControllerBase
         return $result;
     }
 
+    /**
+     * @return array|bool
+     */
+    public function getLoyaltyPoint($restoId)
+    {
+        $result =  $this->db->select(LoyaltyPoints::TABLE_NAME,
+            [
+                LoyaltyPoints::ID_COL,
+                LoyaltyPoints::QUANTITY_COL
+            ],
+            [
+                "AND" =>[
+                    LoyaltyPoints::TABLE_NAME.".".LoyaltyPoints::USER_ID_COL => Authorization::$userId,
+                    LoyaltyPoints::RESTAURANT_ID_COL =>$restoId
+                ]
+            ]);
+//        var_dump($this->db->last_query());
+//        var_dump($this->db->error());
 
+        return $result;
+    }
+
+    /**
+     * @param $restoId
+     * @param $qty
+     */
+    public function addLoyaltyPoints($restoId, $qty)
+    {
+        $lpc = DataControllerFactory::getLoyaltyPointsController();
+        $existing = $this->getLoyaltyPoint($restoId);
+        if(!isset($existing[LoyaltyPoints::ID_COL]))
+        {
+            $point = new LoyaltyPoints();
+            $point->userid = Authorization::$userId;
+            $point->restaurantid = $restoId;
+            $point->quantity = $qty;
+            $lpc->insertLoyaltyPointsEntry($point);
+        }
+        else
+        {
+            /** @var LoyaltyPoints $point */
+            $point = LoyaltyPoints::fromJson($existing);
+            $point->quantity += $qty;
+            $lpc->updateLoyaltyPoints($point);
+        }
+    }
 
     //endregion
 
@@ -560,7 +605,6 @@ class UserController extends ControllerBase
             ]);
     }
     //endregion
-
 }
 
 //$para = [
