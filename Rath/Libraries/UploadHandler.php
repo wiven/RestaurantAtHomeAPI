@@ -261,9 +261,9 @@ class UploadHandler
             }
             $version_path = rawurlencode($version).'/';
         }
-        var_dump($this->options['upload_url']);
-        var_dump($this->get_user_path());
-        var_dump($version_path.rawurlencode($file_name));
+//        var_dump($this->options['upload_url']);
+//        var_dump($this->get_user_path());
+//        var_dump($version_path.rawurlencode($file_name));
         return $this->options['upload_url'].$this->get_user_path()
             .$version_path.rawurlencode($file_name);
     }
