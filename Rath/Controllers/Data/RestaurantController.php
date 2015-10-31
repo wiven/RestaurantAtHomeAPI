@@ -134,6 +134,20 @@ class RestaurantController extends ControllerBase
             ]);
         return $this->getRestaurant($id);
     }
+
+    public function getRestaurantInTheSpotlight()
+    {
+        $query =
+            "SELECT id,name,logoPhoto FROM restaurant
+            ORDER BY RAND()
+            LIMIT 4";
+        $restos = $this->db->query($query)->fetchAll(PDO::FETCH_ASSOC);
+
+        for($i = 0; $i < count($restos); $i++){
+            $restos[$i][Restaurant::LOGO_PHOTO_COL] = PhotoManagement::getPhotoUrls($restos[$i][Restaurant::LOGO_PHOTO_COL]);
+        }
+        return $restos;
+    }
     //endregion
 
     //region KitchenType

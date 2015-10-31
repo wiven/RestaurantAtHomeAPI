@@ -1255,6 +1255,18 @@ $app->group('/restaurantdetail', function() use ($app) {
     });
 });
 //endregion
+
+//region Home
+$app->group('/home', function() use ($app) {
+    $hc = ControllerFactory::getHomeController();
+    $app->get('', function() use ($app,$hc){
+        CrossDomainAjax::PrintCrossDomainCall(
+            $app,
+            $hc->getHomeView()
+        );
+    });
+});
+//endregion
 //endregion
 
 
