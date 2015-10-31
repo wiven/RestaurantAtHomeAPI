@@ -232,7 +232,7 @@ class ProductController extends ControllerBase
         $stock = $this->getProductStockForDay($productId,General::getCurrentDayOfWeek());
         if(!isset($stock[ProductStock::ID_COL])){
             $response->code = 400;
-            $response->message = "There is no stock for the product ".$productId. " available.";
+            $response->message = "There is no stock for the product ".$productId." available.";
             return $response;
         }
 
@@ -266,6 +266,7 @@ class ProductController extends ControllerBase
         $response->data = [
             "available" => $stock[ProductStock::AMOUNT_COL] - $result
         ];
+        $this->log->debug($response);
         return $response;
     }
     //endregion

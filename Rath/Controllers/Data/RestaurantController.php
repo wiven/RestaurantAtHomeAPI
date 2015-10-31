@@ -582,7 +582,7 @@ class RestaurantController extends ControllerBase
         $query =
             "SELECT o.id, name, surname, orderDateTime,amount,orderStatusId,
             (SELECT sum(quantity) from ".OrderDetail::TABLE_NAME." where orderId = o.id) as 'items',
-            (select count(slots) from ".OrderDetail::TABLE_NAME." as od
+            (select sum(slots * quantity) from ".OrderDetail::TABLE_NAME." as od
               INNER join product on od.productId = product.id
               where od.OrderId = o.id) as 'slots'
             FROM ".$this->db->database_name.".".Order::TABLE_NAME." as o
@@ -599,6 +599,7 @@ class RestaurantController extends ControllerBase
         //var_dump($pdoQuery);
         //var_dump($this->db->error());
         //if(!$pdoQuery)
+        $this->logLastQuery();
         return $pdoQuery->fetchAll(PDO::FETCH_ASSOC);
         //return $this->db->error();
     }
@@ -972,24 +973,31 @@ class RestaurantController extends ControllerBase
 
     /**
      * @param $order Order
-     * @return string
+     * @param null $date
+     * @return int
      */
-    public function getSlotUsage($order)
+    public function getSlotUsage($order,$date = null)
     {
-        $date = $this->db->quote(date($order->orderDateTime));
+        $this->log->debug("Date :".$date);
+        if(empty($date))
+            $date = $this->db->quote(date($order->orderDateTime));
+        else
+            $date = $this->db->quote($date);
+        $this->log->debug("Date :".$date);
         $query =
             "SELECT SUM(product.slots * orderdetail.quantity) as total FROM orders
             INNER JOIN orderdetail ON orders.id = orderdetail.orderId
             INNER JOIN product ON orderdetail.productId = product.id
             WHERE orders.slottemplateId = ".$order->slottemplateId
-            ." and date(orders.creationDateTime) = ".$date
+            ." and date(orders.orderDateTime) = ".$date
             ." and orders.id != ".$order->id;
 
         $pdoQuery = $this->db->query($query);
-        $result = $pdoQuery->fetchColumn(0);
 
         $this->logLastQuery();
         $this->logMedooError();
+
+        $result = $pdoQuery->fetchColumn(0);
         $this->log->debug($result);
         return $result;
     }

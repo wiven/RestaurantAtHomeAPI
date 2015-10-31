@@ -119,6 +119,9 @@ class CouponController extends ControllerBase
      */
     public function checkCodeIsValid($code,$restoId)
     {
+        if(empty($code))
+            return null;
+
         $today = General::getCurrentDate();
         /** @var Coupon $coupon */
         $coupon = $this->getCouponByCode($code);

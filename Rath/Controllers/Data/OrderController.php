@@ -145,18 +145,21 @@ class OrderController extends ControllerBase
         if($order->couponId != 0){
             /** @var Coupon $coupon */
             $coupon = $cc->getCoupon($order->couponId);
-            if($coupon->isValid()){
-                $order->origionalAmount = $orderTotal;
-                switch($coupon->discountType){
-                    case Coupon::DISCOUNT_TYPE_VAL_AMOUNT:
-                        $orderTotal -= $coupon->discountAmount;
-                        if($orderTotal < 0)
-                            $orderTotal = 0;
-                        break;
-                    case Coupon::DISCOUNT_TYPE_VAL_PERS:
-                        $mul = 1 - bcdiv($coupon->discountAmount,100);
-                        $orderTotal = bcmul($orderTotal, $mul);
-                        break;
+            if(isset($coupon[Coupon::ID_COL])) {
+                $coupon = Coupon::fromJson($coupon);
+                if ($coupon->isValid()) {
+                    $order->origionalAmount = $orderTotal;
+                    switch ($coupon->discountType) {
+                        case Coupon::DISCOUNT_TYPE_VAL_AMOUNT:
+                            $orderTotal -= $coupon->discountAmount;
+                            if ($orderTotal < 0)
+                                $orderTotal = 0;
+                            break;
+                        case Coupon::DISCOUNT_TYPE_VAL_PERS:
+                            $mul = 1 - bcdiv($coupon->discountAmount, 100);
+                            $orderTotal = bcmul($orderTotal, $mul);
+                            break;
+                    }
                 }
             }
         }
@@ -170,13 +173,11 @@ class OrderController extends ControllerBase
 
         if($full)
         {
+            $this->log->debug("Full details");
             $uc = DataControllerFactory::getUserController();
             $gc = DataControllerFactory::getGeneralController();
 
-
-
             $order->paymentInfo = $this->getMollieInfoPublic($order->id);
-
 
             if($order->couponId != 0)
                 $order->couponDetail = $cc->getCoupon($order->couponId);
@@ -189,6 +190,9 @@ class OrderController extends ControllerBase
                 $order->addressDetail = $gc->getAddress($order->addressId);
             else
                 $order->addressDetail = null;
+
+            //if($order->slottemplateId == 0)
+            $this->getFirstAvailableSlot($order);
 
             $this->log->debug($order);
 
@@ -279,7 +283,6 @@ class OrderController extends ControllerBase
     public function submitOrder($order)
     {
         $response = new ApiResponse();
-        $error = false;
 
         /** @var Order $dbOrder */
         $dbOrder = $this->getOrder($order->id);
@@ -367,6 +370,8 @@ class OrderController extends ControllerBase
         return $response;
     }
 
+    //region Validation
+
     /**
      * @param $order Order
      * @param $response ApiResponse
@@ -377,7 +382,49 @@ class OrderController extends ControllerBase
         $gc = DataControllerFactory::getGeneralController();
         $rc = DataControllerFactory::getRestaurantController();
 
+        //Check Order has products
+        $order->lines = $this->getOrderLines($order->id);
+        if(count($order->lines) == 0){
+            $response->code = 335;
+            $response->message = "Order doesn't have any products";
+            return false;
+        }
+
         $this->log->debug($order);
+        if(!$this->validateAddress($order,$response,$gc))
+            return false;
+
+        if(!$this->validateSlotTemplate($order,$response,$rc))
+            return false;
+
+
+
+
+        //check paymentMethod
+        if(!$rc->getRestaurantHasPaymentMethod($order->restaurantId,$order->paymentmethodid)){
+            $response->code = 330;
+            $response->message = "Selected paymentmethod isn't allowed";
+            return false;
+        }
+
+        $this->log->debug("Validated order before update");
+        $this->log->debug($order);
+        $this->updateOrderFull($order);
+
+//        if(!$this->validateProductStock($order,$response))
+//            return false;
+
+        return true;
+    }
+
+    /**
+     * @param $order Order
+     * @param $response ApiResponse
+     * @param $gc GeneralController
+     * @return bool
+     */
+    public function validateAddress(&$order,&$response,$gc)
+    {
         //check addressId
         /** @var Address $address */
         $address = $gc->getAddress($order->addressId,false);
@@ -395,7 +442,17 @@ class OrderController extends ControllerBase
             $response->message = "Address doesn't belong to the user";
             return false;
         }
+        return true;
+    }
 
+    /**
+     * @param $order Order
+     * @param $response ApiResponse
+     * @param $rc RestaurantController
+     * @return bool
+     */
+    public function validateSlotTemplate(&$order,&$response,$rc)
+    {
         //Check order date Time & slots
         if(empty($order->orderDateTime)){
             $response->code = 310;
@@ -411,7 +468,6 @@ class OrderController extends ControllerBase
         /** @var SlotTemplate $restoSlot */
         $restoSlot = $rc->getSlotOverview($order->restaurantId,$orderDT->format(General::dateFormat),$orderDT->format(General::timeFormat));
         if(isset($restoSlot[SlotTemplate::ID_COL]))
-
             $restoSlot = SlotTemplate::fromJson($restoSlot);
         else{
             $response->code = 311;
@@ -431,7 +487,39 @@ class OrderController extends ControllerBase
             return false;
         }
 
+        return true;
+    }
+
+    public function validateProductStock(&$order,&$response)
+    {
+        //check product stock
+        $pc = DataControllerFactory::getProductController();
+        $stockErrors = [];
+        foreach($order->lines as $line){
+            /** @var ApiResponse $usageResult */
+            $usageResult = $pc->getProductStockUsage(date($order->orderDateTime),$line->productId);
+            if($usageResult->code != 200){
+                $usageResult->orderLineId = $line->id;
+                array_push($stockErrors, [
+                    $usageResult
+                ]);
+            }
+        }
+        if(count($stockErrors) != 0){
+            $response->code = 340;
+            $response->message = "There are stock issues with your order";
+            $response->data = $stockErrors;
+            return false;
+        }
+        return true;
+    }
+
+    public function validateCouponCode(&$order,&$response)
+    {
         //Check Coupon
+        if(!empty($order->couponCode))
+            return true; // no validation needed for emtpy codes
+
         $cc = DataControllerFactory::getCouponController();
         /** @var Coupon $coupon */
         $coupon = $cc->checkCodeIsValid($order->couponCode,$order->restaurantId);
@@ -450,39 +538,9 @@ class OrderController extends ControllerBase
             return false;
         }
 
-        //check paymentMethod
-        if(!$rc->getRestaurantHasPaymentMethod($order->restaurantId,$order->paymentmethodid)){
-            $response->code = 330;
-            $response->message = "Selected paymentmethod isn't allowed";
-            return false;
-        }
-
-        $this->log->debug("Validated order before update");
-        $this->log->debug($order);
-        $this->updateOrderFull($order);
-
-        //check product stock
-        $pc = DataControllerFactory::getProductController();
-        $stockErrors = [];
-        foreach($order->lines as $line){
-            /** @var ApiResponse $usageResult */
-            $usageResult = $pc->getProductStockUsage(date($order->orderDateTime),$line);
-            if($usageResult->code != 200){
-                $usageResult->orderLineId = $line->id;
-                array_push($stockErrors, [
-                    $usageResult
-                ]);
-            }
-        }
-        if(count($stockErrors) != 0){
-            $response->code = 340;
-            $response->message = "There are stock issues with your order";
-            $response->data = $stockErrors;
-            return $response;
-        }
-
         return true;
     }
+    //endregion
     //endregion
 
     //region OrderDetail (lines)
@@ -753,6 +811,9 @@ class OrderController extends ControllerBase
     }
     //endregion
 
+
+
+    //region Loyalty
     /**
      * @param $orderId
      * @return bool|int
@@ -772,6 +833,9 @@ class OrderController extends ControllerBase
                 OrderDetail::ORDER_ID_COL => $orderId
             ]);
     }
+    //endregion
+
+
 
     /**
      * @param $orderLine OrderDetail
@@ -800,6 +864,66 @@ class OrderController extends ControllerBase
     }
 
 
+    //region Slots
+
+    /**
+     * @param $order Order
+     */
+    public function getFirstAvailableSlot(&$order)
+    {
+        if($order->submitted)
+            return;
+
+        $rc = DataControllerFactory::getRestaurantController();
+
+        $date = General::getCurrentDate();
+        $time = General::getCurrentTime();
+        if(!empty($order->orderDateTime))
+        {
+            $orderDT = new \DateTime($order->orderDateTime);
+            $date = $orderDT->format(General::dateFormat);
+            $time = $orderDT->format(General::timeFormat);
+        }
+
+        $this->log->debug("Date: ".$date);
+        $this->log->debug("Time: ".$time);
+        /** @var SlotTemplate[] $restoSlots */
+        $restoSlots = $rc->getSlotOverview($order->restaurantId,$date);
+        if(count($restoSlots) != 0)
+            $restoSlots = SlotTemplate::fromJsonArray($restoSlots);
+        else
+            return;
+
+        $minSlot = false;
+        $suggestedSlotIndex = -1;
+        $slotWeight = $this->getSlotWeight($order->id);
+        for($i = 0; $i < count($restoSlots); $i++)
+        {
+            /** @var SlotTemplate $slot */
+            $slot = $restoSlots[$i];
+            if(($slot->fromTime > $time) or $minSlot)
+            {
+                if(!$minSlot)
+                    $minSlot = true;
+                $order->slottemplateId = $slot->id;
+                $slotUsage = $rc->getSlotUsage($order,$date);
+                if($slot->getSlotAvailability() >= ($slotUsage + $slotWeight))
+                {
+                    $suggestedSlotIndex = $i;
+                    break;
+                }
+            }
+        }
+
+        if($suggestedSlotIndex == -1)
+            return;
+
+        $availableSlot = $restoSlots[$suggestedSlotIndex];
+        $order->slottemplateId = $availableSlot->id;
+        $order->orderDateTime = $date." ".$availableSlot->toTime;
+
+    }
+
     /**
      * @param $orderId int
      * @return bool|int
@@ -821,4 +945,5 @@ class OrderController extends ControllerBase
         $this->log->debug($result);
         return $result;
     }
+    //endregion
 }
