@@ -48,8 +48,6 @@ class OrderController extends ControllerBase
         $this->uc = DataControllerFactory::getUserController();
     }
 
-
-
     //Todo: Order manipulation should return the order?
     //TODO: change the field subset to better suite UI.
 
@@ -62,6 +60,11 @@ class OrderController extends ControllerBase
     {
         $order->submitted = false;
         $order->orderStatusId = OrderStatus::val_New;
+
+        // Cost is 0 by default so don't need to set it otherwise
+        if ($order->needsDelivery != Order::DELIVERY_NONE) {
+            $order->deliveryCost = $this->getRestaurantDeliveryPrice($order);
+        }
 
         $lastId = $this->db->insert(Order::TABLE_NAME,
             Order::toDbArray($order));
@@ -102,6 +105,8 @@ class OrderController extends ControllerBase
             Order::TABLE_NAME.".".Order::CREATION_DATE_TIME_COL,
             Order::TABLE_NAME.".".Order::PAYMENT_METHOD_ID,
             Order::TABLE_NAME.".".Order::SLOT_TEMPLATE_ID_COL,
+            Order::TABLE_NAME.".".Order::DELIVERY_COL,
+            Order::TABLE_NAME.".".Order::DELIVERY_COST_COL,
             SlotTemplate::FROM_TIME_COL."(slotFromTime)",
             SlotTemplate::TO_TIME_COL."(slotToTime)"
         ];
@@ -216,6 +221,13 @@ class OrderController extends ControllerBase
     public function updateOrderFull($order)
     {
         $this->log->debug(Order::toDbUpdateArray($order));
+
+        if ($order->needsDelivery != Order::DELIVERY_NONE) {
+            $order->deliveryCost = $this->getRestaurantDeliveryPrice($order);
+        } else {
+            // Need to reset to 0 in case order had delivery first
+            $order->deliveryCost = 0;
+        }
 
         $this->db->update(Order::TABLE_NAME,
             Order::toDbUpdateArray($order),
@@ -956,4 +968,16 @@ class OrderController extends ControllerBase
         return $result;
     }
     //endregion
+
+    public function getRestaurantDeliveryPrice($order){
+        $resto = $this->db->get("restaurant",
+            [
+                "deliveryCost"
+            ], [
+                "id" => $order->restaurantId
+            ]
+        );
+
+        return json_decode($resto)->{"deliveryCost"};
+    }
 }
