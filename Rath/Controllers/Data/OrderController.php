@@ -34,12 +34,18 @@ class OrderController extends ControllerBase
     private $pc;
 
     /**
+     * @var UserController
+     */
+    private $uc;
+
+    /**
      * OrderController constructor.
      */
     public function __construct()
     {
         parent::__construct();
         $this->pc = DataControllerFactory::getProductController();
+        $this->uc = DataControllerFactory::getUserController();
     }
 
 
@@ -550,6 +556,8 @@ class OrderController extends ControllerBase
      */
     public function addOrderDetailLine($orderLine)
     {
+        $this->uc->checkUserHasOrder($orderLine->orderId,true);
+
         $apiResponse = new ApiResponse();
 
         /** @var Product $product */
@@ -747,6 +755,8 @@ class OrderController extends ControllerBase
      */
     public function updateOrderDetailLine($orderLine)
     {
+        $this->uc->checkUserHasOrder($orderLine->orderId,true);
+
 //        $this->checkOrderLinePrice($orderLine);
         $this->db->update(OrderDetail::TABLE_NAME,
             OrderDetail::toDbArray($orderLine),

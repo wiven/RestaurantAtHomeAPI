@@ -16,6 +16,20 @@ use Rath\Helpers\General;
 
 class SlotController extends ControllerBase
 {
+    /**
+     * @var UserController
+     */
+    private $uc;
+
+    /**
+     * ProductController constructor.
+     */
+    public function __construct()
+    {
+        parent::__construct();
+        $this->uc = DataControllerFactory::getUserController();
+    }
+
     //region Slot Template
     public function getSlotTemplate($id)
     {
@@ -26,8 +40,14 @@ class SlotController extends ControllerBase
             ]);
     }
 
+    /**
+     * @param $st SlotTemplate
+     * @return array|bool
+     */
     public function addSlotTemplate($st)
     {
+        $this->uc->checkUserHasRestaurant($st->restaurantId,true);
+
         $lastId = $this->db->insert(SlotTemplate::TABLE_NAME,
             SlotTemplate::toDbArray($st));
 
@@ -43,6 +63,9 @@ class SlotController extends ControllerBase
      */
     public function updateSlotTemplate($st)
     {
+        $this->uc->checkUserHasSlotTemplate($st->id,true);
+        $this->uc->checkUserHasRestaurant($st->restaurantId,true);
+
         $this->db->update(SlotTemplate::TABLE_NAME,
             SlotTemplate::toDbArray($st),
             [
@@ -77,6 +100,8 @@ class SlotController extends ControllerBase
      */
     public function addSlotTemplateChange($st)
     {
+        $this->uc->checkUserHasSlotTemplate($st->slottemplateId,true);
+
         $lastId = $this->db->insert(SlotTemplateChange::TABLE_NAME,
             SlotTemplateChange::toDbArray($st));
 
@@ -92,6 +117,9 @@ class SlotController extends ControllerBase
      */
     public function updateSlotTemplateChange($st)
     {
+        $this->uc->checkUserHasSlotTemplate($st->slottemplateId,true);
+        $this->uc->checkUserHasSlotTemplateChange($st->id,true);
+
         $this->db->update(SlotTemplateChange::TABLE_NAME,
             SlotTemplateChange::toDbArray($st),
             [

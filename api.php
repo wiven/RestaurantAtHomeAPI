@@ -44,6 +44,7 @@ use Rath\Helpers\CrossDomainAjax;
 use Rath\Libraries\UploadHandler;
 use Rath\Slim\Middleware\Authorization;
 
+
 //region Init
 \Slim\Slim::registerAutoloader();
 
@@ -51,6 +52,9 @@ $app = new \Slim\Slim();
 $app->setName("RestaurantAtHomeApi");
 $app->add(new \Rath\Slim\Middleware\Authorization()); //TODO; Authentication check
 
+//echo "Assign slim app: ";
+DataControllerFactory::$slimApp = $app;
+//var_dump(empty(DataControllerFactory::$slimApp));
 Logger::configure('config.xml');
 
 //$configurator = new LoggerConfiguratorDefault();
@@ -97,30 +101,24 @@ bcscale(2); //Calculation decimals
 $log->debug("Api initialisation finished");
 
 //region App Mgt (old)
-const API_PING_ROUTE = "ping";
 
 $app->get('/ping', function() use ($app){
     $status = Rath\Controllers\ApplicationManagementController::GetStatus();
     CrossDomainAjax::PrintCrossDomainCall($app,$status);
-})->name(API_PING_ROUTE);
-
-
-const API_MASTERDATA_ROUTE = "masterdata";
-const API_UNAUTHORISED_ROUTE = "unauthorised";
+});
 
 
 $app->group('/masterdata', function() use ($app){
     $app->POST('', function() use ($app){
         Rath\helpers\MasterData::CreateDemoData();
         Rath\helpers\CrossDomainAjax::PrintCrossDomainCall($app,['Datageneration success']);
-    })->name(API_MASTERDATA_ROUTE);
+    });
 
     $app->get('/echodataobjects', function() use ($app){
         CrossDomainAjax::PrintCrossDomainCall(
             $app,
             \Rath\helpers\MasterData::echoObjectContent()
         );
-
     });
 });
 //endregion
@@ -250,7 +248,7 @@ $app->group('/user', function() use ($app){
 //endregion
 
 //region management
-$app->group('/manage', function() use ($app){
+$app->group(Authorization::manage, function() use ($app){
     $resto = DataControllerFactory::getRestaurantController();
     $prod = DataControllerFactory::getProductController();
     $promo = DataControllerFactory::getPromotionController();
@@ -573,10 +571,10 @@ $app->group('/manage', function() use ($app){
 //endregion
 
 //region Restaurant
-$app->group('/restaurant', function() use ($app){
+$app->group(Authorization::restaurant, function() use ($app){
     $resto = \Rath\Controllers\Data\DataControllerFactory::getRestaurantController();
 
-    $app->get('/:id', function($id) use ($app,$resto){
+    $app->get('/:'.Authorization::restoId, function($id) use ($app,$resto){
         CrossDomainAjax::PrintCrossDomainCall(
             $app,
             $resto->getRestaurant($id)
@@ -599,7 +597,7 @@ $app->group('/restaurant', function() use ($app){
         );
     });
 
-    $app->get('/delete/:id', function($id) use ($app,$resto){
+    $app->get('/delete/:'.Authorization::restoId, function($id) use ($app,$resto){
         CrossDomainAjax::PrintCrossDomainCall(
             $app,
             $resto->deleteRestaurant($id)
@@ -671,21 +669,21 @@ $app->group('/restaurant', function() use ($app){
     });
 
     $app->group('/paymentmethod', function() use ($app,$resto){
-        $app->get('/:restoId', function($restoId) use ($app,$resto){
+        $app->get('/:'.Authorization::restoId, function($restoId) use ($app,$resto){
             CrossDomainAjax::PrintCrossDomainCall(
                 $app,
                 $resto->getRestaurantPaymentMethods($restoId)
             );
         });
 
-        $app->post('/:restoId/:payId' ,function($restoId,$payId) use ($app,$resto){
+        $app->post('/:'.Authorization::restoId.'/:payId' ,function($restoId,$payId) use ($app,$resto){
             CrossDomainAjax::PrintCrossDomainCall(
                 $app,
                 $resto->addRestaurantPaymentMethod($restoId,$payId)
             );
         });
 
-        $app->get('/delete/:restoId/:payId', function($restoId,$payId) use ($app,$resto){
+        $app->get('/delete/:'.Authorization::restoId.'/:payId', function($restoId,$payId) use ($app,$resto){
             CrossDomainAjax::PrintCrossDomainCall(
                 $app,
                 $resto->deleteRestaurantPaymentMethod($restoId,$payId)
@@ -694,7 +692,7 @@ $app->group('/restaurant', function() use ($app){
     });
 
     $app->group('/speciality', function() use ($app,$resto){
-        $app->get('/:restoId', function($restoId) use ($app,$resto){
+        $app->get('/:'.Authorization::restoId, function($restoId) use ($app,$resto){
             CrossDomainAjax::PrintCrossDomainCall(
                 $app,
                 $resto->getRestaurantSpecialties($restoId)
@@ -707,30 +705,29 @@ $app->group('/restaurant', function() use ($app){
                 $app,
                 $resto->getAllSpecialities()
             );
-        });
+        })->name(Authorization::publicRoute);
 
-        $app->post('/:restoId/:specId' ,function($restoId,$specId) use ($app,$resto){
+        $app->post('/:'.Authorization::restoId.'/:specId' ,function($restoId,$specId) use ($app,$resto){
             CrossDomainAjax::PrintCrossDomainCall(
                 $app,
                 $resto->addRestaurantSpeciality($restoId,$specId)
             );
         });
 
-        $app->post('/new/:restoId/:name' ,function($restoId,$name) use ($app,$resto){
+        $app->post('/new/:'.Authorization::restoId.'/:name' ,function($restoId,$name) use ($app,$resto){
             CrossDomainAjax::PrintCrossDomainCall(
                 $app,
                 $resto->addNewRestaurantSpeciality($restoId,$name)
             );
         });
 
-        $app->get('/delete/:restoId/:specId', function($restoId,$specId) use ($app,$resto){
+        $app->get('/delete/:'.Authorization::restoId.'/:specId', function($restoId,$specId) use ($app,$resto){
             CrossDomainAjax::PrintCrossDomainCall(
                 $app,
                 $resto->deleteRestaurantSpeciality($restoId,$specId)
             );
         });
     });
-
 
     $app->group('/socialmedia', function() use ($app,$resto){
         $app->get('/:id', function($id) use ($app,$resto){
@@ -772,12 +769,12 @@ $app->group('/restaurant', function() use ($app){
     });
 
     $app->group('/product', function() use ($app,$resto){
-        $app->get('/all/:id', function($id) use ($app,$resto){
+        $app->get('/all/:'.Authorization::restoId, function($id) use ($app,$resto){
             CrossDomainAjax::PrintCrossDomainCall(
                 $app,
                 $resto->getProductsAll($id)
             );
-        });
+        })->name(Authorization::publicRoute);
     });
 
     $app->group('/order', function() use ($app,$resto){
@@ -811,14 +808,14 @@ $app->group('/restaurant', function() use ($app){
     });
 
     $app->group('/promotion', function() use ($app,$resto){
-        $app->get('/passed/:id/:skip/:top', function($id,$skip,$top) use ($app,$resto){
+        $app->get('/passed/:'.Authorization::restoId.'/:skip/:top', function($id,$skip,$top) use ($app,$resto){
             CrossDomainAjax::PrintCrossDomainCall(
                 $app,
                 $resto->getPassedPromotions($id,$skip,$top)
             );
         });
 
-        $app->get('/active/:id/:skip/:top', function($id,$skip,$top) use ($app,$resto){
+        $app->get('/active/:'.Authorization::restoId.'/:skip/:top', function($id,$skip,$top) use ($app,$resto){
             CrossDomainAjax::PrintCrossDomainCall(
                 $app,
                 $resto->getActivePromotions($id,$skip,$top)
@@ -873,7 +870,7 @@ $app->group('/restaurant', function() use ($app){
 $app->group('/product', function () use ($app) {
     $prod = \Rath\Controllers\Data\DataControllerFactory::getProductController();
 
-    $app->get('/:id', function($id) use ($app,$prod){
+    $app->get('/:'.Authorization::productId, function($id) use ($app,$prod){
         CrossDomainAjax::PrintCrossDomainCall(
             $app,
             $prod->getProduct($id)
@@ -896,7 +893,7 @@ $app->group('/product', function () use ($app) {
         );
     });
 
-    $app->get('/delete/:id', function($id) use ($app,$prod){
+    $app->get('/delete/:'.Authorization::productId, function($id) use ($app,$prod){
         CrossDomainAjax::PrintCrossDomainCall(
             $app,
             $prod->deleteProduct($id)
@@ -905,21 +902,21 @@ $app->group('/product', function () use ($app) {
 
     $app->group('/tag' , function() use ($app, $prod){
 
-        $app->get('/:productId', function($productId) use ($app,$prod){
+        $app->get('/:'.Authorization::productId, function($productId) use ($app,$prod){
             CrossDomainAjax::PrintCrossDomainCall(
                 $app,
                 $prod->getProductTags($productId)
             );
         });
 
-        $app->post('/:prodId/:tagId', function($prodId,$tagId) use ($app,$prod){
+        $app->post('/:'.Authorization::productId.'/:tagId', function($prodId,$tagId) use ($app,$prod){
             CrossDomainAjax::PrintCrossDomainCall(
                 $app,
                 $prod->addProductTag($prodId,$tagId)
             );
         });
 
-        $app->get('/delete/:prodId/:tagId',function($prodId,$tagId) use ($app,$prod){
+        $app->get('/delete/:'.Authorization::productId.'/:tagId',function($prodId,$tagId) use ($app,$prod){
             CrossDomainAjax::PrintCrossDomainCall(
                 $app,
                 $prod->deleteProductTag($prodId,$tagId)
@@ -929,7 +926,7 @@ $app->group('/product', function () use ($app) {
 
     $app->group('/stock' , function() use ($app, $prod){
 
-        $app->get('/:productId', function($productId) use ($app,$prod){
+        $app->get('/:'.Authorization::productId, function($productId) use ($app,$prod){
             CrossDomainAjax::PrintCrossDomainCall(
                 $app,
                 $prod->getProductStock($productId)
@@ -959,7 +956,7 @@ $app->group('/product', function () use ($app) {
             );
         });
 
-        $app->get('/delete/:id',function($id) use ($app,$prod){
+        $app->get('/delete/:'.Authorization::productId.'/:id',function($id) use ($app,$prod){
             CrossDomainAjax::PrintCrossDomainCall(
                 $app,
                 $prod->deletePoductStock($id)
@@ -969,21 +966,21 @@ $app->group('/product', function () use ($app) {
 
     $app->group('/related' , function() use ($app, $prod){
 
-        $app->get('/:productId', function($productId) use ($app,$prod){
+        $app->get('/:'.Authorization::productId, function($productId) use ($app,$prod){
             CrossDomainAjax::PrintCrossDomainCall(
                 $app,
                 $prod->getRelatedProducts($productId)
             );
         });
 
-        $app->post('/:prodId/:relProdId', function($prodId,$relProdId) use ($app,$prod){
+        $app->post('/:'.Authorization::productId.'/:relProdId', function($prodId,$relProdId) use ($app,$prod){
             CrossDomainAjax::PrintCrossDomainCall(
                 $app,
                 $prod->addRelatedProduct($prodId,$relProdId)
             );
         });
 
-        $app->get('/delete/:prodId/:relProdId',function($prodId,$relProdId) use ($app,$prod){
+        $app->get('/delete/:'.Authorization::productId.'/:relProdId',function($prodId,$relProdId) use ($app,$prod){
             CrossDomainAjax::PrintCrossDomainCall(
                 $app,
                 $prod->deleteRelatedProduct($prodId,$relProdId)
@@ -994,10 +991,10 @@ $app->group('/product', function () use ($app) {
 //endregion
 
 //region Promotion
-$app->group('/promotion', function () use ($app) {
+$app->group(Authorization::promotion, function () use ($app) {
     $promo = \Rath\Controllers\Data\DataControllerFactory::getPromotionController();
 
-    $app->get('/:id', function($id) use ($app,$promo){
+    $app->get('/:'.Authorization::promotionId, function($id) use ($app,$promo){
         CrossDomainAjax::PrintCrossDomainCall(
             $app,
             $promo->getPromotion($id)
@@ -1020,14 +1017,14 @@ $app->group('/promotion', function () use ($app) {
         );
     });
 
-    $app->get('/delete/:id',function($id) use ($app,$promo){
+    $app->get('/delete/:'.Authorization::promotionId,function($id) use ($app,$promo){
         CrossDomainAjax::PrintCrossDomainCall(
             $app,
             $promo->deletePromotion($id)
         );
     });
 
-    $app->group('/history' , function() use ($app, $promo){
+    $app->group(Authorization::history , function() use ($app, $promo){
 
         $app->get('/:id', function($id) use ($app,$promo){
             CrossDomainAjax::PrintCrossDomainCall(
@@ -1059,14 +1056,14 @@ $app->group('/order', function() use ($app){
     $oc = DataControllerFactory::getOrderController();
     $pc = ControllerFactory::getPaymentController();
 
-    $app->get('/:id', function($id) use ($app,$oc){
+    $app->get('/:'.Authorization::orderId, function($id) use ($app,$oc){
         CrossDomainAjax::PrintCrossDomainCall(
             $app,
             $oc->getOrderDetail($id)
         );
     });
 
-    $app->get('/detailed/:id', function($id) use ($app,$oc){
+    $app->get('/detailed/:'.Authorization::orderId, function($id) use ($app,$oc){
         CrossDomainAjax::PrintCrossDomainCall(
             $app,
             $oc->getOrderDetail($id,true)
@@ -1089,14 +1086,14 @@ $app->group('/order', function() use ($app){
         );
     });
 
-    $app->get('/delete/:id', function($id) use ($app,$oc){
+    $app->get('/delete/:'.Authorization::orderId, function($id) use ($app,$oc){
         CrossDomainAjax::PrintCrossDomainCall(
             $app,
             $oc->deleteOrder($id)
         );
     });
 
-    $app->put('/submit/:orderId', function($orderId) use ($app,$oc){
+    $app->put('/submit/:'.Authorization::orderId, function($orderId) use ($app,$oc){
         $o = json_decode($app->request->getBody());
         $o = \Rath\Entities\Order\Order::fromJson($o);
         $o->id = $orderId;
@@ -1111,9 +1108,9 @@ $app->group('/order', function() use ($app){
             $app,
             $pc->handleMollieWebhook($app)
         );
-    });
+    })->name(Authorization::publicRoute);
 
-    $app->get('/paymentstatus/:id', function($id) use ($app,$oc){
+    $app->get('/paymentstatus/:'.Authorization::orderId, function($id) use ($app,$oc){
         CrossDomainAjax::PrintCrossDomainCall(
             $app,
             $oc->checkOrderPayment($id)
@@ -1126,7 +1123,7 @@ $app->group('/order', function() use ($app){
                 $app,
                 $oc->getOrderDetailLine($id)
             );
-        });
+        })->name(Authorization::blockedRoute);
 
         $app->post('/', function() use ($app,$oc){
             $o = json_decode($app->request->getBody());
@@ -1144,7 +1141,7 @@ $app->group('/order', function() use ($app){
             );
         });
 
-        $app->get('/delete/:orderId/:id', function($orderId,$id) use ($app,$oc){
+        $app->get('/delete/:'.Authorization::orderId.'/:id', function($orderId,$id) use ($app,$oc){
             CrossDomainAjax::PrintCrossDomainCall(
                 $app,
                 $oc->deleteOrderDetailLine($orderId,$id)
@@ -1157,66 +1154,66 @@ $app->group('/order', function() use ($app){
 
 //region Front-end data provider
 //region Dashboard
-$app->group('/dashboard', function() use ($app){
+$app->group(Authorization::dashboard, function() use ($app){
     $dash = ControllerFactory::getDashboardController();
 
-    $app->get('/neworders/:restoId', function($restoId) use ($app,$dash){
+    $app->get('/neworders/:'.Authorization::restoId, function($restoId) use ($app,$dash){
         CrossDomainAjax::PrintCrossDomainCall(
             $app,
             $dash->getNewOrderCount($restoId)
         );
     });
 
-    $app->get('/overview/:restoId', function($restoId) use ($app,$dash){
+    $app->get('/overview/:'.Authorization::restoId, function($restoId) use ($app,$dash){
         CrossDomainAjax::PrintCrossDomainCall(
             $app,
             $dash->getOverviewContent($restoId)
         );
     });
 
-    $app->get('/profile/:restoId',function($restoId) use ($app,$dash){
+    $app->get('/profile/:'.Authorization::restoId,function($restoId) use ($app,$dash){
         CrossDomainAjax::PrintCrossDomainCall(
             $app,
             $dash->getProfileContent($restoId)
         );
     });
 
-    $app->get('/products/:restoId/:skip/:top/:query',function($restoId,$skip,$top,$query) use ($app,$dash){
+    $app->get('/products/:'.Authorization::restoId.'/:skip/:top/:query',function($restoId,$skip,$top,$query) use ($app,$dash){
         CrossDomainAjax::PrintCrossDomainCall(
             $app,
             $dash->getProductContent($restoId,$skip,$top,$query)
         );
     });
 
-    $app->get('/products/:restoId/:skip/:top',function($restoId,$skip,$top) use ($app,$dash){
+    $app->get('/products/:'.Authorization::restoId.'/:skip/:top',function($restoId,$skip,$top) use ($app,$dash){
         CrossDomainAjax::PrintCrossDomainCall(
             $app,
             $dash->getProductContent($restoId,$skip,$top,"")
         );
     });
 
-    $app->get('/orders/:restoId',function($restoId) use ($app,$dash){
+    $app->get('/orders/:'.Authorization::restoId,function($restoId) use ($app,$dash){
         CrossDomainAjax::PrintCrossDomainCall(
             $app,
             $dash->getOrderContent($restoId)
         );
     });
 
-    $app->get('/slots/:restoId',function($restoId) use ($app,$dash){
+    $app->get('/slots/:'.Authorization::restoId,function($restoId) use ($app,$dash){
         CrossDomainAjax::PrintCrossDomainCall(
             $app,
             $dash->getSlotContent($restoId)
         );
     });
 
-    $app->get('/loyalty/:restoId',function($restoId) use ($app,$dash){
+    $app->get('/loyalty/:'.Authorization::restoId,function($restoId) use ($app,$dash){
         CrossDomainAjax::PrintCrossDomainCall(
             $app,
             $dash->getLoyaltyContent($restoId)
         );
     });
 
-    $app->get('/promotions/:restoId/:skip/:top',function($restoId,$skip,$top) use ($app,$dash){
+    $app->get('/promotions/:'.Authorization::restoId.'/:skip/:top',function($restoId,$skip,$top) use ($app,$dash){
         CrossDomainAjax::PrintCrossDomainCall(
             $app,
             $dash->getPromotionContent($restoId,$skip,$top)
@@ -1266,13 +1263,32 @@ $app->group('/home', function() use ($app) {
         );
     });
 });
+
+$app->group('/cities',function() use ($app){
+    $apmc = ControllerFactory::getAppManagementController();
+
+    $app->get('/:codeOrName',function($codeOrName) use ($app,$apmc){
+        CrossDomainAjax::PrintCrossDomainCall(
+            $app,
+            $apmc->getCities($codeOrName)
+        );
+    });
+
+    $app->get('/all/',function() use ($app,$apmc){
+        CrossDomainAjax::PrintCrossDomainCall(
+            $app,
+            $apmc->getAllCities()
+        );
+    });
+
+});
 //endregion
 //endregion
 
 
 //region Photos
-$app->group('/photo', function() use ($app){
-    $app->post('/product/:id', function($id) use ($app){
+$app->group(Authorization::photo, function() use ($app){
+    $app->post('/product/:'.Authorization::productId, function($id) use ($app){
         $pc = DataControllerFactory::getProductController();
 
         $upload_handler = new UploadHandler(["link_id" => $id]);
@@ -1288,7 +1304,7 @@ $app->group('/photo', function() use ($app){
 
     $app->group('/restaurant', function() use ($app) {
         $rc = DataControllerFactory::getRestaurantController();
-        $app->post('/logo/:id', function ($id) use ($app,$rc) {
+        $app->post('/logo/:'.Authorization::restoId, function ($id) use ($app,$rc) {
 
             $upload_handler = new UploadHandler(["link_id" => $id]);
             $files = $upload_handler->post(true);
@@ -1301,14 +1317,14 @@ $app->group('/photo', function() use ($app){
                 throw new Exception("Error Uploading file");
         });
 
-        $app->get('/:id', function($id) use ($app,$rc){
+        $app->get('/:'.Authorization::restoId, function($id) use ($app,$rc){
             CrossDomainAjax::PrintCrossDomainCall(
                 $app,
                 $rc->getPhotos($id)
             );
         });
 
-        $app->post('/:id' ,function($id) use ($app,$rc){
+        $app->post('/:'.Authorization::restoId ,function($id) use ($app,$rc){
             $photoCount = count($rc->getPhotos($id));
             if(count($_FILES) > (10-$photoCount))
                 throw new Exception("To many foto's uploaded for this restaurant!");
@@ -1332,19 +1348,17 @@ $app->group('/photo', function() use ($app){
                 $rc->deletePhoto($id)
             );
         });
-
-
     });
 });
 //endregion
 
 
 //region Slots
-$app->group('/slots', function() use ($app){
+$app->group(Authorization::slots, function() use ($app){
     $sc = DataControllerFactory::getSlotController();
 
     $app->group('/template', function() use ($app,$sc) {
-        $app->get('/:id',function($id) use ($app,$sc){
+        $app->get('/:'.Authorization::slotTemplateId,function($id) use ($app,$sc){
             CrossDomainAjax::PrintCrossDomainCall(
                 $app,
                 $sc->getSlotTemplate($id)
@@ -1367,14 +1381,14 @@ $app->group('/slots', function() use ($app){
             );
         });
 
-        $app->get('/delete/:id',function($id) use ($app,$sc){
+        $app->get('/delete/:'.Authorization::slotTemplateId,function($id) use ($app,$sc){
             CrossDomainAjax::PrintCrossDomainCall(
                 $app,
                 $sc->deleteSlotTemplate($id)
             );
         });
 
-        $app->get('/generate/:id/:slotSize/:quantity',function($id,$slotSize,$quantity) use ($app,$sc){
+        $app->get('/generate/:'.Authorization::restoId.'/:slotSize/:quantity',function($id,$slotSize,$quantity) use ($app,$sc){
             CrossDomainAjax::PrintCrossDomainCall(
                 $app,
                 $sc->generateSlotsForRestaurantOpeningHours($id,$slotSize,$quantity)
@@ -1383,7 +1397,7 @@ $app->group('/slots', function() use ($app){
     });
 
     $app->group('/change', function() use ($app,$sc) {
-        $app->get('/:id',function($id) use ($app,$sc){
+        $app->get('/:'.Authorization::slotTemplateChangeId,function($id) use ($app,$sc){
             CrossDomainAjax::PrintCrossDomainCall(
                 $app,
                 $sc->getSlotTemplateChange($id)
@@ -1406,24 +1420,11 @@ $app->group('/slots', function() use ($app){
             );
         });
 
-        $app->get('/delete/:id',function($id) use ($app,$sc){
+        $app->get('/delete/:'.Authorization::slotTemplateChangeId,function($id) use ($app,$sc){
             CrossDomainAjax::PrintCrossDomainCall(
                 $app,
                 $sc->deleteSlotTemplateChange($id)
             );
-        });
-    });
-
-    $app->group('/restaurant', function() use ($app) {
-        $app->post('/logo/:id', function ($id) use ($app) {
-            $rc = DataControllerFactory::getRestaurantController();
-
-            $upload_handler = new UploadHandler(["link_id" => $id]);
-            $files = $upload_handler->post(true);
-            if (count($files) != 0)
-                $rc->updateLogoPhoto($id, $files[0]->name);
-            else
-                throw new Exception("Error Uploading file");
         });
     });
 });
@@ -1431,7 +1432,7 @@ $app->group('/slots', function() use ($app){
 
 
 //region Loyalty Bonus
-$app->group('/loyaltybonus',function() use ($app){
+$app->group(Authorization::loyaltybonus,function() use ($app){
     $lbc = DataControllerFactory::getLoyaltyBonusController();
     $app->get('/:id',function($id) use ($app,$lbc){
         CrossDomainAjax::PrintCrossDomainCall(
@@ -1466,7 +1467,7 @@ $app->group('/loyaltybonus',function() use ($app){
 //endregion
 
 //region Coupons
-$app->group('/coupon',function() use ($app){
+$app->group(Authorization::coupon,function() use ($app){
     $cc = DataControllerFactory::getCouponController();
     $app->get('/:id',function($id) use ($app,$cc){
         CrossDomainAjax::PrintCrossDomainCall(
@@ -1510,28 +1511,11 @@ $app->group('/coupon',function() use ($app){
             $app,
             $cc->validateCodeCreation($code,false)
         );
-    });
+    })->name(Authorization::publicRoute);
 });
 //endregion
 
-$app->group('/cities',function() use ($app){
-    $apmc = ControllerFactory::getAppManagementController();
 
-    $app->get('/:codeOrName',function($codeOrName) use ($app,$apmc){
-        CrossDomainAjax::PrintCrossDomainCall(
-            $app,
-            $apmc->getCities($codeOrName)
-        );
-    });
-
-    $app->get('/all/',function() use ($app,$apmc){
-        CrossDomainAjax::PrintCrossDomainCall(
-            $app,
-            $apmc->getAllCities()
-        );
-    });
-
-});
 //function exception_handler($exception) {
 //   if($exception);
 //}

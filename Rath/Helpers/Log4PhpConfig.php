@@ -11,6 +11,9 @@ namespace Rath\Helpers;
 
 class Log4PhpConfig
 {
+    //Errors possible with roling file appender. Fix: https://issues.apache.org/jira/browse/LOG4PHP-210
+
+
     public static function getConfig()
     {
         // LOCAL

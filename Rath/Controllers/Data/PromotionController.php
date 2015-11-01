@@ -18,6 +18,21 @@ use Rath\Helpers\General;
 
 class PromotionController Extends ControllerBase
 {
+    /**
+     * @var UserController
+     */
+    private $uc;
+
+    /**
+     * ProductController constructor.
+     */
+    public function __construct()
+    {
+        parent::__construct();
+        $this->uc = DataControllerFactory::getUserController();
+    }
+
+
     //region Promotions
     public function getPromotion($id)
     {
@@ -45,6 +60,7 @@ class PromotionController Extends ControllerBase
      */
     public function addPromotion($promo)
     {
+        $this->uc->checkUserHasRestaurant($promo->restaurantId,true);
         //Todo: validations
 
         $lastId = $this->db->insert(Promotion::TABLE_NAME,
@@ -64,6 +80,9 @@ class PromotionController Extends ControllerBase
      */
     public function updatePromotion($promo)
     {
+        $this->uc->checkUserHasRestaurant($promo->restaurantId,true);
+        $this->uc->checkUserHasPromotion($promo->id,true);
+
         //Todo: validations
         $this->db->update(Promotion::TABLE_NAME,
             Promotion::toDbArray($promo),

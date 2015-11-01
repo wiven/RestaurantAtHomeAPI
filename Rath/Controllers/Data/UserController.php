@@ -8,9 +8,14 @@
 
 namespace Rath\Controllers\Data;
 
+use Rath\Controllers\UserPermissionController;
 use Rath\Entities\General\Address;
 use Rath\Entities\Order\Order;
+use Rath\Entities\Product\Product;
+use Rath\Entities\Promotion\Promotion;
 use Rath\Entities\Restaurant\Restaurant;
+use Rath\Entities\Slots\SlotTemplate;
+use Rath\Entities\Slots\SlotTemplateChange;
 use Rath\Entities\User\LoyaltyPoints;
 use Rath\Helpers\General;
 use Rath\helpers\MedooFactory;
@@ -20,44 +25,170 @@ use Rath\Entities\ApiResponse;
 use Rath\Libraries\medoo;
 use Rath\Slim\Middleware\Authorization;
 use Slim\Route;
+use Slim\Slim;
 
 
 class UserController extends ControllerBase
 {
+    /**
+     * @var Slim
+     */
+    private $app;
 
     /**
-     * @SWG\Get(
-     *     path="/login/{email}/{password}/{socialmediaLogin}",
-     *     summary="Login a user",
-     *     description="checks a users information and returns it",
-     *     tags={"User"},
-     *     produces={"application/json"},
-     *     @SWG\Parameter(
-     *         description="ID of pet to return",
-     *         in="path",
-     *         name="petId",
-     *         required=true,
-     *         type="integer",
-     *         format="int64"
-     *     ),
-     *     @SWG\Response(
-     *         response=200,
-     *         description="pet response",
-     *         @SWG\Schema(
-     *             type="array",
-     *             @SWG\Items(ref="#/definitions/Pet")
-     *         ),
-     *         @SWG\Header(header="x-expires", type="string")
-     *     ),
-     *     @SWG\Response(
-     *         response="default",
-     *         description="unexpected error",
-     *         @SWG\Schema(
-     *             ref="#/definitions/Error"
-     *         )
-     *     )
-     * )
+     * UserController constructor.
+     * @param Slim $app
      */
+    public function __construct($app)
+    {
+        parent::__construct();
+//        var_dump("App empty in UC: ");
+//        var_dump(empty($app));
+        $this->app = $app;
+    }
+
+    //region Security
+
+    public function checkUserHasRestaurant($restoId,$halt = false)
+    {
+        $result = $this->db->get(Restaurant::TABLE_NAME,
+            [
+                Restaurant::ID_COL,
+                Restaurant::USER_ID_COL
+            ],
+            [
+                "AND" => [
+                    Restaurant::USER_ID_COL => Authorization::$userId,
+                    Restaurant::ID_COL => $restoId
+                ]
+            ]);
+
+        if($halt && !isset($result[Restaurant::ID_COL]))
+            $this->app->halt(401,json_encode(UserPermissionController::GetPermissionErrorMessage("restaurant")));
+
+        return isset($result[Restaurant::ID_COL]);
+    }
+
+    public function checkUserHasOrder($orderId,$halt = false)
+    {
+        $result = $this->db->get(Order::TABLE_NAME,
+            [
+                Order::ID_COL
+            ],
+            [
+                "AND" =>[
+                    Order::ID_COL => $orderId,
+                    Order::USER_ID_COL => Authorization::$userId
+                ]
+            ]);
+
+        if($halt && !isset($result[Order::ID_COL]))
+            $this->app->halt(401,json_encode(UserPermissionController::GetPermissionErrorMessage("order")));
+
+        return isset($result[Order::ID_COL]);
+    }
+
+    public function checkUserHasProduct($productId,$halt = false)
+    {
+        $result = $this->db->get(Product::TABLE_NAME,
+            [
+                "[><]".Restaurant::TABLE_NAME => [
+                    Product::TABLE_NAME.".".Product::RESTAURANT_ID_COL => Restaurant::ID_COL
+                ]
+            ],
+            [
+                Product::TABLE_NAME.".".Product::ID_COL
+            ],
+            [
+                "AND" => [
+                    Product::TABLE_NAME.".".Product::ID_COL => $productId,
+                    Restaurant::USER_ID_COL => Authorization::$userId
+                ]
+            ]);
+//        var_dump(empty($this->app));
+        if($halt && !isset($result[Product::ID_COL]))
+            $this->app->halt(401,json_encode(UserPermissionController::GetPermissionErrorMessage("products")));
+
+        return isset($result[Product::ID_COL]);
+    }
+
+    public function checkUserHasPromotion($promoId,$halt = false)
+    {
+        $result = $this->db->get(Promotion::TABLE_NAME,
+            [
+                "[><]".Restaurant::TABLE_NAME => [
+                    Promotion::TABLE_NAME.".".Promotion::RESTAURANT_ID_COL => Restaurant::ID_COL
+                ]
+            ],
+            [
+                Promotion::TABLE_NAME.".".Promotion::ID_COL
+            ],
+            [
+                "AND" => [
+                    Promotion::TABLE_NAME.".".Promotion::ID_COL => $promoId,
+                    Restaurant::USER_ID_COL => Authorization::$userId
+                ]
+            ]);
+
+        if($halt && !isset($result[Promotion::ID_COL]))
+            $this->app->halt(401,json_encode(UserPermissionController::GetPermissionErrorMessage("promotions")));
+
+        return isset($result[Product::ID_COL]);
+    }
+
+    public function checkUserHasSlotTemplate($slotTemplateId, $halt = false)
+    {
+        $result = $this->db->get(SlotTemplate::TABLE_NAME,
+            [
+                "[><]".Restaurant::TABLE_NAME => [
+                    SlotTemplate::TABLE_NAME.".".SlotTemplate::RESTAURANT_ID_COL => Restaurant::ID_COL
+                ]
+            ],
+            [
+                SlotTemplate::TABLE_NAME.".".SlotTemplate::ID_COL
+            ],
+            [
+                "AND" => [
+                    SlotTemplate::TABLE_NAME.".".SlotTemplate::ID_COL => $slotTemplateId,
+                    Restaurant::USER_ID_COL => Authorization::$userId
+                ]
+            ]);
+
+        if($halt && !isset($result[SlotTemplate::ID_COL]))
+            $this->app->halt(401,json_encode(UserPermissionController::GetPermissionErrorMessage("slottemplate")));
+
+        return isset($result[SlotTemplate::ID_COL]);
+    }
+
+    public function checkUserHasSlotTemplateChange($slotTemplateChangeId, $halt = false)
+    {
+        $result = $this->db->get(SlotTemplateChange::TABLE_NAME,
+            [
+                "[><]".SlotTemplate::TABLE_NAME => [
+                    SlotTemplateChange::TABLE_NAME.".".SlotTemplateChange::SLOT_TEMPLATE_ID_COL => SlotTemplate::ID_COL
+                ],
+                "[><]".Restaurant::TABLE_NAME => [
+                    SlotTemplate::TABLE_NAME.".".SlotTemplate::RESTAURANT_ID_COL => Restaurant::ID_COL
+                ]
+            ],
+            [
+                SlotTemplateChange::TABLE_NAME.".".SlotTemplateChange::ID_COL
+            ],
+            [
+                "AND" => [
+                    SlotTemplateChange::TABLE_NAME.".".SlotTemplateChange::ID_COL => $slotTemplateChangeId,
+                    Restaurant::USER_ID_COL => Authorization::$userId
+                ]
+            ]);
+
+        if($halt && !isset($result[SlotTemplateChange::ID_COL]))
+            $this->app->halt(401,json_encode(UserPermissionController::GetPermissionErrorMessage("slottemplate")));
+
+        return isset($result[SlotTemplateChange::ID_COL]);
+    }
+    //endregion
+
+
     public function authenticateUser($email,$password,$socialLogin){
         $para = [
             User::EMAIL_COL => $email,
@@ -77,16 +208,11 @@ class UserController extends ControllerBase
             ],[
                 "AND" => $para
             ]
-            );
-//        var_dump($para);
-//        echo "User: ".$user[User::NAME_COL]." Surname: ".$user[User::SURNAME_COL];
-//        die(var_dump($user));
-
-//        var_dump($user);
-        //TODO: See when to send the Admin parameter.
+        );
         return $user;
     }
 
+    //region CRUD
     /**
      * @param $user User
      * @return string
@@ -136,7 +262,7 @@ class UserController extends ControllerBase
         $a = $this->db->insert(User::TABLE_NAME,$data);
 //        var_dump('Insert Result: '.$a);
 
-        return UserController::getUserByEmail($user->email);
+        return $this->getUserByEmail($user->email);
     }
 
     public function updateUser($user)
@@ -151,14 +277,14 @@ class UserController extends ControllerBase
         ];
 
         if(property_exists($user,"password"))
-            $data[User::PASSWORD_COL] = $user->password; //Already MD5
+            $data[User::PASSWORD_COL] = $user->password; //Already hashed
 
         $this->db->update(User::TABLE_NAME,
             $data,
             [
                 User::HASH_COL => $user->hash,
             ]);
-        return UserController::getUserByHash($user->hash);
+        return $this->getUserByHash($user->hash);
     }
 
     public function deleteUser($hash)
@@ -173,6 +299,7 @@ class UserController extends ControllerBase
         $response->message = "User successfully removed.";
         return $response;
     }
+    //endregion
 
     public function getUserByEmail($email,$internal = false){
         $param = [
@@ -233,7 +360,7 @@ class UserController extends ControllerBase
      * @return bool
      */
     public function checkUserPermissions($hash,$route){
-        $result = UserController::getUserByHash($hash);
+        $result = $this->getUserByHash($hash);
 //        var_dump($result);
 
         if(!isset($user[User::EMAIL_COL]))
@@ -285,31 +412,16 @@ class UserController extends ControllerBase
     public function getUserIdByHash($hash){
         $user = $this->db->get(User::TABLE_NAME,
             [
-                User::ID_COL
+                User::ID_COL,
+                User::ADMIN_COL,
+                User::TYPE_COL
             ],
             [
                 User::HASH_COL => $hash
             ]);
-        $this->log->debug($user);
         return $user;
     }
 
-    public function checkUserHasRestaurant($userId, $restoId)
-    {
-        $result = $this->db->get(Restaurant::TABLE_NAME,
-            [
-                Restaurant::ID_COL,
-                Restaurant::USER_ID_COL
-            ],
-            [
-                "AND" => [
-                    Restaurant::USER_ID_COL => $userId,
-                    Restaurant::ID_COL => $restoId
-                ]
-            ]);
-
-        return isset($result[Restaurant::ID_COL]);
-    }
 
     public function getUserRestaurants()
     {
@@ -503,8 +615,6 @@ class UserController extends ControllerBase
         mail($user->email,$subject,$message,$headers);
     }
     //endregion
-
-
 
     //region LoyaltyPoints
 

@@ -26,6 +26,21 @@ use Rath\Libraries\UploadHandler;
 
 class ProductController extends ControllerBase
 {
+    /**
+     * @var UserController
+     */
+    private $uc;
+
+    /**
+     * ProductController constructor.
+     */
+    public function __construct()
+    {
+        parent::__construct();
+        $this->uc = DataControllerFactory::getUserController();
+    }
+
+
     //region General
 
     /**
@@ -50,6 +65,8 @@ class ProductController extends ControllerBase
      * @return array|bool
      */
     public function addProduct($product){
+        $this->uc->checkUserHasRestaurant($product->restaurantId,true);
+
         $lastId = $this->db->insert(Product::TABLE_NAME,
             Product::toDbArray($product)
         );
@@ -64,13 +81,19 @@ class ProductController extends ControllerBase
      * @return array
      */
     public function updateProduct($product){
-        $this->db->update(Product::TABLE_NAME,
+        $this->uc->checkUserHasProduct($product->id,true);
+        $this->uc->checkUserHasRestaurant($product->restaurantId,true);
+
+        $change = $this->db->update(Product::TABLE_NAME,
             Product::toDbArray($product),
             [
                 Product::ID_COL => $product->id
             ]
         );
-        return $this->db->error();
+        if($change == 0)
+            return $this->db->error();
+        else
+            return $this->getProduct($product->id);
     }
 
     public function deleteProduct($id){
@@ -188,6 +211,8 @@ class ProductController extends ControllerBase
      */
     public function addProductStock($prodStock)
     {
+        $this->uc->checkUserHasProduct($prodStock->productId,true);
+
         $lastId = $this->db->insert(ProductStock::TABLE_NAME,
             ProductStock::toDbArray($prodStock));
 
@@ -203,7 +228,8 @@ class ProductController extends ControllerBase
      */
     public function updateProductStock($prodStock)
     {
-        //TODO: update promotion price if this changed
+        $this->uc->checkUserHasProduct($prodStock->productId,true);
+
         $this->db->update(ProductStock::TABLE_NAME,
             ProductStock::toDbArray($prodStock),
             [
@@ -297,6 +323,8 @@ class ProductController extends ControllerBase
 
     public function addRelatedProduct($productId, $relProdId)
     {
+        $this->uc->checkUserHasProduct($relProdId,true);
+
         $this->db->insert(RelatedProducts::TABLE_NAME,
             [
                 RelatedProducts::PRODUCT_ID_COL => $productId,
@@ -307,6 +335,8 @@ class ProductController extends ControllerBase
 
     public function deleteRelatedProduct($prodId, $relProdId)
     {
+        $this->uc->checkUserHasProduct($relProdId,true);
+
         $this->db->delete(RelatedProducts::TABLE_NAME,
             [
                 "AND" =>

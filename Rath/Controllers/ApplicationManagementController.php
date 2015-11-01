@@ -58,12 +58,15 @@ class ApplicationManagementController Extends ControllerBase
 
     public function calculateDistanceMatrix($provinceId)
     {
+        $response = new ApiResponse();
+        $response->data = [];
+
         ini_set('max_execution_time', 3000);
         $removed = $this->db->delete(DistanceMatrix::TABLE_NAME,[
             DistanceMatrix::ID_COL.'[!]' => 0
         ]);
 
-        echo '<br> Cleared existing matrix: '.$removed.' rows';
+        array_push($response->data,'<br> Cleared existing matrix: '.$removed.' rows');
 
         $cities = $this->db->select(City::TABLE_NAME,
             [
@@ -75,7 +78,7 @@ class ApplicationManagementController Extends ControllerBase
                 City::PROVINCE_COL => $provinceId
             ]);
 
-        echo "<br> City count: ".count($cities);
+        array_push($response->data,"<br> City count: ".count($cities));
 
         foreach($cities as $fromCity )
         {
@@ -115,8 +118,10 @@ class ApplicationManagementController Extends ControllerBase
             }
         }
 
-        echo "<br> Finished";
+        array_push($response->data,"<br> Finished");
         ini_set('max_execution_time', 30);
+
+        return $response;
     }
 
     /*

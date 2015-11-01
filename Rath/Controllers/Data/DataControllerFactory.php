@@ -10,9 +10,15 @@ namespace Rath\Controllers\Data;
 
 
 use Rath\Entities\Restaurant\LoyaltyBonus;
+use Slim\Slim;
 
 class DataControllerFactory
 {
+    /**
+     * @var Slim
+     */
+    public static $slimApp;
+
     /**
      * @var UserController
      */
@@ -83,8 +89,14 @@ class DataControllerFactory
      */
     public static function getUserController()
     {
-        if(empty(self::$userController))
-            self::$userController = new UserController();
+//        echo "SlimApp - factory: ";
+//        var_dump(empty(self::$slimApp));
+//
+//        echo "UC - factory: ";
+//        var_dump(empty(self::$userController));
+
+        if(empty(self::$userController) && !empty(self::$slimApp))
+            self::$userController = new UserController(self::$slimApp);
         return self::$userController;
     }
 

@@ -1,9 +1,10 @@
 <configuration xmlns="http://logging.apache.org/log4php/">
-    <appender name="myAppender" class="LoggerAppenderFile">
+    <appender name="myAppender" class="LoggerAppenderRollingFile">
         <layout class="LoggerLayoutPattern">
             <param name="conversionPattern" value="%date{Y-m-d H:i:s,u} %-5level [%logger] %method %line | %message%newline%ex" />
         </layout>
-        <param name="file" value="myLog.log" />
+        <param name="file" value="log\myLog.log" />
+        <param name="maxBackupIndex" value="5" />
     </appender>
     <root>
         <level value="DEBUG" />
