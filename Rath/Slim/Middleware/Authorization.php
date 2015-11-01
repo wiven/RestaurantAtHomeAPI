@@ -103,6 +103,8 @@ class Authorization extends \Slim\Middleware
             if(self::$user->admin)
                 return;
 
+//        return; //Uncomment this to disable security
+
         $route = $this->app->router()->getCurrentRoute();
         if($route->getName() == self::publicRoute)
             return;
