@@ -56,9 +56,9 @@ class RestaurantController extends ControllerBase
                 Restaurant::URL_COL,
                 Restaurant::DOMINATING_COLOR_COL,
                 Restaurant::COMMENT_COL,
-                Restaurant::PREORDER_COL,
-                Restaurant::DELIVERY_COL,
-                Restaurant::DELIVERY_COST_COL
+                Restaurant::PREORDER_COL
+//                Restaurant::DELIVERY_COL,
+//                Restaurant::DELIVERY_COST_COL
             ],
             [
                 Restaurant::ID_COL => $id
@@ -89,13 +89,13 @@ class RestaurantController extends ControllerBase
      */
     public function updateRestaurant($resto){
 
-        if ($resto->doesDelivery == Restaurant::DELIVERY_NONE) {
-            $resto->deliveryCost = 0;
-        }
-
-        if ($resto->doesDelivery == Restaurant::DELIVERY_PLATFORM) {
-            $resto->deliveryCost = 9.68;
-        }
+//        if ($resto->doesDelivery == Restaurant::DELIVERY_NONE) {
+//            $resto->deliveryCost = 0;
+//        }
+//
+//        if ($resto->doesDelivery == Restaurant::DELIVERY_PLATFORM) {
+//            $resto->deliveryCost = 9.68;
+//        }
 
         $this->db->update(Restaurant::TABLE_NAME,
             Restaurant::restaurantToDbArray($resto),

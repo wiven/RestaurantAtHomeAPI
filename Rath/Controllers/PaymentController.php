@@ -69,7 +69,8 @@ class PaymentController extends ControllerBase
 
             //TODO: add payment method parameter
             $data = [
-                "amount" => $order->amount + $order->deliveryCost,
+                "amount" => $order->amount,
+//                "amount" => $order->amount + $order->deliveryCost,
                 "description" => Order::getOrderDescription($order),
                 "redirectUrl" => "http://playground.restaurantathome.be", //TODO:Parameter?
                 "webhookUrl" => $webhook,

@@ -28,14 +28,14 @@ class Restaurant extends EntityBase
     const DOMINATING_COLOR_COL ="dominatingColor";
     const COMMENT_COL = "comment";
 
-    const PREORDER_COL = "preorder";
-
-    const DELIVERY_COL = "doesDelivery";
-    const DELIVERY_COST_COL = "deliveryCost";
-
-    const DELIVERY_NONE = 0;
-    const DELIVERY_RESTAURANT = 1;
-    const DELIVERY_PLATFORM = 2;
+//    const PREORDER_COL = "preorder";
+//
+//    const DELIVERY_COL = "doesDelivery";
+//    const DELIVERY_COST_COL = "deliveryCost";
+//
+//    const DELIVERY_NONE = 0;
+//    const DELIVERY_RESTAURANT = 1;
+//    const DELIVERY_PLATFORM = 2;
 
     /**
      * @var int
@@ -81,18 +81,18 @@ class Restaurant extends EntityBase
      * @var string
      */
     public $comment;
-    /**
-     * @var bool
-     */
-    public $preorder = false;
-    /**
-     * @var int
-     */
-    public $doesDelivery = Restaurant::DELIVERY_NONE;
-    /**
-     * @var float
-     */
-    public $deliveryCost = 0;
+//    /**
+//     * @var bool
+//     */
+//    public $preorder = false;
+//    /**
+//     * @var int
+//     */
+//    public $doesDelivery = Restaurant::DELIVERY_NONE;
+//    /**
+//     * @var float
+//     */
+//    public $deliveryCost = 0;
 
 
     /**
@@ -108,10 +108,10 @@ class Restaurant extends EntityBase
             Restaurant::EMAIL_COL => $resto->email,
             Restaurant::URL_COL => $resto->url,
             Restaurant::DOMINATING_COLOR_COL => $resto->dominatingColor,
-            Restaurant::COMMENT_COL => $resto->comment,
-            Restaurant::PREORDER_COL => $resto->preorder,
-            Restaurant::DELIVERY_COL => $resto->doesDelivery,
-            Restaurant::DELIVERY_COST_COL => $resto->deliveryCost
+            Restaurant::COMMENT_COL => $resto->comment
+//            Restaurant::PREORDER_COL => $resto->preorder,
+//            Restaurant::DELIVERY_COL => $resto->doesDelivery,
+//            Restaurant::DELIVERY_COST_COL => $resto->deliveryCost
         ];
 
         if(!empty($resto->logoPhoto))

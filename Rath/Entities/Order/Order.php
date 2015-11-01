@@ -36,12 +36,12 @@ class Order extends EntityBase
         const PAYMENT_STATUS_VAL_PENDING = "Pending";
         const PAYMENT_STATUS_VAL_PAYED = "Payed";
 
-    const DELIVERY_COL = "needsDelivery";
-    const DELIVERY_COST_COL = "deliveryCost";
-
-    const DELIVERY_NONE = 0;
-    const DELIVERY_RESTAURANT = 1;
-    const DELIVERY_PLATFORM = 2;
+//    const DELIVERY_COL = "needsDelivery";
+//    const DELIVERY_COST_COL = "deliveryCost";
+//
+//    const DELIVERY_NONE = 0;
+//    const DELIVERY_RESTAURANT = 1;
+//    const DELIVERY_PLATFORM = 2;
 
     /**
      * @var int
@@ -104,14 +104,14 @@ class Order extends EntityBase
     public $lines;
     public $couponCode;
 
-    /**
-     * @var int
-     */
-    public $needsDelivery = Order::DELIVERY_NONE;
-    /**
-     * @var float
-     */
-    public $deliveryCost = 0;
+//    /**
+//     * @var int
+//     */
+//    public $needsDelivery = Order::DELIVERY_NONE;
+//    /**
+//     * @var float
+//     */
+//    public $deliveryCost = 0;
 
     /**
      * @param $order Order
@@ -138,9 +138,9 @@ class Order extends EntityBase
 //            Order::ORDER_DATETIME_COL => $order->orderDateTime,
 //            Order::COMMENT_COL => $order->comment,
 //            Order::ADDRESS_ID_COL => $order->addressId,
-            Order::CREATION_DATE_TIME_COL => date("Y-m-d H:i:s"),
-            Order::DELIVERY_COL => $order->needsDelivery,
-            Order::DELIVERY_COST_COL => $order->deliveryCost
+            Order::CREATION_DATE_TIME_COL => date("Y-m-d H:i:s")
+//            Order::DELIVERY_COL => $order->needsDelivery,
+//            Order::DELIVERY_COST_COL => $order->deliveryCost
         ];
 
         if(!empty($order->couponId))
@@ -194,8 +194,8 @@ class Order extends EntityBase
             $data[self::SUBMITTED_COL] = $order->submitted;
             $data[self::PAYMENT_STATUS_COL] = $order->paymentStatus;
 
-        $data[Order::DELIVERY_COL] = $order->needsDelivery;
-        $data[Order::DELIVERY_COST_COL] = $order->deliveryCost;
+//        $data[Order::DELIVERY_COL] = $order->needsDelivery;
+//        $data[Order::DELIVERY_COST_COL] = $order->deliveryCost;
 
         return $data;
     }
