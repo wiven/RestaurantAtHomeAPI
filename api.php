@@ -147,68 +147,75 @@ $app->get('/login/:email/:password/:socialLogin',function($email,$password,$soci
 })->name(API_LOGIN_ROUTE);
 
 $app->group('/user', function() use ($app){
-    $user = DataControllerFactory::getUserController();
-    $app->get('/:hash', function($hash) use ($app,$user){
+    $uc = DataControllerFactory::getUserController();
+    $app->get('/:hash', function($hash) use ($app,$uc){
         CrossDomainAjax::PrintCrossDomainCall(
             $app,
-            $user->getUserByHash($hash));
+            $uc->getUserByHash($hash));
     })->name(API_USER_GET_ROUTE);
 
-    $app->post('',function() use ($app,$user){
+    $app->post('',function() use ($app,$uc){
         $userData = json_decode($app->request->getBody());
         CrossDomainAjax::PrintCrossDomainCall(
             $app,
-            $user->createUser($userData));
+            $uc->createUser($userData));
     })->name(API_USER_CREATE_ROUTE);
 
-    $app->put('', function() use ($app,$user){
+    $app->put('', function() use ($app,$uc){
         $userData = json_decode($app->request->getBody());
         CrossDomainAjax::PrintCrossDomainCall(
             $app,
-            $user->updateUser($userData));
+            $uc->updateUser($userData));
     })->name(API_USER_UPDATE_ROUTE);
 
-    $app->get('/delete/:hash', function($hash) use ($app,$user){
+    $app->get('/delete/:hash', function($hash) use ($app,$uc){
         CrossDomainAjax::PrintCrossDomainCall(
             $app,
-            $user->deleteUser($hash));
+            $uc->deleteUser($hash));
     })->name(API_USER_DELETE_ROUTE);
 
     //region Password recovery
 
-    $app->get('/reset/:email', function($email) use ($app,$user){
+    $app->get('/reset/:email', function($email) use ($app,$uc){
         CrossDomainAjax::PrintCrossDomainCall(
             $app,
-            $user->sendUserPasswordRecoveryMail($email));
+            $uc->sendUserPasswordRecoveryMail($email));
     });
 
 
-    $app->post('/recovery/:recoveryHash', function ($recoveryHash) use ($app, $user) {
+    $app->post('/recovery/:recoveryHash', function ($recoveryHash) use ($app, $uc) {
         $userInfo = json_decode($app->request->getBody());
         CrossDomainAjax::PrintCrossDomainCall(
             $app,
-            $user->handleUserPasswordRecoveryChange($recoveryHash, $userInfo));
+            $uc->handleUserPasswordRecoveryChange($recoveryHash, $userInfo));
     });
     //endregion
 
-    $app->get('/resto/', function() use ($app,$user){
+    $app->get('/resto/', function() use ($app,$uc){
         CrossDomainAjax::PrintCrossDomainCall(
             $app,
-            $user->getUserRestaurants());
+            $uc->getUserRestaurants());
     });
 
-    $app->get('/order/', function() use ($app,$user){
+    $app->get('/order/', function() use ($app,$uc){
         CrossDomainAjax::PrintCrossDomainCall(
             $app,
-            $user->getUserActiveOrder());
+            $uc->getUserActiveOrder());
     });
 
-    $app->group('/address', function() use ($app){
+    $app->group('/address', function() use ($app,$uc){
         $gen = new \Rath\Controllers\Data\GeneralController();
         $app->get('/:id', function($id) use ($app,$gen){
             CrossDomainAjax::PrintCrossDomainCall(
                 $app,
                 $gen->getAddress($id)
+            );
+        });
+
+        $app->get('/all/', function() use ($app,$uc){
+            CrossDomainAjax::PrintCrossDomainCall(
+                $app,
+                $uc->getUserAddresses(Authorization::$userId)
             );
         });
 
@@ -236,11 +243,11 @@ $app->group('/user', function() use ($app){
         });
     });
 
-    $app->group('/loyaltypoints',function() use ($app,$user){
-        $app->get('/', function() use ($app,$user){
+    $app->group('/loyaltypoints',function() use ($app,$uc){
+        $app->get('/', function() use ($app,$uc){
             CrossDomainAjax::PrintCrossDomainCall(
                 $app,
-                $user->getLoyaltyPoints() //bug
+                $uc->getLoyaltyPoints() //bug
             );
         });
     });
