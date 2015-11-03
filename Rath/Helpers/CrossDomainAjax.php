@@ -18,7 +18,7 @@ class CrossDomainAjax
      */
     static function PrintCrossDomainCall($app, $data){
         $callback = $app->request()->get('callback');
-        $app->contentType('application/javascript');
+        $app->contentType('application/json');
         echo sprintf("%s(%s)", $callback, json_encode($data));
     }
 
