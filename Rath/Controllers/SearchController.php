@@ -224,10 +224,13 @@ class SearchController extends ControllerBase
         //Allow custom options to be passed
         $options = $this->getMedooWhereArrayOptions($where);
 
+        $this->log->debug("options:");
+        $this->log->debug($options);
         if(isset($options["open"])){
             $this->log->debug("Open option available: ".(string)$options["open"]);
-            if($options["open"] === true)
+            if($options["open"] === 'true')
             {
+                $this->log->debug("Adding 'open' filters");
                 $where["AND"][OpeningHours::TABLE_NAME.".".OpeningHours::DAY_OF_WEEK_COL] = General::getCurrentDayOfWeek();
                 $where["AND"][OpeningHours::TABLE_NAME.".".OpeningHours::FROM_TIME_COL."[<=]"] = General::getCurrentTime();
                 $where["AND"][OpeningHours::TABLE_NAME.".".OpeningHours::TO_TIME_COL."[>=]"] = General::getCurrentTime();
