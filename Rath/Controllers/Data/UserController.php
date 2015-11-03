@@ -699,7 +699,7 @@ class UserController extends ControllerBase
      */
     public function getUserAddresses($userId)
     {
-        return $this->db->select(Address::TABLE_NAME,
+        $result = $this->db->select(Address::TABLE_NAME,
             [
                 Address::ID_COL,
                 Address::STREET_COL,
@@ -713,6 +713,8 @@ class UserController extends ControllerBase
             [
                 Address::USER_ID_COL => $userId
             ]);
+
+        return $result;
     }
     //endregion
 }
