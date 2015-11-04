@@ -56,7 +56,7 @@ class RestaurantController extends ControllerBase
                 Restaurant::URL_COL,
                 Restaurant::DOMINATING_COLOR_COL,
                 Restaurant::COMMENT_COL,
-                Restaurant::PREORDER_COL
+//                Restaurant::PREORDER_COL
 //                Restaurant::DELIVERY_COL,
 //                Restaurant::DELIVERY_COST_COL
             ],
