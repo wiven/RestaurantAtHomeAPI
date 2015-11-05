@@ -58,6 +58,15 @@ class OrderController extends ControllerBase
      */
     public function createOrder($order)
     {
+        $result = $this->uc->getUserActiveOrder();
+        if(!isset($result->code))
+        {
+            $response = new ApiResponse();
+            $response->code = 400;
+            $response->message = "There is still an open order.";
+            return $response;
+        }
+
         $order->submitted = false;
         $order->orderStatusId = OrderStatus::val_New;
 

@@ -21,8 +21,15 @@ if(!defined('APP_MODE')){
     elseif(strpos($_SERVER["HTTP_HOST"],"test") !== false)
         define('APP_MODE','TEST');
     else
+    {
         define('APP_MODE', 'APIDEV');
+        error_reporting(E_ALL);
+        ini_set('display_errors', 'On');
+    }
+
 }
+
+
 
 if(!defined('EMAIL_TEMPLATE'))
     define('EMAIL_TEMPLATE',APP_PATH."/Resources/emailTemplate.html");
@@ -102,7 +109,8 @@ $log->debug("Api initialisation finished");
 
 //region App Mgt (old)
 
-$app->get('/ping', function() use ($app){
+$app->get('/ping', function() use ($app,$log){
+    $log->debug("Ping entered");
     $status = Rath\Controllers\ApplicationManagementController::GetStatus();
     CrossDomainAjax::PrintCrossDomainCall($app,$status);
 });
@@ -1528,5 +1536,5 @@ $app->group(Authorization::coupon,function() use ($app){
 //}
 //
 //set_exception_handler('exception_handler');
-
+$log->debug("Befor Run Slim App");
 $app->run();

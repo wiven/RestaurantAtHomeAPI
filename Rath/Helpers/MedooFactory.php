@@ -8,6 +8,7 @@
 
 namespace Rath\helpers;
 
+use Logger;
 use Rath\Libraries\medoo;
 use Exception;
 
@@ -51,10 +52,10 @@ class MedooFactory
             MedooFactory::$db =  new medoo([
                 // required
                 'database_type' => 'mysql',
-                'database_name' => 'deb84843n3_rathdev',
-                'server' => 'localhost',
-                'username' => 'deb84843n3_tdp',
-                'password' => 'gEcDgPOy',
+                'database_name' => 'ID188346_rathdev',
+                'server' => 'mysql006.hosting.combell.com',
+                'username' => 'ID188346_rathdev',
+                'password' => 'azertyWiven10',
                 'charset' => 'utf8',
 
                 // optional
@@ -68,10 +69,10 @@ class MedooFactory
          MedooFactory::$db = new medoo([
              // required
              'database_type' => 'mysql',
-             'database_name' => 'deb84843n3_rathtest',
-             'server' => 'localhost',
-             'username' => 'deb84843n3_tdp',
-             'password' => 'gEcDgPOy',
+             'database_name' => 'ID188346_rattest',
+             'server' => 'mysql038.hosting.combell.com',
+             'username' => 'ID188346_rattest',
+             'password' => 'azertyWiven10',
              'charset' => 'utf8',
 
              // optional

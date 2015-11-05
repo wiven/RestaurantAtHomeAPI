@@ -3,7 +3,7 @@
         <layout class="LoggerLayoutPattern">
             <param name="conversionPattern" value="%date{Y-m-d H:i:s,u} %-5level [%logger] %method %line | %message%newline%ex" />
         </layout>
-        <param name="file" value="log\myLog.log" />
+        <param name="file" value="log/myLog.log" />
         <param name="maxBackupIndex" value="5" />
     </appender>
     <root>
