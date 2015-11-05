@@ -9,6 +9,7 @@
 namespace Rath\Controllers\Data;
 
 
+use Rath\Entities\ApiResponse;
 use Rath\Entities\Restaurant\OpeningHours;
 use Rath\Entities\Slots\SlotTemplate;
 use Rath\Entities\Slots\SlotTemplateChange;
@@ -148,6 +149,7 @@ class SlotController extends ControllerBase
      */
     public function generateSlotsForRestaurantOpeningHours($restoId, $slotSize,$slotQuantity)
     {
+        $response = new ApiResponse();
         $open = $this->db->select(OpeningHours::TABLE_NAME,
             "*",
             [
@@ -156,8 +158,25 @@ class SlotController extends ControllerBase
                     OpeningHours::RESTAURANT_ID_COL => $restoId
                 ]
             ]);
-        if(count($open) == 0)
-            throw new \Exception("No openinghours defined for this restaurant!");
+        if(count($open) == 0){
+            $response->code = 300;
+            $response->message = "No openinghours defined for this restaurant";
+            return $response;
+        }
+
+        $slots = $this->db->select(SlotTemplate::TABLE_NAME,
+            [
+                SlotTemplate::ID_COL
+            ],
+            [
+                SlotTemplate::RESTAURANT_ID_COL => $restoId
+            ]);
+
+        if(count($slots) != 0){
+            $response->code = 310;
+            $response->message = "There are already slots defined for this restaurant. You can only use this function once.";
+            return $response;
+        }
 
 
         try {
