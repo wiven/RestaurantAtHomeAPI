@@ -9,6 +9,7 @@
 namespace Rath\Controllers\Data;
 
 
+use Exception;
 use Rath\Controllers\PaymentController;
 use Rath\Entities\ApiResponse;
 use Rath\Entities\General\Address;
@@ -364,7 +365,14 @@ class OrderController extends ControllerBase
         $this->log->debug($dbOrder);
         $this->updateOrderFull($dbOrder);
 
-        $this->sendOrderConfirmation($dbOrder,$links->paymentUrl);
+        try {
+            $this->sendOrderConfirmation($dbOrder, $links->paymentUrl);
+        } catch (Exception $e) {
+            $response->code = 201;
+            $response->message = "Order submitted successfully but confirmation mail failed.";
+            $response->data = $links;
+            return $response;
+        }
 
         $response->code = 200;
         $response->message = "Order submitted succesfully";
@@ -428,7 +436,7 @@ class OrderController extends ControllerBase
         $date = new \DateTime($order->orderDateTime);
 
         $subject = 'Restaurant At Home - '.Order::getOrderDescription($order);
-        $from = "info@restaurantathome.be"; //Todo: Param - from email
+        $from = SEND_FROM_EMAIL;
 
         $headers = "MIME-Version: 1.0"."\r\n";
         $headers .= "Content-Type: text/html; charset=UTF-8"."\r\n";

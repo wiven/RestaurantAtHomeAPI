@@ -526,7 +526,7 @@ class UserController extends ControllerBase
             return $response;
         }
 
-        $url = "http://restaurantathome.be/user/passwordrecovery?key=".$this->createRecoveryHash($user); //TODO: Param - Url to recovery
+        $url = General::getBaseUrl()."/user/passwordrecovery?key=".$this->createRecoveryHash($user);
 
         try{
             $this->sendRecoveryEmail($user,$url);
@@ -627,7 +627,7 @@ class UserController extends ControllerBase
     private function sendRecoveryEmail($user,$recoveryUrl)
     {
         $subject = 'Restaurant At Home - Password Recovery';
-        $from = "info@restaurantathome.be"; //Todo: Param - from email
+        $from = SEND_FROM_EMAIL;
 
         $headers = "MIME-Version: 1.0"."\r\n";
         $headers .= "Content-Type: text/html; charset=UTF-8"."\r\n";
