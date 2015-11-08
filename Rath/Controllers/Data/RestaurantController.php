@@ -90,7 +90,6 @@ class RestaurantController extends ControllerBase
      * @return array
      */
     public function updateRestaurant($resto){
-
 //        if ($resto->doesDelivery == Restaurant::DELIVERY_NONE) {
 //            $resto->deliveryCost = 0;
 //        }
