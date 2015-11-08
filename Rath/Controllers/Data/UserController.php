@@ -634,7 +634,6 @@ class UserController extends ControllerBase
         $headers = "MIME-Version: 1.0"."\r\n";
         $headers .= "Content-Type: text/html; charset=UTF-8"."\r\n";
         $headers .= "From: " . strip_tags($from) . "\r\n";
-        $headers .= "Reply-To: ". strip_tags($from) . "\r\n";
         //$headers .= "CC: susan@example.com\r\n";
 
         $message = file_get_contents(EMAIL_TEMPLATE);
