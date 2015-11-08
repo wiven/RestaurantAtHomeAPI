@@ -189,7 +189,15 @@ class UserController extends ControllerBase
     //endregion
 
 
-    public function authenticateUser($email,$password,$socialLogin){
+    public function authenticateUser($email,$password,$socialLogin = false){
+        $response = new ApiResponse();
+
+        if($socialLogin){
+            $response->code = 500;
+            $response->message = "Social login not available";
+            return $response;
+        }
+
         $para = [
             User::EMAIL_COL => $email,
             User::SOCIAL_LOGIN_COL => $socialLogin
@@ -198,8 +206,10 @@ class UserController extends ControllerBase
         if(!$socialLogin)
             $para[User::PASSWORD_COL] = $password;
 
-        $user = $this->db->select(User::TABLE_NAME,
+
+        $user = $this->db->get(User::TABLE_NAME,
             [
+                User::ID_COL,
                 User::HASH_COL,
                 User::EMAIL_COL,
                 User::NAME_COL,
@@ -209,7 +219,29 @@ class UserController extends ControllerBase
                 "AND" => $para
             ]
         );
-        return $user;
+
+        $this->log->debug($user);
+        if(isset($user[User::HASH_COL]))
+        {
+            Authorization::$userId = $user[User::ID_COL];
+            $this->log->Debug(Authorization::$user);
+            if($user[User::TYPE_COL] == User::TYPE_VALUE_RESTO){
+                $restos = $this->getUserRestaurants();
+                if(count($restos) != 0)
+                    $user["resto"] = $restos[0];
+                else
+                    $user["resto"] = null;
+            }
+
+            unset($user[User::ID_COL]);
+            return $user;
+        }
+        else{
+            $this->logMedooError();
+            $response->code = 401;
+            $response->message = "User login failed";
+            return $response;
+        }
     }
 
     //region CRUD
@@ -223,7 +255,7 @@ class UserController extends ControllerBase
 
         $email = $user->email;//[User::EMAIL_COL]; //TODO: Validate Email;
 
-        $dbUser = $this->db->select(User::TABLE_NAME,
+        $dbUser = $this->db->get(User::TABLE_NAME,
             [
                 User::ID_COL,
                 User::EMAIL_COL,
@@ -236,7 +268,7 @@ class UserController extends ControllerBase
 //        echo "user value: ";
 //        var_dump($dbUser);
 
-        if($dbUser){
+        if(isset($dbUser[User::ID_COL])){
             $response->code = 2;
             $response->message = "User with email ".$email." already exists.";
             return $response;

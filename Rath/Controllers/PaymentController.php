@@ -72,17 +72,17 @@ class PaymentController extends ControllerBase
                 "amount" => $order->amount,
 //                "amount" => $order->amount + $order->deliveryCost,
                 "description" => Order::getOrderDescription($order),
-                "redirectUrl" => "http://playground.restaurantathome.be", //TODO:Parameter?
+                "redirectUrl" => "http://playground.restaurantathome.be/paymentsuccess?id=".$order->id, //TODO:Parameter?
                 "webhookUrl" => $webhook,
                 "method" => $paymMethod->mollieId,
                 "metadata" => [
-                    "orderId" => $order->id
+                    "orderId" => $order->id,
+                    "restoId" => $order->restaurantId,
                 ]
             ];
             $this->log->debug($data);
             $payment = $this->mollie->payments->create($data);
             $this->log->debug($payment);
-
             $mollieInfoId = $this->paymentInfoToDatabase($order->id,$payment);
 
             $this->log->debug($mollieInfoId);

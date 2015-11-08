@@ -6,8 +6,15 @@
         <param name="file" value="log/myLog.log" />
         <param name="maxBackupIndex" value="5" />
     </appender>
+    <appender name="echoAppender" class="LoggerAppenderEcho">
+        <layout class="LoggerLayoutPattern">
+            <param name="conversionPattern" value="%date{Y-m-d H:i:s,u} %-5level [%logger] %method %line | %message%newline%ex" />
+        </layout>
+        <param name="htmlLineBreaks" value="true" />
+    </appender>
     <root>
         <level value="DEBUG" />
-        <appender_ref ref="myAppender" />
+        <!--<appender_ref ref="myAppender" />-->
+        <appender_ref ref="echoAppender" />
     </root>
 </configuration>

@@ -496,7 +496,7 @@ class RestaurantController extends ControllerBase
         /** @noinspection SqlDialectInspection */
         $date = $this->db->quote(General::getCurrentDate());
         $query =
-            "SELECT promotion.id,promotion.name,toDate,fromDate, (select sum(quantity) from promotionusagehistory".
+            "SELECT promotion.id,promotion.name,promotion.description,toDate,fromDate, (select sum(quantity) from promotionusagehistory".
             " WHERE promotionId = promotion.id) as 'usage' FROM ".Promotion::TABLE_NAME.
             " INNER JOIN promotiontype ON promotion.promotiontypeId = promotiontype.id".
             ' WHERE restaurantId = '.$this->db->quote($restoId).
@@ -886,15 +886,25 @@ class RestaurantController extends ControllerBase
     {
         $result = $this->db->select(Product::TABLE_NAME,
             [
-                Product::ID_COL,
-                Product::NAME_COL,
-                Product::PHOTO_COL
+                "[>]".Promotion::TABLE_NAME => [
+                    Product::TABLE_NAME.".".Product::PROMOTION_ID_COL => Promotion::ID_COL
+                ]
+            ],
+            [
+                Product::TABLE_NAME.".".Product::ID_COL,
+                Product::TABLE_NAME.".".Product::NAME_COL,
+                Product::TABLE_NAME.".".Product::DESCRIPTION_COL,
+                Product::TABLE_NAME.".".Product::PHOTO_COL,
+                Product::TABLE_NAME.".".Product::PRICE_COL,
+                Promotion::TABLE_NAME.".".Promotion::ID_COL."(promoId)",
+                Promotion::TABLE_NAME.".".Promotion::DISCOUNT_TYPE_COL,
+                Promotion::TABLE_NAME.".".Promotion::DISCOUNT_AMOUNT_COL
             ],
             [
                 "AND" =>
                     [
-                        Product::RESTAURANT_ID_COL => $restoId,
-                        Product::PRODUCT_TYPE_ID => $productTypeId
+                        Product::TABLE_NAME.".".Product::RESTAURANT_ID_COL => $restoId,
+                        Product::TABLE_NAME.".".Product::PRODUCT_TYPE_ID => $productTypeId
                     ]
             ]);
 

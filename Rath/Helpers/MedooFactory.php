@@ -72,7 +72,7 @@ class MedooFactory
              'database_name' => 'ID188346_rattest',
              'server' => 'mysql038.hosting.combell.com',
              'username' => 'ID188346_rattest',
-             'password' => 'azertyWiven10',
+             'password' => 'AzertyWiven10',
              'charset' => 'utf8',
 
              // optional

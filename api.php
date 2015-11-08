@@ -26,8 +26,8 @@ if(!defined('APP_MODE')){
         error_reporting(E_ALL);
         ini_set('display_errors', 'On');
     }
-
 }
+
 
 
 
@@ -106,6 +106,7 @@ bcscale(2); //Calculation decimals
 //$app->add(new \Slagger\Slagger('/v1/docs', 'Rath'));
 
 $log->debug("Api initialisation finished");
+$log->debug("AppMode: ".APP_MODE);
 
 //region App Mgt (old)
 
@@ -180,7 +181,7 @@ $app->group('/user', function() use ($app){
         CrossDomainAjax::PrintCrossDomainCall(
             $app,
             $uc->deleteUser($hash));
-    })->name(API_USER_DELETE_ROUTE);
+    })->name(Authorization::blockedRoute);
 
     //region Password recovery
 
@@ -566,7 +567,7 @@ $app->group(Authorization::manage, function() use ($app){
             $app,
             $mgt->calculateDistanceMatrix($provinceId)
         );
-    });
+    });//->name(Authorization::publicRoute);
 
     $app->get('/payments/mollie/paymentmethods', function () use ($app, $pay) {
         CrossDomainAjax::PrintCrossDomainCall(

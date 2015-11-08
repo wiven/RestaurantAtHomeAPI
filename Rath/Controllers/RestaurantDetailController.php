@@ -31,15 +31,21 @@ class RestaurantDetailController extends ControllerBase
          * product Types
          *  - Products
          *      - Tags
+         *
          */
+        $this->log->debug("RestoId:");
+        $this->log->debug(gettype($restoId));
 
         $productTypes = $pc->getProductTypes();
         for ($i = 0; $i < count($productTypes); $i++)
         {
             $products = $rc->getProductsAllByProductType($restoId,$productTypes[$i][ProductType::ID_COL]);
+            $this->log->debug($products);
+            $this->logMedooError();
             for($j = 0; $j < count($products); $j++)
             {
-                   $products[$j]["tags"] = $pc->getProductTags($products[$j][Product::ID_COL]);
+                $products[$j]["tags"] = $pc->getProductTags($products[$j][Product::ID_COL]);
+                $products[$j]["related"] = $pc->getRelatedProducts($products[$j][Product::ID_COL]);
             }
             $productTypes[$i]["products"] = $products;
         }

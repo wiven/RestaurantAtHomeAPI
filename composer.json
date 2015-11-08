@@ -18,7 +18,8 @@
         "zircote/swagger-php": "2.0.0",
         "apache/log4php": "2.3.0",
         "netresearch/jsonmapper": "v0.10.0",
-        "athari/yalinqo": "v2.3.0.0"
+        "athari/yalinqo": "v2.3.0.0",
+        "mollie/reseller-api": "1.6.0"
     },
     "suggest": {
         "ext-mcrypt": "Required for HTTP cookie encryption"

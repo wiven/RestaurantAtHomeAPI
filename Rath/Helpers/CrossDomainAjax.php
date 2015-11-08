@@ -21,5 +21,4 @@ class CrossDomainAjax
         $app->contentType('application/json');
         echo sprintf("%s(%s)", $callback, json_encode($data));
     }
-
 }
