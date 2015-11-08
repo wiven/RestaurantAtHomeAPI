@@ -182,8 +182,10 @@ class Order extends EntityBase
 //        if(!empty($order->orderStatusId))
             $data[Order::ORDER_STATUS_ID_COL] = $order->orderStatusId;
 
-//        if(!empty($order->couponId))
+          if($order->couponId != 0)
             $data[Order::COUPON_ID] = $order->couponId;
+        else
+            $data[Order::COUPON_ID] = null;
 
 //        if(!empty($order->slottemplateId))
             $data[self::SLOT_TEMPLATE_ID_COL] = $order->slottemplateId;

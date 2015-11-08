@@ -114,6 +114,7 @@ class OrderController extends ControllerBase
             Order::TABLE_NAME.".".Order::CREATION_DATE_TIME_COL,
             Order::TABLE_NAME.".".Order::PAYMENT_METHOD_ID,
             Order::TABLE_NAME.".".Order::SLOT_TEMPLATE_ID_COL,
+            Order::TABLE_NAME.".".Order::PAYMENT_STATUS_COL,
 //            Order::TABLE_NAME.".".Order::DELIVERY_COL,
 //            Order::TABLE_NAME.".".Order::DELIVERY_COST_COL,
             SlotTemplate::FROM_TIME_COL."(slotFromTime)",
@@ -243,6 +244,7 @@ class OrderController extends ControllerBase
             [
                 Order::ID_COL => $order->id
             ]);
+        $this->logMedooError();
         return $this->db->error();
     }
 
