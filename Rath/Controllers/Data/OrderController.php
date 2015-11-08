@@ -366,7 +366,13 @@ class OrderController extends ControllerBase
         $this->updateOrderFull($dbOrder);
 
         try {
-            $this->sendOrderConfirmation($dbOrder, $links->paymentUrl);
+            if(!$this->sendOrderConfirmation($dbOrder, $links->paymentUrl))
+            {
+                $response->code = 201;
+                $response->message = "Order submitted successfully but confirmation mail failed.";
+                $response->data = $links;
+                return $response;
+            }
         } catch (Exception $e) {
             $response->code = 201;
             $response->message = "Order submitted successfully but confirmation mail failed.";
@@ -472,7 +478,7 @@ class OrderController extends ControllerBase
         if($message === false)
             throw new \Exception("Failed to read email template");
 
-        mail(Authorization::$user->email,$subject,$message,$headers);
+        return mail(Authorization::$user->email,$subject,$message,$headers);
     }
 
 

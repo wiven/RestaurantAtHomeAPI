@@ -622,6 +622,7 @@ class UserController extends ControllerBase
     /**
      * @param $user User
      * @param $recoveryUrl
+     * @return bool
      * @throws \Exception
      */
     private function sendRecoveryEmail($user,$recoveryUrl)
@@ -642,7 +643,7 @@ class UserController extends ControllerBase
         if($message === false)
             throw new \Exception("Failed to read email template");
 
-        mail($user->email,$subject,$message,$headers);
+        return mail($user->email,$subject,$message,$headers);
     }
     //endregion
 

@@ -30,7 +30,7 @@ if(!defined('APP_MODE')){
 
 
 
-if(!define('SEND_FROM_EMAIL'))
+if(!defined('SEND_FROM_EMAIL'))
     define('SEND_FROM_EMAIL',"info@restaurantathome.be");
 
 if(!defined('EMAIL_TEMPLATE'))
