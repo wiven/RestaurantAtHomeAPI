@@ -107,12 +107,14 @@ class Restaurant extends EntityBase
             Restaurant::PHONE_COL => $resto->phone,
             Restaurant::EMAIL_COL => $resto->email,
             Restaurant::URL_COL => $resto->url,
-            Restaurant::DOMINATING_COLOR_COL => $resto->dominatingColor,
             Restaurant::COMMENT_COL => $resto->comment
 //            Restaurant::PREORDER_COL => $resto->preorder,
 //            Restaurant::DELIVERY_COL => $resto->doesDelivery,
 //            Restaurant::DELIVERY_COST_COL => $resto->deliveryCost
         ];
+
+//        if(!empty($resto->dominatingColor))
+//            $array[Restaurant::DOMINATING_COLOR_COL] = $resto->dominatingColor;
 
         if(!empty($resto->logoPhoto))
             $array[Restaurant::LOGO_PHOTO_COL] = $resto->logoPhoto;
