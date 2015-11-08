@@ -897,6 +897,7 @@ class RestaurantController extends ControllerBase
                 Product::TABLE_NAME.".".Product::PHOTO_COL,
                 Product::TABLE_NAME.".".Product::PRICE_COL,
                 Promotion::TABLE_NAME.".".Promotion::ID_COL."(promoId)",
+                Promotion::TABLE_NAME.".".Promotion::NAME_COL."(promoName)",
                 Promotion::TABLE_NAME.".".Promotion::DISCOUNT_TYPE_COL,
                 Promotion::TABLE_NAME.".".Promotion::DISCOUNT_AMOUNT_COL
             ],
@@ -907,6 +908,30 @@ class RestaurantController extends ControllerBase
                         Product::TABLE_NAME.".".Product::PRODUCT_TYPE_ID => $productTypeId
                     ]
             ]);
+
+        $this->log->debug($result);
+        $this->log->debug(count($result));
+
+        for($i = 0; $i < count($result); $i++){
+            $this->log->debug($i);
+            $discount = Promotion::fromJson($result[$i]);
+            if($discount->discountType != null){
+                $result[$i]["oldPrice"] = $result[$i][Product::PRICE_COL];
+                switch($discount->discountType){
+                    case Promotion::DISCOUNT_TYPE_VAL_PERS:
+                        $mul = 1 - bcdiv($discount->discountAmount,100);
+                        $price = floatval($result[$i][Product::PRICE_COL]);
+                        $result[$i][Product::PRICE_COL] = bcmul($price, $mul);
+                        break;
+                    case Promotion::DISCOUNT_TYPE_VAL_AMOUNT:
+                        $result[$i][Product::PRICE_COL] -= $discount->discountAmount;
+                }
+
+                if($result[$i][Product::PRICE_COL] < 0)
+                    $result[$i][Product::PRICE_COL] = 0;
+            }
+            $this->log->debug("Count: ".count($result));
+        }
 
         $result = PhotoManagement::getPhotoUrlsForArray($result,Product::PHOTO_COL);
         return $result;

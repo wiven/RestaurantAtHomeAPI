@@ -9,7 +9,9 @@
 namespace Rath\Entities\Promotion;
 
 
-class Promotion
+use Rath\Entities\EntityBase;
+
+class Promotion extends EntityBase
 {
     const TABLE_NAME = "promotion";
 
@@ -27,19 +29,52 @@ class Promotion
     const DISCOUNT_AMOUNT_COL = "discountAmount";
     const LOYALTY_POINTS_COL ="loyaltyPoints";
 
+    /**
+     * @var int
+     */
     public $id;
+    /**
+     * @var int
+     */
     public $promotiontypeId;
+    /**
+     * @var int
+     */
     public $restaurantId;
 
     //Used for updating linked products.
+    /**
+     * @var int
+     */
     public $productId;
 
+    /**
+     * @var string
+     */
     public $name;
+    /**
+     * @var string
+     */
     public $fromDate;
+    /**
+     * @var string
+     */
     public $toDate;
+    /**
+     * @var string
+     */
     public $description;
+    /**
+     * @var string
+     */
     public $discountType;
+    /**
+     * @var float
+     */
     public $discountAmount;
+    /**
+     * @var int
+     */
     public $loyaltyPoints;
 
 
