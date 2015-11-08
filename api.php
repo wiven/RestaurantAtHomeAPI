@@ -1543,6 +1543,17 @@ $app->group('/dev',function() use ($app){
             \Rath\Helpers\General::getBaseUrl()
         );
     });
+
+    $app->get('/testordermail/',function() use ($app){
+        $oc = DataControllerFactory::getOrderController();
+        $order = $oc->getOrder(24);
+        /** @var Order $order */
+        $order = \Rath\Entities\Order\Order::fromJson($order);
+        CrossDomainAjax::PrintCrossDomainCall(
+            $app,
+            $oc->sendOrderConfirmation($order,"dummy")
+        );
+    });
 });
 
 //function exception_handler($exception) {

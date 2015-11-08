@@ -446,7 +446,8 @@ class UserController extends ControllerBase
             [
                 User::ID_COL,
                 User::ADMIN_COL,
-                User::TYPE_COL
+                User::TYPE_COL,
+                User::EMAIL_COL
             ],
             [
                 User::HASH_COL => $hash
