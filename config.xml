@@ -14,7 +14,7 @@
     </appender>
     <root>
         <level value="DEBUG" />
-        <appender_ref ref="myAppender" />
-        <!--<appender_ref ref="echoAppender" />-->
+        <!--<appender_ref ref="myAppender" />-->
+        <appender_ref ref="echoAppender" />
     </root>
 </configuration>

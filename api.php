@@ -34,6 +34,9 @@ if(!defined('APP_MODE')){
 if(!defined('EMAIL_TEMPLATE'))
     define('EMAIL_TEMPLATE',APP_PATH."/Resources/emailTemplate.html");
 
+if(!defined('ORDER_EMAIL_TEMPLATE'))
+    define('ORDER_EMAIL_TEMPLATE',APP_PATH."/Resources/orderTemplate.html");
+
 if(!defined('HASH_ALGO'))
     define('HASH_ALGO',"sha256");
 
@@ -1531,6 +1534,14 @@ $app->group(Authorization::coupon,function() use ($app){
 });
 //endregion
 
+$app->group('/dev',function() use ($app){
+    $app->get('/getbaseurl/',function() use ($app){
+        CrossDomainAjax::PrintCrossDomainCall(
+            $app,
+            \Rath\Helpers\General::getBaseUrl()
+        );
+    });
+});
 
 //function exception_handler($exception) {
 //   if($exception);

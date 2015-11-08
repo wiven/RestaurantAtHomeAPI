@@ -64,4 +64,9 @@ class General
     const resourceType = "resource";
     const nullType = "NULL";
     const unknownType = "unknown type";
+
+    public static function getBaseUrl()
+    {
+        return "//".$_SERVER["HTTP_HOST"];
+    }
 }

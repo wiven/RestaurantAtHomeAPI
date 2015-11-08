@@ -20,6 +20,7 @@ use Rath\Entities\Order\OrderStatus;
 use Rath\Entities\Product\Product;
 use Rath\Entities\Promotion\Promotion;
 use Rath\Entities\Restaurant\PaymentMethod;
+use Rath\Entities\Restaurant\Restaurant;
 use Rath\Entities\Slots\SlotTemplate;
 use Rath\Exceptions\OrderDetailException;
 use Rath\Helpers\General;
@@ -363,6 +364,8 @@ class OrderController extends ControllerBase
         $this->log->debug($dbOrder);
         $this->updateOrderFull($dbOrder);
 
+        $this->sendOrderConfirmation($dbOrder,$links->paymentUrl);
+
         $response->code = 200;
         $response->message = "Order submitted succesfully";
         $response->data = $links;
@@ -398,6 +401,72 @@ class OrderController extends ControllerBase
         $response->data = $order;
         return $response;
     }
+
+
+    /**
+     * @param $order Order
+     * @throws \Exception
+     */
+    public function sendOrderConfirmation($order,$paymentLink)
+    {
+        $rc = DataControllerFactory::getRestaurantController();
+        $gc = DataControllerFactory::getGeneralController();
+
+        $this->log->debug($order);
+
+        /** @var Restaurant $resto */
+        $resto = $rc->getRestaurant($order->restaurantId,false);
+        $this->log->debug($resto);
+        if(isset($resto[Restaurant::ID_COL]))
+            $resto = Restaurant::fromJson($resto);
+        /** @var Address $address */
+        $address = $gc->getAddress($resto->addressId);
+        if(isset($address[Address::ID_COL]))
+            $address = Address::fromJson($address);
+        $this->log->debug($address);
+
+        $date = new \DateTime($order->orderDateTime);
+
+        $subject = 'Restaurant At Home - '.Order::getOrderDescription($order);
+        $from = "info@restaurantathome.be"; //Todo: Param - from email
+
+        $headers = "MIME-Version: 1.0"."\r\n";
+        $headers .= "Content-Type: text/html; charset=UTF-8"."\r\n";
+        $headers .= "From: " . strip_tags($from) . "\r\n";
+        $headers .= "Reply-To: ". strip_tags($from) . "\r\n";
+        //$headers .= "CC: susan@example.com\r\n";
+
+        $message = file_get_contents(ORDER_EMAIL_TEMPLATE);
+
+        $message = str_replace("%%date%%",$date->format(General::dateFormat),$message);
+        $message = str_replace("%%hour%%",$date->format('H'),$message);
+        $message = str_replace("%%min%%",$date->format('i'),$message);
+
+        $message = str_replace("%%restoName%%",$resto->name,$message);
+        $message = str_replace("%%street%%",$address->street,$message);
+        $message = str_replace("%%number%%",$address->number,$message);
+        if(!empty($address->addition))
+            $message = str_replace("%%addition%%",'/'.$address->addition,$message);
+        else
+            $message = str_replace("%%addition%%",'',$message);
+        $message = str_replace("%%postCode%%",$address->postcode,$message);
+        $message = str_replace("%%city%%",$address->city,$message);
+        $message = str_replace("%%phone%%",$resto->phone,$message);
+
+        $url = General::getBaseUrl()."/paymentsuccess?id=".$order->id;
+        $message = str_replace("%%orderLink%%",$url,$message);
+
+        if($paymentLink != '')
+            $message = str_replace("%%paymentLink%%",
+                "<span>Indien er iets fout liep tijdens de betaling kan u deze steeds herroepen via volgende <a href='".$paymentLink."'>link</a>.</span>"
+                ,$message);
+
+        if($message === false)
+            throw new \Exception("Failed to read email template");
+
+        mail(Authorization::$user->email,$subject,$message,$headers);
+    }
+
 
     //region Validation
 

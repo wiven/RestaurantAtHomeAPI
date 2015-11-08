@@ -43,7 +43,7 @@ class RestaurantController extends ControllerBase
      * @param $id
      * @return array|bool
      */
-    public function getRestaurant($id){
+    public function getRestaurant($id,$includePhotoLinks = true){
         $resto = $this->db->get(Restaurant::TABLE_NAME,
             [
                 Restaurant::ID_COL,
@@ -63,7 +63,9 @@ class RestaurantController extends ControllerBase
             [
                 Restaurant::ID_COL => $id
             ]);
-        $resto[Restaurant::LOGO_PHOTO_COL] = PhotoManagement::getPhotoUrls($resto[Restaurant::LOGO_PHOTO_COL]);
+        if($includePhotoLinks)
+            $resto[Restaurant::LOGO_PHOTO_COL] = PhotoManagement::getPhotoUrls($resto[Restaurant::LOGO_PHOTO_COL]);
+
         return $resto;
     }
 

@@ -626,8 +626,6 @@ class UserController extends ControllerBase
      */
     private function sendRecoveryEmail($user,$recoveryUrl)
     {
-        //TODo: read template html
-
         $subject = 'Restaurant At Home - Password Recovery';
         $from = "info@restaurantathome.be"; //Todo: Param - from email
 
