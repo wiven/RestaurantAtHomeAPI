@@ -326,14 +326,14 @@ $app->group(Authorization::manage, function() use ($app){
                 $app,
                 $resto->getPaymentMethod($id)
             );
-        });
+        })->name(Authorization::publicRoute);
 
         $app->get('/all/', function() use ($app,$resto){
             CrossDomainAjax::PrintCrossDomainCall(
                 $app,
                 $resto->getPaymentMethods()
             );
-        });
+        })->name(Authorization::publicRoute);
 
         $app->post('', function() use ($app,$resto){
             $pm = json_decode($app->request->getBody());
@@ -366,7 +366,14 @@ $app->group(Authorization::manage, function() use ($app){
                 $app,
                 $prod->getTag($id)
             );
-        });
+        })->name(Authorization::publicRoute);
+
+        $app->get('/all/', function() use ($app,$prod){
+            CrossDomainAjax::PrintCrossDomainCall(
+                $app,
+                $prod->getAllTags()
+            );
+        })->name(Authorization::publicRoute);
 
         $app->post('', function() use ($app,$prod){
             $tag = json_decode($app->request->getBody());
@@ -406,7 +413,7 @@ $app->group(Authorization::manage, function() use ($app){
                 $app,
                 $prod->getProductTypes()
             );
-        });
+        })->name(Authorization::publicRoute);
 
         $app->post('', function() use ($app,$prod){
             $prodType = json_decode($app->request->getBody());
@@ -439,14 +446,14 @@ $app->group(Authorization::manage, function() use ($app){
                 $app,
                 $promo->getPromotionType($id)
             );
-        });
+        })->name(Authorization::publicRoute);
 
         $app->get('/all/', function() use ($app,$promo){
             CrossDomainAjax::PrintCrossDomainCall(
                 $app,
                 $promo->getAllpromotionTypes()
             );
-        });
+        })->name(Authorization::publicRoute);
 
         $app->post('/', function() use ($app,$promo){
             $ps = json_decode($app->request->getBody());
@@ -479,14 +486,14 @@ $app->group(Authorization::manage, function() use ($app){
                 $app,
                 $gen->getPartner($id)
             );
-        });
+        })->name(Authorization::publicRoute);
 
         $app->get('/all/', function() use ($app,$gen){
             CrossDomainAjax::PrintCrossDomainCall(
                 $app,
                 $gen->getAllPartners()
             );
-        });
+        })->name(Authorization::publicRoute);
 
         $app->post('', function() use ($app,$gen){
             $prodType = json_decode($app->request->getBody());
@@ -519,14 +526,14 @@ $app->group(Authorization::manage, function() use ($app){
                 $app,
                 $gen->getSocialMediaType($id)
             );
-        });
+        })->name(Authorization::publicRoute);
 
         $app->get('/all/', function() use ($app,$gen){
             CrossDomainAjax::PrintCrossDomainCall(
                 $app,
                 $gen->getAllSocialMediaTypes()
             );
-        });
+        })->name(Authorization::publicRoute);
 
         $app->post('', function() use ($app,$gen){
             $socType = json_decode($app->request->getBody());

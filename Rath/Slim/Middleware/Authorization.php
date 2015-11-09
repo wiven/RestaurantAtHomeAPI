@@ -120,6 +120,7 @@ class Authorization extends \Slim\Middleware
     private function loadUserIdFromHash(){
         $headers = $this->app->request->headers;
         $this->hash = $headers["hash"];
+        $this->log->debug($this->hash);
         if(!empty($this->hash)){
             $result = $this->userController->getUserIdByHash($this->hash);
             $this->log->debug($result);

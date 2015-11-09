@@ -28,6 +28,8 @@ abstract class ControllerBase
     public function __construct(){
         $this->db = MedooFactory::getMedooInstance();
         $this->log = Logger::getLogger(get_called_class());
+
+        $this->log->debug($this->db->database_name);
     }
 
     public function logLastQuery()
