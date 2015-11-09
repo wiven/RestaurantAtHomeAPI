@@ -49,6 +49,7 @@ class GeneralController extends ControllerBase
      * @return array|bool
      */
     public function addAddress($address){
+        //$this->log->debug($address);
         $address->userId = Authorization::$userId;
         $lastId = $this->db->insert(Address::TABLE_NAME,
             Address::toDbArray($address)
