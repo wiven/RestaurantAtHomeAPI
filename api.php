@@ -284,14 +284,14 @@ $app->group(Authorization::manage, function() use ($app){
                 $app,
                 $resto->getKitchenType($id)
             );
-        });
+        })->name(Authorization::publicRoute);
 
         $app->get('/all/', function() use ($app,$resto){
             CrossDomainAjax::PrintCrossDomainCall(
                 $app,
                 $resto->getKitchenTypes()
             );
-        });
+        })->name(Authorization::publicRoute);
 
         $app->post('', function() use ($app,$resto){
             $kt = json_decode($app->request->getBody());
