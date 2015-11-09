@@ -53,10 +53,13 @@ class ApplicationManagementController Extends ControllerBase
                 City::ID_COL,
                 City::NAME_COL,
                 City::CODE_COL
+            ],
+            [
+                City::PROVINCE_COL."[<>]" => [1,5]
             ]);
     }
 
-    public function calculateDistanceMatrix($provinceId)
+    public function calculateDistanceMatrix()
     {
         $response = new ApiResponse();
         $response->data = [];
@@ -75,7 +78,7 @@ class ApplicationManagementController Extends ControllerBase
                 City::LONGITUDE_COL
             ],
             [
-                City::PROVINCE_COL => $provinceId
+                City::PROVINCE_COL."[<>]" => [1,5]
             ]);
 
         array_push($response->data,"<br> City count: ".count($cities));

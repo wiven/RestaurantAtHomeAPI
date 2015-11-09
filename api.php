@@ -576,12 +576,12 @@ $app->group(Authorization::manage, function() use ($app){
         });
     });
 
-    $app->post('/distancematrix/:provinceId', function ($provinceId) use ($app, $mgt) {
+    $app->post('/distancematrix', function () use ($app, $mgt) {
         CrossDomainAjax::PrintCrossDomainCall(
             $app,
-            $mgt->calculateDistanceMatrix($provinceId)
+            $mgt->calculateDistanceMatrix()
         );
-    });//->name(Authorization::publicRoute);
+    })->name(Authorization::publicRoute);
 
     $app->get('/payments/mollie/paymentmethods', function () use ($app, $pay) {
         CrossDomainAjax::PrintCrossDomainCall(
