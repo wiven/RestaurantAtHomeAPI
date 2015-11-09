@@ -20,6 +20,8 @@ if(!defined('APP_MODE')){
         define('APP_MODE', 'LOCAL');
     elseif(strpos($_SERVER["HTTP_HOST"],"test") !== false)
         define('APP_MODE','TEST');
+    elseif(strpos($_SERVER["HTTP_HOST"],"syst") !== false)
+        define('APP_MODE','SYST');
     else
     {
         define('APP_MODE', 'APIDEV');

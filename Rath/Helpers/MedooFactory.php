@@ -82,6 +82,23 @@ class MedooFactory
              //                PDO::ATTR_CASE => PDO::CASE_NATURAL
              //
          ]);
+        else if(APP_MODE == 'SYST')
+            MedooFactory::$db = new medoo([
+                // required
+                'database_type' => 'mysql',
+                'database_name' => 'ID188346_rathsys',
+                'server' => 'mysql017.hosting.combell.com',
+                'username' => 'ID188346_rathsys',
+                'password' => 'AzertyWiven10',
+                'charset' => 'utf8',
+
+                // optional
+                'port' => 3306,
+                // driver_option for connection, read more from http://www.php.net/manual/en/pdo.setattribute.php
+                //            'option' => [
+                //                PDO::ATTR_CASE => PDO::CASE_NATURAL
+                //
+            ]);
         else
             throw new Exception("Application Mode not defined.");
     }
