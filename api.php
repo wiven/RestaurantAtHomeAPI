@@ -996,7 +996,7 @@ $app->group('/product', function () use ($app) {
 
     $app->group('/related' , function() use ($app, $prod){
 
-        $app->get('/:'.Authorization::productId, function($productId) use ($app,$prod){
+        $app->get('/:productId', function($productId) use ($app,$prod){
             CrossDomainAjax::PrintCrossDomainCall(
                 $app,
                 $prod->getRelatedProducts($productId)

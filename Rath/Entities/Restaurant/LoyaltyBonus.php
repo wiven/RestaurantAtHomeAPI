@@ -96,8 +96,8 @@ class LoyaltyBonus extends EntityBase
         }
 
         //$this->log->debug($this);
-        $this->log->debug("validatePoint: ".json_encode($this->validatePoints()));
-        $this->log->debug("validateAmount: ".json_encode($this->validateAmount()));
+//        $this->log->debug("validatePoint: ".json_encode($this->validatePoints()));
+//        $this->log->debug("validateAmount: ".json_encode($this->validateAmount()));
 
         if(!$this->validatePoints() or !$this->validateAmount())
         {

@@ -844,8 +844,8 @@ class RestaurantController extends ControllerBase
         $search = ControllerFactory::getSearchController();
         if(!empty($query)){
             $where = $search->getFilterFieldsToMedooWhereArray($query,$fields,false);
-            $where["AND"][Product::RESTAURANT_ID_COL] = $restoId;
         }
+        $where["AND"][Product::RESTAURANT_ID_COL] = $restoId;
         $where["LIMIT"] = [$skip,$top];
         //var_dump($where);
 
