@@ -1086,14 +1086,14 @@ $app->group('/order', function() use ($app){
     $oc = DataControllerFactory::getOrderController();
     $pc = ControllerFactory::getPaymentController();
 
-    $app->get('/:'.Authorization::orderId, function($id) use ($app,$oc){
+    $app->get('/:orderId', function($id) use ($app,$oc){
         CrossDomainAjax::PrintCrossDomainCall(
             $app,
             $oc->getOrderDetail($id)
         );
     });
 
-    $app->get('/detailed/:'.Authorization::orderId, function($id) use ($app,$oc){
+    $app->get('/detailed/:orderId', function($id) use ($app,$oc){
         CrossDomainAjax::PrintCrossDomainCall(
             $app,
             $oc->getOrderDetail($id,true)
