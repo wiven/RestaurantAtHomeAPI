@@ -616,6 +616,26 @@ class RestaurantController extends ControllerBase
         return $pdoQuery->fetchAll(PDO::FETCH_ASSOC);
         //return $this->db->error();
     }
+
+    public function updateOrderStartus($order,$restoId)
+    {
+        $oc = DataControllerFactory::getOrderController();
+        $result = $this->db->update(Order::TABLE_NAME,
+                [
+                    Order::ORDER_STATUS_ID_COL => $order->orderStatusId
+                ],
+                [
+                    "AND" => [
+                        Order::ID_COL => $order->id,
+                        Order::RESTAURANT_ID_COL => $restoId
+                    ]
+                ]);
+
+        if($result != 0)
+            return $oc->getOrder($order->id);
+        else
+            return $this->db->last_query();
+    }
     //endregion
 
     //region Photo

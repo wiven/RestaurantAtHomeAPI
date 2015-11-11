@@ -666,6 +666,16 @@ $app->group(Authorization::restaurant, function() use ($app){
         });
     });
 
+    $app->group('/order', function() use ($app,$resto){
+        $app->put('/:'.Authorization::restoId, function($restoId) use ($app,$resto){
+            $ho = json_decode($app->request->getBody());
+            CrossDomainAjax::PrintCrossDomainCall(
+                $app,
+                $resto->updateOrderStartus($ho,$restoId)
+            );
+        });
+    });
+
     $app->group('/openinghour', function() use ($app,$resto){
         $app->get('/:id', function($id) use ($app,$resto){
             CrossDomainAjax::PrintCrossDomainCall(
